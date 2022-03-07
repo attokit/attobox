@@ -1,0 +1,50 @@
+{
+	"name": "attokit/attobox",
+	"type": "framework",
+	"description": "Simple PHP framework for developing usage. Provide http request & response processing, router, resource building, and basic ORM supporting.",
+	"keywords": ["PHP framework", "attobox", "attokit", "developing usage"],
+	"homepage": "https://cgy.design/attokit/attobox",
+	"license": "MIT",
+	"support": {
+		"issues": "https://github.com/attokit/attobox/issues",
+		"source": "https://github.com/attokit/attobox"
+	},
+	"authors": [
+		{"name": "cgy", "email": "dommy529@126.com"}
+	],
+	"require": {
+		"php": ">=7",
+		"catfan/medoo": "^2.0"
+	},
+	"require-dev": {
+        
+    },
+	"suggest": {
+		
+	},
+	"autoload": {
+		"psr-4": {
+			"Atto\\Box\\": [
+                "src/", 
+                "src/modules/", 
+                "../../../", 
+                "../../../library/",
+                "../../../modules/"
+            ],
+            "Atto\\Box\\App\\": [
+                "../../../app/"
+            ]
+		},
+        "files": [
+            "src/autoload/autoload.php"
+        ]
+	},
+	"autoload-dev": {
+        "psr-4": {
+            
+        }
+	},
+	"scripts": {
+		
+	}
+}
