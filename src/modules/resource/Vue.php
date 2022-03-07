@@ -1,14 +1,13 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源操作类
- * vue 文件操作
+ * Attobox Framework / Module Resource
+ * VUE file processor
  */
 
-namespace CPHP\resource;
+namespace Atto\Box\resource;
 
-use CPHP\Request;
+use Atto\Box\Request;
 use MatthiasMullie\Minify;  //JS/CSS文件压缩
 
 class Vue

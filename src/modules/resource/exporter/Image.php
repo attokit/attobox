@@ -1,19 +1,20 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源输出器
- * 输出图片 image 文件
+ * Attobox Framework / Module Resource
+ * Resource Exporter
+ * 
+ * Image exporter
  */
 
-namespace CPHP\resource\exporter;
+namespace Atto\Box\resource\exporter;
 
-use CPHP\resource\Exporter;
-use CPHP\Request;
-use CPHP\request\Url;
-use CPHP\Response;
-use CPHP\Resource;
-use CPHP\resource\Mime;
+use Atto\Box\resource\Exporter;
+use Atto\Box\Request;
+use Atto\Box\request\Url;
+use Atto\Box\Response;
+use Atto\Box\Resource;
+use Atto\Box\resource\Mime;
 
 class Image extends Exporter
 {

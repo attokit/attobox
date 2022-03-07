@@ -1,18 +1,22 @@
 <?php
+
 /*
- *  CPHP框架  stream 视频流，音频流，或其他数据流 输出工具
- *  支持的视频格式  mp4,mov,m4v
- *  支持的音频格式  mp3,m4a,ogg
- *  支持远程文件读取并输出流，支持的格式与本地文件相同
- *  对于不支持的格式，以下载方式将文件发送到浏览器
+ * Attobox Framework / Module Resource
+ * stream 视频流，音频流，或其他数据流 输出工具
+ * 
+ * 支持的视频格式  mp4,mov,m4v
+ * 支持的音频格式  mp3,m4a,ogg
+ * 
+ * 支持远程文件读取并输出流，支持的格式与本地文件相同
+ * 对于不支持的格式，以下载方式将文件发送到浏览器
  */
 
-namespace CPHP\resource;
+namespace Atto\Box\resource;
 
-use CPHP\Resource;
-use CPHP\Response;
+use Atto\Box\Resource;
+use Atto\Box\Response;
 
-use CPHP\traits\staticCreate;
+use Atto\Box\traits\staticCreate;
 
 ini_set("memory_limit", "1024M");   //脚本最大运行内存
 set_time_limit(600);                //脚本超时时间 10min

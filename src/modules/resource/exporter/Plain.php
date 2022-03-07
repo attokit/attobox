@@ -1,15 +1,16 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源输出器
- * 输出纯字符文件
+ * Attobox Framework / Module Resource
+ * Resource Exporter
+ * 
+ * export plain file
  */
 
-namespace CPHP\resource\exporter;
+namespace Atto\Box\resource\exporter;
 
-use CPHP\resource\Exporter;
-use CPHP\Response;
+use Atto\Box\resource\Exporter;
+use Atto\Box\Response;
 
 use MatthiasMullie\Minify;  //JS/CSS文件压缩
 

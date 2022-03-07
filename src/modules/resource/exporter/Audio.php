@@ -1,17 +1,18 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源输出器
- * 输出音频 audio 文件
+ * Attobox Framework / Module Resource
+ * Resource Exporter
+ * 
+ * export audio file
  */
 
-namespace CPHP\resource\exporter;
+namespace Atto\Box\resource\exporter;
 
-use CPHP\resource\Exporter;
-use CPHP\Response;
-use CPHP\resource\Mime;
-use CPHP\resource\Stream;
+use Atto\Box\resource\Exporter;
+use Atto\Box\Response;
+use Atto\Box\resource\Mime;
+use Atto\Box\resource\Stream;
 
 class Audio extends Exporter
 {

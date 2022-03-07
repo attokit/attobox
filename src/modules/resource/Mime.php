@@ -1,13 +1,13 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * mime 文件类型工具
+ * Attobox Framework / Module Resource
+ * mime toolkit
  */
 
-namespace CPHP\resource;
+namespace Atto\Box\resource;
 
-use CPHP\Response;
+use Atto\Box\Response;
 
 class Mime
 {

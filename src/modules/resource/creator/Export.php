@@ -1,16 +1,17 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源内容生成器
- * 本地动态资源，由 route 动态生成内容
+ * Attobox Framework / Module Resource
+ * Resource Creator
+ * 
+ * Local resource create by route methods
  */
 
-namespace CPHP\resource\creator;
+namespace Atto\Box\resource\creator;
 
-use CPHP\resource\Creator;
-use CPHP\request\Curl;
-use CPHP\resource\Mime;
+use Atto\Box\resource\Creator;
+use Atto\Box\request\Curl;
+use Atto\Box\resource\Mime;
 
 class Export extends Creator
 {

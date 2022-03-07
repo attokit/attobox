@@ -1,14 +1,14 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源输出器 Exporter
- * 基类
+ * Attobox Framework / Module Resource
+ * Resource Exporter
+ * base class
  */
 
-namespace CPHP\resource;
+namespace Atto\Box\resource;
 
-use CPHP\Response;
+use Atto\Box\Response;
 
 class Exporter
 {

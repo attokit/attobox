@@ -1,12 +1,12 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源内容生成器 creator
- * 基类
+ * Attobox Framework / Module Resource
+ * Resource Creator
+ * base class
  */
 
-namespace CPHP\resource;
+namespace Atto\Box\resource;
 
 class Creator
 {

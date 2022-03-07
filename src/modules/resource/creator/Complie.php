@@ -1,18 +1,20 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源内容生成器 creator
- * 本地资源，需要编译生成内容
- * 支持的编译格式：
- *      scss、sass  -> css
- *      ts          -> js
+ * Attobox Framework / Module Resource
+ * Resource Creator
+ * 
+ * Local resource complie, for plain file like: ts, scss ...
+ * 
+ * support formats：
+ *      scss, sass   -> css
+ *      ts           -> js
  */
 
-namespace CPHP\resource\creator;
+namespace Atto\Box\resource\creator;
 
-use CPHP\resource\Creator;
-use CPHP\resource\Mime;
+use Atto\Box\resource\Creator;
+use Atto\Box\resource\Mime;
 
 use ScssPhp\ScssPhp\Compiler as scssCompiler;
 use ScssPhp\ScssPhp\OutputStyle as scssOutputStyle;

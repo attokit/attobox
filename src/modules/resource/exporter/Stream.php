@@ -1,16 +1,18 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源输出器
- * 输出不支持的文件，mime = application/octet-stream
+ * Attobox Framework / Module Resource
+ * Resource Exporter
+ * 
+ * export unsupported file, to download
+ * mime = application/octet-stream
  */
 
-namespace CPHP\resource\exporter;
+namespace Atto\Box\resource\exporter;
 
-use CPHP\resource\Exporter;
-use CPHP\Response;
-use CPHP\resource\Stream as rStream;
+use Atto\Box\resource\Exporter;
+use Atto\Box\Response;
+use Atto\Box\resource\Stream as rStream;
 
 class Stream extends Exporter
 {

@@ -1,17 +1,18 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源内容生成器
- * 本地静态资源，直接读取内容
+ * Attobox Framework / Module Resource
+ * Resource Creator
+ * 
+ * Real local file, read content directly
  */
 
-namespace CPHP\resource\creator;
+namespace Atto\Box\resource\creator;
 
-use CPHP\resource\Creator;
-use CPHP\resource\Mime;
+use Atto\Box\resource\Creator;
+use Atto\Box\resource\Mime;
 
-use CPHP\resource\Vue;
+use Atto\Box\resource\Vue;
 
 use MatthiasMullie\Minify;  //JS/CSS文件压缩
 

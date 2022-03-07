@@ -1,14 +1,15 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源内容生成器
- * 本地动态资源，通过 require 文件 动态生成内容
+ * Attobox Framework / Module Resource
+ * Resource Creator
+ * 
+ * Local dynamic resource, created by requiring local php file
  */
 
-namespace CPHP\resource\creator;
+namespace Atto\Box\resource\creator;
 
-use CPHP\resource\Creator;
+use Atto\Box\resource\Creator;
 
 class Required extends Creator
 {

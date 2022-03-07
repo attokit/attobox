@@ -1,17 +1,18 @@
 <?php
 /**
- * CPHP框架  Resource 模块
- * 资源内容生成器 Creator
- * 本地资源动态构建 Build，用于纯文本文件  js，css，vue 等
+ * Attobox Framework / Module Resource
+ * Resource Creator
+ * 
+ * Local resource dynamic build，for plain file like: js，css，vue ...
  */
 
-namespace CPHP\resource\creator;
+namespace Atto\Box\resource\creator;
 
-use CPHP\Resource;
-use CPHP\resource\Creator;
-use CPHP\resource\creator\Compile;
-use CPHP\request\Url;
-use CPHP\request\Curl;
+use Atto\Box\Resource;
+use Atto\Box\resource\Creator;
+use Atto\Box\resource\creator\Compile;
+use Atto\Box\request\Url;
+use Atto\Box\request\Curl;
 
 use ScssPhp\ScssPhp\Compiler as scssCompiler;
 use ScssPhp\ScssPhp\OutputStyle as scssOutputStyle;

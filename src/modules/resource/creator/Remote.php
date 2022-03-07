@@ -1,16 +1,17 @@
 <?php
 
 /**
- * CPHP框架  Resource 模块
- * 资源内容生成器
- * 远程资源，cURL读取远程内容
+ * Attobox Framework / Module Resource
+ * Resource Creator
+ * 
+ * Remote resource, get content by using cURL tool
  */
 
-namespace CPHP\resource\creator;
+namespace Atto\Box\resource\creator;
 
-use CPHP\resource\Creator;
-use CPHP\request\Curl;
-use CPHP\resource\Mime;
+use Atto\Box\resource\Creator;
+use Atto\Box\request\Curl;
+use Atto\Box\resource\Mime;
 
 class Remote extends Creator
 {
