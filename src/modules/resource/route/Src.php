@@ -8,7 +8,6 @@
 
 namespace Atto\Box\route;
 
-//use Atto\Box\Route;
 use Atto\Box\Resource;
 
 class Src extends Base
@@ -47,4 +46,5 @@ class Src extends Base
         
         exit;
     }
+    
 }
