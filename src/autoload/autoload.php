@@ -108,12 +108,24 @@ function autoRequireFiles($dir = "", $except = [])
  * get class by path str like "foo/Bar"  == \Atto\Box\foo\Bar
  * 
  * @param String $path      full class name
+ * @param String $pathes...
  * @return Class            not found return null
  */
 function cls($path = "")
 {
-    $cls = NS . str_replace("/","\\", $path);
-    return class_exists($cls) ? $cls : null;
+    $ps = func_get_args();
+    if (empty($ps)) return null;
+    $cl = null;
+    for ($i=0; $i<count($ps); $i++) {
+        $cls = NS . str_replace("/","\\", $ps[$i]);
+        if (class_exists($cls)) {
+            $cl = $cls;
+            break;
+        }
+    }
+    //$cls = NS . str_replace("/","\\", $path);
+    //return class_exists($cls) ? $cls : null;
+    return $cl;
 }
 function clspre($path = "")
 {
