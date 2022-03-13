@@ -30,6 +30,7 @@ class Src extends Base
      */
     public function defaultMethod()
     {
+        //var_dump(cls("resource/creator/Complie"));
         $args = func_get_args();
         $resource = Resource::create($args);
 

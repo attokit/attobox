@@ -2,25 +2,25 @@
 
 /**
  * Attobox Framework / Module Resource
- * Resource Exporter
+ * Resource Extension
  * 
- * Image exporter
+ * Image
  */
 
-namespace Atto\Box\resource\exporter;
+namespace Atto\Box\resource;
 
-use Atto\Box\resource\Exporter;
+use Atto\Box\Resource;
 use Atto\Box\Request;
 use Atto\Box\request\Url;
 use Atto\Box\Response;
-use Atto\Box\Resource;
 use Atto\Box\resource\Mime;
 
-class Image extends Exporter
+class Image extends Resource
 {
-    public $mime = "";
-    public $size = 0;
-    public $sizestr = "";
+    //image info
+    //public $mime = "";
+    //public $size = 0;
+    //public $sizestr = "";
     public $width = 0;
     public $height = 0;
     public $ratio = 1;  //宽高比，width/height
@@ -38,47 +38,41 @@ class Image extends Exporter
         ["watermark", "dommyphp,right,bottom,25"]    //水印
     ];
 
-    public function prepare($params = [])
+    /**
+     * @override getContent 
+     * create source image from $realPath
+     * @return Image $source
+     */
+    protected function getContent()
     {
-        $this->getInfo();
-        $this->getImage();
-        $this->process($params);
-    }
-
-    //获取文件信息
-    protected function getInfo()
-    {
-        $this->mime = Mime::get($this->resource->rawExt);
-        $imgPath = $this->resource->realPath;
-        $this->size = filesize($imgPath);
-        $this->sizestr = sizeToStr($this->size);
-
-        $is = getimagesize($imgPath);
+        $is = getimagesize($this->realPath);
         $this->width = $is[0];
         $this->height = $is[1];
         $this->ratio = $is[0]/$is[1]; 
         $this->bit = $is["bits"];
-    }
 
-    //从原图像生成新图像，准备处理
-    protected function getImage()
-    {
-        $method = "imagecreatefrom" . str_replace("image/", "", $this->mime);
+        $method = "imagecreatefrom" . str_replace("image/", "", $this->rawMime);
         if (function_exists($method)) {
-            $this->source = @$method($this->resource->realPath);
+            $ims = @$method($this->realPath);
+            if (!$ims) {   //fail to create source image, export 404 directly
+                Response::code(404);
+                exit;
+            } else {
+                $this->source = $ims;
+            }
         }
+
+        return $this->source;
     }
 
-    //根据get参数处理图片
+    /**
+     * process image by queue
+     * @param Array $param      customized process params, cover $params
+     * @return Resource $this
+     */
     protected function process($params = [])
     {
-        //检查当前图片是否由URL调用
-        //url调用，则从 $_GET 中获取 process 参数
-        //否则从 params 参数中获取
-        $url = Url::current();
-        if (strpos(strtolower(implode("/", $url->path)), strtolower($this->resource->rawBasename)) !== false) {
-            $params = $_GET;
-        }
+        $params = empty($params) ? $this->params : arr_extend($this->params, $params);
         $que = $this->queue;
         for ($i=0; $i<count($que); $i++) {
             $qi = $que[$i];
@@ -93,37 +87,34 @@ class Image extends Exporter
                 }
             }
         }
-        
     }
 
-
-
-    /*
-     *  process主要方法
+    /**
+     * process methods
      */
     //processZoom %比例缩放
-    public function processZoom($opt = 100)
+    protected function processZoom($opt = 100)
     {
         $opt = empty($opt) || !is_numeric($opt) ? 100 : (int)$opt;
         $this->im = $this->resizeImage($opt);
         return $this;
     }
     //processResize 指定宽高，当指定的宽高比不等于原图片时，保证缩放后的图片不超出指定的宽高
-    public function processResize($opt = "256,192")
+    protected function processResize($opt = "256,192")
     {
         $opt = explode(",", $opt);
         $this->im = $this->resizeImage((int)$opt[0], (int)$opt[1]);
         return $this;
     }
     //processThumb 自动生成缩略图，裁切原图，满足缩略图宽高比
-    public function processThumb($opt = "128,128")
+    protected function processThumb($opt = "128,128")
     {
         $opt = explode(",", $opt);
         $this->im = $this->thumbImage((int)$opt[0], (int)$opt[1]);
         return $this;
     }
     //processWatermark 添加水印
-    public function processWatermark($opt = "cphp,right,bottom,25")
+    protected function processWatermark($opt = "cphp,right,bottom,25")
     {
         $opt = explode(",", $opt);
         $mn = $opt[0];
@@ -136,18 +127,18 @@ class Image extends Exporter
         if (is_null($mp)) return $this;
         $mp = Resource::create($mp);
         //var_dump($mp); exit;
-        $mpo = $mp->exporter;
+        //$mpo = $mp->exporter;
         //当前图像
-        if (is_null($this->im)) $this->im = imagecreatefromstring(file_get_contents($this->fullpath));
+        if (is_null($this->im)) $this->im = imagecreatefromstring(file_get_contents($this->realPath));
         //当前图像尺寸
         $w = imagesx($this->im);
         $h = imagesy($this->im);
         //水印应缩放到的尺寸
         $ww = $w * (int)$opt[3] / 100;
-        $wh = $ww / $mpo->ratio;
+        $wh = $ww / $mp->ratio;
         //缩放水印
         $wim = imagecreatetruecolor($ww, $wh);
-        imagecopyresampled($wim, $mpo->source, 0, 0, 0, 0, $ww, $wh, $mpo->width, $mpo->height);
+        imagecopyresampled($wim, $mp->source, 0, 0, 0, 0, $ww, $wh, $mp->width, $mp->height);
         //水印位置
         list($x, $y) = $this->watermarkPosition($w, $h, $ww, $wh, $opt[1], $opt[2]);
         //水印copy到当前图像
@@ -158,11 +149,47 @@ class Image extends Exporter
 
 
 
-    /*
-     *  工具
+    /**
+     * @override export
+     * export image directly
+     * @return void exit
+     */
+    public function export($params = [])
+    {
+        //get resource content
+        $this->getContent();
+        $this->process($params);
+        $im = !empty($this->im) ? $this->im : $this->source;
+        if (empty($im)) {
+            Response::code(404); 
+            exit;
+        }
+        
+        $m = str_replace("/", "", $this->rawMime);   // imagejpeg, imagepng, imagegif, imagewebp, imagebmp
+        if (function_exists($m)) {
+            //sent header
+            $this->sentHeader();
+            //echo
+            if ($this->rawExt == "png") {
+                $m($im);
+            } else {
+                $m($im, null, 100);
+            }
+            imagedestory($im);
+        } else {
+            Response::code(404);
+        }
+        exit;
+    }
+
+
+
+
+    /**
+     * tools
      */
     //缩放到% 或 指定大小，等比缩放
-    public function resizeImage($w = null, $h = null)
+    protected function resizeImage($w = null, $h = null)
     {
         if (empty($w) && empty($h)) return $this->source;
         $ow = $this->width;
@@ -190,8 +217,9 @@ class Image extends Exporter
         imagecopyresampled($im, $this->source, 0, 0, 0, 0, $w, $h, $ow, $oh);
         return $im;
     }
+
     //将原图缩放并裁剪，生成thumb
-    public function thumbImage($w = 64, $h = 64)
+    protected function thumbImage($w = 64, $h = 64)
     {
         $ow = $this->width;
         $oh = $this->height;
@@ -212,8 +240,9 @@ class Image extends Exporter
         imagecopyresampled($newim, $im, 0, 0, 0, 0, $w, $h, $tw, $th);
         return $newim;
     }
+
     //根据图片尺寸，水印尺寸，水印位置，计算水印坐标
-    public function watermarkPosition($w, $h, $ww, $wh, $xpos = "left", $ypos = "top")
+    protected function watermarkPosition($w, $h, $ww, $wh, $xpos = "left", $ypos = "top")
     {
         $sep = 5;   //水印边距 5%
         $x = 0;
@@ -229,40 +258,5 @@ class Image extends Exporter
             case "center" :     $y = ($h - $wh) / 2; break;
         }
         return [$x, $y];
-    }
-
-    //默认的输出方法，子类覆盖
-    public function export($params = [])
-    {
-        $this->prepare($params);
-        $im = !empty($this->im) ? $this->im : $this->source;
-        $m = str_replace("/", "", $this->mime);   // imagejpeg, imagepng, imagegif, imagewebp, imagebmp
-        if (function_exists($m)) {
-            $this->header()->sent();
-            if ($this->resource->rawExt == "png") {
-                $m($im);
-            } else {
-                $m($im, null, 100);
-            }
-            imagedestory($im);
-        }
-        exit;
-    }
-
-    //保存图片
-    public function save($savepath = null, $params = [])
-    {
-        $this->prepare($params);
-        $im = !empty($this->im) ? $this->im : $this->source;
-        $m = str_replace("/", "", $this->mime);   // imagejpeg, imagepng, imagegif, imagewebp, imagebmp
-        $savepath = empty($savepath) ? $this->path.DS.str_replace(".".$this->ext, "", $this->name)."_".time().".".$this->ext : $savepath;
-        //var_dump($this->path); exit;
-        if (function_exists($m)) {
-            if ($this->resource->rawExt == "png") {
-                $m($im, $savepath);
-            } else {
-                $m($im, $savepath, 100);
-            }
-        }
     }
 }

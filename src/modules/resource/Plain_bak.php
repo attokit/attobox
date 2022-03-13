@@ -2,21 +2,26 @@
 
 /**
  * Attobox Framework / Module Resource
- * Resource Exporter
+ * Resource Extension
  * 
- * export plain file
+ * Plain
  */
 
-namespace Atto\Box\resource\exporter;
+namespace Atto\Box\resource;
 
-use Atto\Box\resource\Exporter;
+use Atto\Box\Resource;
 use Atto\Box\Response;
 
 use MatthiasMullie\Minify;  //JS/CSS文件压缩
 
-class Plain extends Exporter
+class Plain_bak extends Resource
 {
-    //改写export方法
+
+    /**
+     * @override export
+     * export plain file
+     * @return void exit
+     */
     public function export()
     {
         //输出前 处理

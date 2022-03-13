@@ -1,16 +1,16 @@
 <?php
+
 /**
  * Attobox Framework / Module Resource
- * Resource Creator
+ * Resource Builder
  * 
  * Local resource dynamic build，for plain file like: js，css，vue ...
  */
 
-namespace Atto\Box\resource\creator;
+namespace Atto\Box\resource;
 
 use Atto\Box\Resource;
-use Atto\Box\resource\Creator;
-use Atto\Box\resource\creator\Compile;
+use Atto\Box\resource\Compiler;
 use Atto\Box\request\Url;
 use Atto\Box\request\Curl;
 
@@ -19,54 +19,34 @@ use ScssPhp\ScssPhp\OutputStyle as scssOutputStyle;
 
 use MatthiasMullie\Minify;  //JS/CSS文件压缩
 
-class Build extends Creator
+class Builder
 {
-    //builder params 文件构造参数，来自$_GET，Arr实例
-    public $params = [
+    //reference of the resource instance
+    protected $resource = null;
+
+    //builder params (runtime params)
+    protected $params = [
         "version" => "latest",
         "use" => null,
         "min" => "no",
         "export" => "no"
     ];
 
-    //修改content，默认针对 plain 纯文本
-    public function appendContent()
+    public function __construct($resource)
     {
-        $args = func_get_args();
-        $rn = $this->rn();
-        $cnt = empty($args) ? "" : $rn . implode($rn, $args);
-        $this->resource->content .= $cnt;
-        return $this;
-    }
-
-    public function prependContent()
-    {
-        $args = func_get_args();
-        $rn = $this->rn();
-        $cnt = empty($args) ? "" : implode($rn, $args) . $rn;
-        $this->resource->content = $cnt . $this->resource->content;
-        return $this;
-    }
-
-    public function resetContent()
-    {
-        $args = func_get_args();
-        $rn = $this->rn();
-        $cnt = empty($args) ? "" : implode($rn, $args);
-        $this->resource->content = $cnt;
-        return $this;
+        $this->resource = &$resource;
+        $this->params = arr_extend($this->params, $this->resource->params);
     }
 
 
 
-    /*
-     *  构建方法
+    /**
+     * build method
+     * entrence
+     * @return String $resource->content
      */
-    //入口
-    public function create()
+    public function build()
     {
-        //prepsre params
-        $this->getParams();
         //start
         $this->resetContent(
             $this->comment("Build ".$this->resource->rawBasename." Start")
@@ -74,7 +54,6 @@ class Build extends Creator
 
         //build
         foreach ($this->params as $k => $v) {
-        //$this->params->each(function($v, $k) use (&$self) {
             $m = "build" . ucfirst($k);
             if (method_exists($this, $m)) {
                 if (!empty($v)) $this->$m($v);
@@ -83,7 +62,6 @@ class Build extends Creator
                     if (!empty($v)) $this->buildSubDir($k);
                 }
             }
-        //});
         }
 
         //end
@@ -91,20 +69,12 @@ class Build extends Creator
             $this->comment("Build End")
         );
 
-        //export
-        /*if ($this->params["export"] != "no" && $this->resource->rawExt == "js") {
-            $this->jsEs6Export();
-        }
-
-        //minimize
-        if ($this->params["min"] == "yes") {
-            $this->minimize();
-        }*/
-
-        //$this->file->setContents($this->contents);
-        //return $this;
+        return $this->resource->content;
     }
 
+    /**
+     * build methods
+     */
     //buildVersion
     protected function buildVersion($ver = null)
     {
@@ -192,22 +162,49 @@ class Build extends Creator
     }
 
 
-
-    /*
-     *  工具
+    /**
+     * content modify methods
      */
-
-    //params 准备
-    protected function getParams()
+    protected function appendContent()
     {
-        $resp = $this->resource->params;
-        $this->params = arr_extend($this->params, $resp);
+        $args = func_get_args();
+        $rn = $this->rn();
+        $cnt = empty($args) ? "" : $rn . implode($rn, $args);
+        $this->resource->content .= $cnt;
+        return $this;
     }
 
-    //创建comment注释
+    protected function prependContent()
+    {
+        $args = func_get_args();
+        $rn = $this->rn();
+        $cnt = empty($args) ? "" : implode($rn, $args) . $rn;
+        $this->resource->content = $cnt . $this->resource->content;
+        return $this;
+    }
+
+    protected function resetContent()
+    {
+        $args = func_get_args();
+        $rn = $this->rn();
+        $cnt = empty($args) ? "" : implode($rn, $args);
+        $this->resource->content = $cnt;
+        return $this;
+    }
+
+
+
+    /**
+     * tools
+     */
+    
+    /**
+     * create comment
+     * @param String $comment       comment content
+     * @return String formatted comment
+     */
     public function comment($comment = "")
     {
-        //if ($this->params["min"] == "yes") return "";
         $rn = $this->rn();
         switch ($this->resource->rawExt) {
             case "vue" :
@@ -221,20 +218,22 @@ class Build extends Creator
         }
     }
 
-    //生成间隔行
     public function separator()
     {
         $rn = $this->rn();
         return $rn.$rn.$rn;
     }
 
-    //生成换行符
     public function rn()
     {
-        return /*$this->params["min"] == "yes" ? "" : */"\r\n";
+        return "\r\n";
     }
 
-    //从dir中查找版本号（版本号作为名称）最高的file或subdir，返回版本号字符串
+    /**
+     * get latest version file or subdir from $dir
+     * @param String $dir       the dir need to be checken
+     * @return String version   file or subdir name
+     */
     public function latest($dir = null)
     {
         $dir = empty($dir) ? $this->resource->realPath : $dir;
@@ -244,7 +243,7 @@ class Build extends Creator
             if (is_dir($fp)) {
                 $ver = str_replace(".", "", $f);
                 if (is_numeric($ver)) $vers[] = $f;
-            } elseif (is_file($fp)) {
+            } else if (is_file($fp)) {
                 if (strpos($f, ".min.") !== false) {
                     $f = str_replace(".min", "", $f);
                 }
@@ -258,15 +257,24 @@ class Build extends Creator
         return $vers[0];
     }
 
-    //查找可能存在的文件
+    /**
+     * find the file that could been exists
+     * @param String $path      the dir been looking over
+     * @param String $name      filename must contains $name
+     * @param String $ext       file extension
+     * @param Boolean $checkMin     if filename contains ".min"
+     * @return String file fullpath or null
+     */
     protected function find($path, $name, $ext, $checkMin = true)
     {
         $ps = [];
-        if ($checkMin) $ps = array_merge($ps, [
-            "$path.min.$ext",
-            $path.DS.$name.".min.$ext",
-            $path.DS.$ext.DS.$name.".min.$ext"
-        ]);
+        if ($checkMin) {
+            $ps = [
+                "$path.min.$ext",
+                $path.DS.$name.".min.$ext",
+                $path.DS.$ext.DS.$name.".min.$ext"
+            ];
+        }
         $ps = array_merge($ps, [
             "$path.$ext",
             $path.DS.$name.".$ext",
@@ -277,26 +285,31 @@ class Build extends Creator
         return $f;
     }
 
-    //获取某文件的内容，参数为 path or pathinf($path)
+    /**
+     * find the file & get contents
+     * @param String $path      the dir been looking over
+     * @param String $name      filename must contains $name
+     * @param String $ext       file extension
+     * @return String file content or null
+     */
     protected function getContent($path, $name, $ext)
     {
-        //step 1    检查是否存在真实的本地文件
+        //step 1    if local file exists
         $f = $this->find($path, $name, $ext, true);
         if (!is_null($f)) return file_get_contents($f);
 
-        //step 2    检查是否存在php文件，动态生成内容
+        //step 2    if local PHP file exists, dynamic create file content
         $f = $this->find($path, $name, $ext.EXT);
         if (!is_null($f)) {
             $f = str_replace(EXT, "", $f);
-            //$u = Url::domain()."/src/".Resource::toUri($f);
             $u = Url::mk("/src/".Resource::toUri($f))->full;
             //var_dump($u);
             $cnt = Curl::get($u);
             if (!is_null($cnt)) return $cnt;
         }
         
-        //step 3    检查是否需要编译生成文件内容
-        $cext = Compile::getCompileExt($ext);
+        //step 3    if need to complie file content
+        $cext = Compiler::getCompileExt($ext);
         if (!empty($cext)) {
             $f = null;
             foreach ($cext as $i => $ei) {
@@ -307,7 +320,6 @@ class Build extends Creator
                 foreach ($cext as $i => $ei) {
                     $f = str_replace(".$ei", ".$ext", $f);
                 }
-                //$u = Url::domain()."/src/".Resource::toUri($f);
                 $u = Url::mk("/src/".Resource::toUri($f))->full;
                 //var_dump($u);
                 $cnt = Curl::get($u);
@@ -316,68 +328,5 @@ class Build extends Creator
         }
         return null;
     }
-    
-    //当输出 JS 文件时，export=yes 则在当前路径下寻找 export.js，找到则引入
-    protected function jsEs6Export()
-    {
-        if ($this->params["export"] != "no" && $this->resource->rawExt == "js") {
-            $f = $this->resource->realPath.DS."export.js";
-            if (file_exists($f)) {
-                $this->appendContent(
-                    $this->comment("ES6 export"),
-                    file_get_contents($f)
-                );
-            } else {
-                $exportKey = $this->params["export"];
-                $this->appendContent(
-                    $this->comment("ES6 export"),
-                    "export default $exportKey;"
-                );
-            }
-        }
-        return $this;
-    }
 
-    //压缩文件，支持 css,js
-    protected function minimize()
-    {
-        $min = $this->params["min"] == "yes";
-        if (!$min) return ;
-        $ext = $this->resource->rawExt;
-
-        $m = "min".ucfirst($ext);
-        if (method_exists($this, $m)) {
-            return $this->$m();
-        }
-
-        return ;
-    }
-
-    //压缩css
-    protected function minCss()
-    {
-        $compiler = new scssCompiler();
-        $compiler->setOutputStyle(scssOutputStyle::COMPRESSED);
-        $cnt = null;
-        try {
-            $cnt = $compiler->compileString($this->resource->content)->getCss();
-        } catch (\Exception $e) {
-
-        }
-        
-        if (!is_null($cnt)) {
-            $this->resetContent($cnt);
-        }
-    }
-
-    //压缩js
-    protected function minJs()
-    {
-        $minifier = new Minify\JS();
-        $minifier->add($this->resource->content);
-        $minjs = $minifier->minify();
-        $this->resetContent($minjs);
-    }
-    
-    
 }

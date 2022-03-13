@@ -279,7 +279,7 @@ class Mime
         if (substr($key, 0, 2) == "is") {
             $pm = strtolower(str_replace("is", "", $key));
             if (empty($args)) return false;
-            return isset(self::$processable[$pm]) && isset(self::$processable[$pm][strtolower($args[0])]);
+            return isset(self::$processable[$pm]) && in_array(strtolower($args[0]), self::$processable[$pm]);
         }
 
 

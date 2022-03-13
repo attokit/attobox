@@ -9,14 +9,16 @@
 namespace Atto\Box;
 
 use Atto\Box\resource\Mime;
-use Atto\Box\resource\creator\Complie;
+use Atto\Box\resource\Builder;
+use Atto\Box\resource\Compiler;
 use Atto\Box\request\Url;
-use Atto\Box\traits\staticCreate;
+use Atto\Box\request\Curl;
+use Atto\Box\Response;
 
 class Resource
 {
     //引入trait
-    use staticCreate;
+    //use staticCreate;
 
     //资源类型
     public static $resTypes = [
@@ -25,7 +27,7 @@ class Resource
         "export",       //通过调用 route 动态生成内容的文件
         "required",     //通过 require 本地 php 文件动态生成内容
         "local",        //真实存在的本地文件
-        "complie",      //通过编译本地文件，生成的文件
+        "compile",      //通过编译本地文件，生成的文件
     ];
 
     /**
@@ -50,14 +52,17 @@ class Resource
     //资源类型
     public $resType = "";
 
+    //资源处理对象，根据 rawExt 指定
+    //public $processor = null;
+
     //资源内容生成器
-    public $creator = null;
+    //public $creator = null;
 
     //资源内容
     public $content = null;
 
     //资源输出器
-    public $exporter = null;
+    //public $exporter = null;
 
     //资源路径信息，从 rawPath 与 realPath 解析得到
     public $extension = "";
@@ -71,7 +76,7 @@ class Resource
     /**
      * 构造
      */
-    public function __construct($path = "", $params = [])
+    /*public function __construct($path = "", $params = [])
     {
         if (is_indexed($path)) $path = implode(DS, $path);
         $p = self::parse($path);
@@ -93,7 +98,68 @@ class Resource
         $this->parseCreator();
         //exporter
         $this->parseExporter();
+    }*/
+    public function __construct($opt = [])
+    {
+        if (empty($opt) || !is_array($opt) || !is_associate($opt)) return null;
+        foreach ($opt as $k => $v) {
+            if (property_exists($this, $k)) {
+                $this->$k = is_array($v) ? arr_extend($this->$k, $v) : $v;
+            }
+        }
+        $this->rawMime = Mime::get($this->rawExt);
+        $pinfo = pathinfo($this->rawPath);
+        $this->rawBasename = $pinfo["basename"];
+        $this->rawFilename = $pinfo["filename"];
     }
+
+    /**
+     * get resource content by $resType
+     * if necessary, derived class should override this method
+     * @return String $this->content
+     */
+    protected function getContent()
+    {
+        $rtp = $this->resType;
+        $m = "get".ucfirst($rtp)."Content";
+        if (method_exists($this, $m)) {
+            $this->$m();
+        }
+        return $this->content;
+    }
+
+    /**
+     * get[$resType]Content methods
+     * if necessary, derived class should override these methods
+     * @return void
+     */
+    protected function getRemoteContent() {
+        $this->content = Curl::get($this->realPath);
+    }
+    protected function getBuildContent() {
+        $builder = new Builder($this);
+        $builder->build();
+    }
+    protected function getExportContent() {
+        $this->content = Curl::get($this->realPath);
+    }
+    protected function getRequiredContent() {
+        //@ob_start();
+        require($this->realPath); 
+        $this->content = ob_get_contents(); 
+        ob_clean();
+    }
+    protected function getLocalContent() {
+        $ext = $this->rawExt;
+        if (Mime::isPlain($ext)) {
+            $this->content = file_get_contents($this->realPath);
+        }
+    }
+    protected function getCompileContent() {
+        $compiler = new Compiler($this);
+        $compiler->compile();
+    }
+
 
 
     /**
@@ -101,7 +167,7 @@ class Resource
      * 未找到资源返回 null
      * @return Array | null
      */
-    public static function parse($path = "")
+    protected static function parse($path = "")
     {
         if (!is_notempty_str($path)) return null;
         $params = [];
@@ -146,7 +212,7 @@ class Resource
                         if (!is_null($realPath)) {  //通过require本地php文件动态生成内容
                             $resType = "required";
                         } else {
-                            $realPath = Compile::getCompilePath($rawPath);
+                            $realPath = Compiler::getCompilePath($rawPath);
                             if (!is_null($realPath)) {  //通过编译本地文件，生成纯文本内容
                                 $resType = "compile";
                             } else {
@@ -169,56 +235,94 @@ class Resource
     }
 
     /**
-     * 根据 resType 生成 creator 对象实例
-     * @return Creator
+     * 外部创建 Resource 入口方法
+     * Resource::create($path, $params)
+     * @param String $path      call path of resource (usually from url)
+     * @param Array $param      resource process params
+     * @return Resource instance or null
      */
-    protected function parseCreator()
+    public static function create($path = "", $params = [])
     {
-        $rtp = $this->resType;
-        $cls = cls("resource/creator/".ucfirst($rtp));   //"\\CPHP\\resource\\creator\\".ucfirst($rtp);
-        if (empty($cls) || !class_exists($cls)) {
-            $cls = cls("resource/Creator");   //"\\CPHP\\resource\\Creator";
-        }
-        $this->creator = new $cls($this);
+        if (is_indexed($path)) $path = implode(DS, $path);
+        $p = self::parse($path);
+        if (is_null($p)) return null;
+        $params = is_notempty_arr($params) ? $params : [];
+        if (!empty($_GET)) $params = arr_extend($params, $_GET);
+        if (!isset($p["params"]) || !is_array($p["params"])) $p["params"] = [];
+        $p["params"] = arr_extend($p["params"], $params);
+        //find specific resource class
+        $cls = self::resCls($p);
+        if (is_null($cls)) return null;
+        $res = new $cls($p);
+        return $res;
     }
 
     /**
-     * 根据 rawExt 生成 exporter 对象实例
-     * @return Exporter
+     * get resource class by parsed options
+     * @param Array $option     option array returned by self::parse()
+     * @return String full class name
      */
-    protected function parseExporter()
+    protected static function resCls($option = [])
     {
-        $ext = $this->rawExt;
-        //首先检查是否存在当前 ext 专用的 exporter
-        $cls = cls("resource/exporter/".ucfirst($ext));   //"\\CPHP\\resource\\exporter\\".ucfirst($ext);
-        if (empty($cls)) {
-            $processableType = Mime::getProcessableType($ext);
-            if (is_null($processableType)) {
-                //不支持直接处理的文件类型，采用 数据流 输出，浏览器将解析为下载文件
-                $cls = cls("resource/exporter/Stream");   //"\\CPHP\\resource\\exporter\\Stream";
-            } else {
-                //支持直接处理的文件类型，调用对应的 exporter 输出
-                $cls = cls("resource/exporter/".ucfirst($processableType));   //"\\CPHP\\resource\\exporter\\".ucfirst($processableType);
-            }
-            if (!class_exists($cls)) {
-                //如果 目标exporter 不存在，则调用 默认exporter 输出 
-                $cls = cls("resource/Exporter"); //"\\CPHP\\resource\\Exporter";
-            }
+        if (!is_notempty_arr($option)) return cls("Resource");
+        $clss = [];
+        $ext = $option["rawExt"];
+        $clss[] = "resource/".ucfirst($ext);
+        $processableType = Mime::getProcessableType($ext);
+        if (!is_null($processableType)) {
+            $clss[] = "resource/".ucfirst($processableType);
+        } else {
+            //$clss[] = "resource/Stream";
+            $clss[] = "resource/Download";
         }
-        
-        $this->exporter = new $cls($this);
+        $clss[] = "Resource";
+        return cls(...$clss);
     }
 
+
+
     /**
-     * 输出文件
-     * 跳过 Response，直接输出资源
-     * @return void
+     * export resource directly
+     * if necessary, derived class should override this method
+     * @return void exit
      */
     public function export($params = [])
     {
-        $this->creator->create();
-        $this->exporter->export($params);
+        //get resource content
+        $this->getContent();
+        //sent header
+        $this->sentHeader();
+        //echo
+        echo $this->content;
         exit;
+
+        /*
+        if (is_null($this->creator) || is_null($this->exporter)) {
+            Response::code(404);
+        } else {
+            $this->creator->create();
+            $this->exporter->export($params);
+        }
+        exit;
+        */
+    }
+
+    /**
+     * sent header before export echo
+     * @param String $ext       if export resource in different extension
+     * @return Resource $this
+     */
+    protected function sentHeader($ext = null)
+    {
+        if (!is_notempty_str($ext) && $ext != $this->rawExt) {
+            $basename = $this->rawFilename.".".$ext;
+        } else {
+            $ext = $this->rawExt;;
+            $basename = $this->rawBasename;
+        }
+        Mime::header($ext, $basename);
+        Response::headersSent();
+        return $this;
     }
 
 

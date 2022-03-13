@@ -2,22 +2,19 @@
 
 /**
  * Attobox Framework / Module Resource
- * Resource Extension
- * 
  * VUE file processor
  */
 
 namespace Atto\Box\resource;
 
-use Atto\Box\Resource;
 use Atto\Box\Request;
-use Atto\Box\Response;
 use MatthiasMullie\Minify;  //JS/CSS文件压缩
 
-class Vue extends Resource
+class Vue
 {
-    //original vue content
-    //public $realContent = "";
+    //原始文件信息
+    protected $realPath = "";
+    public $realContent = "";
 
     //content 原始内容
     /*public $content = [
@@ -28,10 +25,7 @@ class Vue extends Resource
         "custom" => []
     ];*/
 
-    //export extension
-    protected $expExt = null;
-
-    //vue content parse, blocks
+    //vue文件 语言块
     public $template = [];
     public $script = [];
     public $style = [];     //可以有多个style
@@ -40,7 +34,7 @@ class Vue extends Resource
     //自定义的 vue 文件说明，在 <profile></profile> 中定义，json形式
     public $profile = [];
 
-    /*public function __construct($realPath)
+    public function __construct($realPath)
     {
         $this->realPath = $realPath;
         $this->realContent = file_get_contents($realPath);
@@ -50,71 +44,72 @@ class Vue extends Resource
         $this->parseStyle();
         $this->parseCustom();
         $this->parseProfile();
-    }*/
-
-    /**
-     * @override getContent
-     * @return null
-     */
-    protected function getContent()
-    {
-        $rtp = $this->resType;
-        $m = "get".ucfirst($rtp)."Content";
-        if (method_exists($this, $m)) {
-            $this->$m();
-        }
-
-        //parse vue content
-        $this->parseTemplate();
-        $this->parseScript();
-        $this->parseStyle();
-        $this->parseCustom();
-        $this->parseProfile();
-
-        return $this->content;
     }
 
-    /**
-     * @override export
-     * export plain file
-     * @return void exit
-     */
-    public function export($params = [])
+    //输出信息
+    public function info($node="")
     {
-        $params = empty($params) ? $this->params : arr_extend($this->params, $params);
+        $info = [];
+        foreach (["template","script","style","custom"] as $i => $nd) {
+            $info[$nd] = $this->$nd;
+        }
+        return $node=="" ? $info : $info[$node];
+    }
 
-        //get resource content
-        $this->getContent();
+    //component name，按顺序从 $_GET["name"] / profile["name"] / pathinfo(realPath)["filename"] 中获取
+    public function name()
+    {
+        $name = Request::get("name", $this->profile["name"]);
+        if (empty($name)) {
+            $name = pathinfo($this->realPath)["filename"];
+        }
+        return $name;
+    }
 
-        //process
-        $cnt = $this->content;
-        $ps = $this->params;
-        if (isset($ps["export"])) {
-            $m = "export".ucfirst($ps["export"]);
-            if (method_exists($this, $m)) {
-                $cnt = $this->$m();
+    //查找父级 operater，返回数组
+    public function forefathers()
+    {
+        $rp = $this->realPath;
+        $rparr = explode("/", str_replace(DS,"/",$rp));
+        $fs = [];
+        for ($i=count($rparr)-2;$i>=0;$i--) {
+            $rpi = implode(DS, array_slice($rparr, 0, $i+1)).".vue";
+            if (file_exists($rpi)) {
+                array_unshift($fs, new Vue($rpi));
+            } else {
+                break;
             }
         }
-        $this->content = $cnt;
-        if (is_null($this->expExt)) $this->expExt = $this->rawExt;
+        return $fs;
+    }
 
-        //sent header
-        $this->sentHeader($this->expExt);
-
-        //echo
-        echo $this->content;
-        exit;
+    //查找父级 operater，返回 $vue->profile[$field] 组成的数组，用于生成名称链
+    public function chain($field = "title")
+    {
+        if (!isset($this->profile[$field])) return [];
+        $self = $this->profile[$field];
+        $fs = $this->forefathers();
+        if (empty($fs)) return [$self];
+        $cs = [];
+        for ($i=0;$i<count($fs);$i++) {
+            $fpi = $fs[$i]->profile;
+            if (!isset($fpi[$field])) return [$self];
+            $cs[] = $fpi[$field];
+        }
+        $cs[] = $self;
+        return $cs;
     }
 
 
 
-    /**
-     * content parse methods
+    /*
+     *  解析
      */
+
     //解析 template
     protected function parseTemplate()
     {
-        $cnt = $this->content;
+        $cnt = $this->realContent;
         $count = 0;
         $temp = "";
         $regx = "/\<template\>[\s\S]*\<\/template\>/";
@@ -134,7 +129,7 @@ class Vue extends Resource
     //解析 script
     protected function parseScript()
     {
-        $cnt = $this->content;
+        $cnt = $this->realContent;
         $count = 0;
         $temp = "";
         $regx = "/\<script\>[\s\S]*\<\/script\>/";
@@ -175,7 +170,7 @@ class Vue extends Resource
     //解析自定义语言块
     protected function parseCustom()
     {
-        $cnt = $this->content;
+        $cnt = $this->realContent;
         //先排除固定的三种 node
         foreach (["template","script","style"] as $i => $node) {
             $cnt = preg_replace("/\<".$node."[^\>]*\>[\s\S]*\<\/".$node."\>/", "", $cnt);
@@ -206,7 +201,7 @@ class Vue extends Resource
     protected function parseNode($node="")
     {
         //var_dump($node);
-        $cnt = $this->content;
+        $cnt = $this->realContent;
         $cnts = [];
         //$node = str_replace("-","\\-")
         $regx = "/\<".$node."[^\>]*\>[\s\S]*\<\/".$node."\>/U";
@@ -246,64 +241,9 @@ class Vue extends Resource
 
 
 
-    /**
-     * process methods
+    /*
+     *  处理
      */
-    //输出信息
-    public function info($node="")
-    {
-        $info = [];
-        foreach (["template","script","style","custom"] as $i => $nd) {
-            $info[$nd] = $this->$nd;
-        }
-        return $node=="" ? $info : $info[$node];
-    }
-
-    //component name，按顺序从 $_GET["name"] / profile["name"] / pathinfo(realPath)["filename"] 中获取
-    public function name()
-    {
-        $name = Request::get("name", $this->profile["name"]);
-        if (empty($name)) {
-            $name = pathinfo($this->realPath)["filename"];
-        }
-        return $name;
-    }
-
-    //查找父级 operater，返回数组
-    public function forefathers()
-    {
-        $rp = $this->realPath;
-        $rparr = explode("/", str_replace(DS,"/",$rp));
-        $fs = [];
-        for ($i=count($rparr)-2;$i>=0;$i--) {
-            $rpi = implode(DS, array_slice($rparr, 0, $i+1)).".vue";
-            if (file_exists($rpi)) {
-                //array_unshift($fs, new Vue($rpi));
-                array_unshift($fs, Resource::create($rpi));
-            } else {
-                break;
-            }
-        }
-        return $fs;
-    }
-
-    //查找父级 operater，返回 $vue->profile[$field] 组成的数组，用于生成名称链
-    public function chain($field = "title")
-    {
-        if (!isset($this->profile[$field])) return [];
-        $self = $this->profile[$field];
-        $fs = $this->forefathers();
-        if (empty($fs)) return [$self];
-        $cs = [];
-        for ($i=0;$i<count($fs);$i++) {
-            $fpi = $fs[$i]->profile;
-            if (!isset($fpi[$field])) return [$self];
-            $cs[] = $fpi[$field];
-        }
-        $cs[] = $self;
-        return $cs;
-    }
-    
     //去除换行符，tab
     protected function inline($str) 
     {
@@ -311,7 +251,6 @@ class Vue extends Resource
         $str = preg_replace("/\s{2,}/"," ", $str);
         return $str;
     }
-
     //压缩js/css
     protected function min($ext="js", $cnt)
     {
@@ -322,9 +261,15 @@ class Vue extends Resource
 
     
     
-    /**
-     * export methods
+    /*
+     *  输出
      */
+    public function export($type="default")
+    {
+        $m = "export".ucfirst($type);
+        return method_exists($this, $m) ? $this->$m() : $this->realContent;
+    }
+
     //输出 vue 组件的定义结构，并 export default
     protected function exportJs()
     {
@@ -345,7 +290,6 @@ class Vue extends Resource
             //$js_c = "document.querySelector('head').innerHTML+=`<style>".$js_c."</style>`;";
             $js_c = "let sty = document.createElement('div');sty.innerHTML='<style>".$js_c."</style>';sty=sty.childNodes[0];document.querySelector('head').appendChild(sty);";
         }
-        $this->expExt = "js";
         return $js_a.";".$js_b.$js_c."export default comp;";
     }
 
@@ -358,7 +302,6 @@ class Vue extends Resource
         $template = "let template = `".$this->inline($this->template["content"])."`;";
         $style = "let style = `".$this->style["min"]."`;";
         $export = "export default {option, template, style}";
-        $this->expExt = "js";
         return $js_a.";".$js_b.$template.$style.$export;
     }
 
@@ -378,7 +321,6 @@ class Vue extends Resource
         $js_b = "let option = ".$js_b.";";
         $style = "let style = `".$this->style["min"]."`;";
         $export = "export default {option, style}";
-        $this->expExt = "js";
         return $js_a.";".$js_b.$style.$export;
     }
 
@@ -386,7 +328,7 @@ class Vue extends Resource
     protected function exportDump()
     {
         var_dump($this->info());
-        return $this->content;
+        return $this->realContent;
     }
     
 

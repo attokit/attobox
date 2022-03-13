@@ -2,7 +2,7 @@
 
 /**
  * Attobox Framework / Module Resource
- * Resource Creator
+ * Resource Compiler
  * 
  * Local resource complie, for plain file like: ts, scss ...
  * 
@@ -11,47 +11,50 @@
  *      ts           -> js
  */
 
-namespace Atto\Box\resource\creator;
+namespace Atto\Box\resource;
 
-use Atto\Box\resource\Creator;
 use Atto\Box\resource\Mime;
 
 use ScssPhp\ScssPhp\Compiler as scssCompiler;
 use ScssPhp\ScssPhp\OutputStyle as scssOutputStyle;
 
-class Complie extends Creator
+class Compiler
 {
-    public static $extension = [
+    //reference of the resource instance
+    protected $resource = null;
+
+    //supported format
+    protected static $extension = [
         "css" => ["scss", "sass"],
-        "js" => ["ts"]
+        //"js" => ["ts"]
     ];
 
-    //根据资源的 Mime::processableType 读取内容，保存到content
-    public function create()
+    public function __construct($resource)
+    {
+        $this->resource = &$resource;
+    }
+
+
+
+    /**
+     * compile method
+     * enterence
+     * @return String $resource->content
+     */
+    public function compile()
     {
         $f = $this->resource->realPath;
         $cext = strtolower(pathinfo($f)["extension"]);
         $m = "compile".ucfirst($cext);
         if (method_exists($this, $m)) {
             $this->resource->content = $this->$m();
-        } else {
-            $this->resource->content = "";
         }
     }
 
-    //判断输出的内容是否压缩
-    private function isCompressed()
-    {
-        $p = $this->resource->params;
-        return isset($p["min"]) && $p["min"] == "yes" ? true : false;
-    }
-
-
-
-    /*
-     *  compiler
+    /**
+     * compile methods
+     * temporary support format: scss
      */
-
     //scss
     private function compileScss()
     {
@@ -66,16 +69,33 @@ class Complie extends Creator
         } catch (\Exception $e) {
 
         }
-        return is_null($cnt) ? "" : $cnt;
+        return /*is_null($cnt) ? "" : */$cnt;
     }
 
 
 
-    /*
-     *  静态工具
+    //判断输出的内容是否压缩
+    /**
+     * check if content need to be compressed
+     */
+    private function isCompressed()
+    {
+        $p = $this->resource->params;
+        return isset($p["min"]) && $p["min"] !== "no" ? true : false;
+    }
+
+
+
+
+    /**
+     * tools
      */
     
-    //根据给定的文件路径，获取编译文件的路径，不存在返回null
+    /**
+     * get source file path from $path
+     * @param String $path      dir been checking
+     * @return String source file fullpath or null
+     */
     public static function getCompilePath($path = "")
     {
         $pi = pathinfo($path);
@@ -90,6 +110,12 @@ class Complie extends Creator
     }
 
     //根据文件ext获取编译文件ext，css -> scss,sass
+    /**
+     * get source file extension from target file extension
+     * css -> scss,sass
+     * @param String $ext       target file extension
+     * @return Array source file extensions or []
+     */
     public static function getCompileExt($ext = "css")
     {
         return isset(self::$extension[strtolower($ext)]) ? self::$extension[strtolower($ext)] : [];
