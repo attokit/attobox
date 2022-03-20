@@ -19,6 +19,7 @@ class Page extends Exporter
     public function prepare()
     {
         $page = $this->data["data"];
+        
         if (!file_exists($page)) {
             http_response_code(404);
             exit;

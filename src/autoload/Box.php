@@ -107,6 +107,7 @@ class Box
         //flow start
         self::$request = \Atto\Box\Request::current();
         self::$router = \Atto\Box\Router::current();
+        //var_dump(self::$router->info());
         self::$response = \Atto\Box\Response::current();
         //var_dump(self::$response->info());
         self::$response->create()->export();

@@ -71,8 +71,8 @@ class App
         if (!is_notempty_str($appname)) return false;
         $ap = APP_PATH.DS.strtolower($appname);
         if (!is_dir($ap)) return false;
-        $acls = "\\CAPP\\".ucfirst(strtolower($appname));
-        return class_exists($acls);
+        $acls = cls("App/".ucfirst($appname));
+        return !is_null($acls);
     }
 
 

@@ -451,11 +451,12 @@ class Response
             if (!empty($ps)) $params = arr_extend($params, $ps);
             if (!empty($data)) {
                 if (isset($params["data"]) && !empty($params["data"])) {
-                    if (is_associate($params["data"]) && is_associate($data)) {
+                    /*if (is_associate($params["data"]) && is_associate($data)) {
                         $params["data"] = arr_extend($params["data"], $data);
                     } else {
                         $params["data"] = $data;
-                    }
+                    }*/
+                    $params = arr_extend($params, $data);
                 } else {
                     $params["data"] = $data;
                 }

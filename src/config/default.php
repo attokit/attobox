@@ -20,6 +20,7 @@ return [
     //当使用阿里云解析时，安装ssl证书，首次需要开启此验证，通过后即可关闭
     "ALI_SSLCHECK"  => false,   
 
+    //dirs
     "LIB_DIRS"      => "modules,library,model,operater,plugin,route,asset",
     "DB_DIRS"       => "db,library/db",
     "ASSET_DIRS"    => "asset,asset/library,src,src/library,public,page",

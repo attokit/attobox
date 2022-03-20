@@ -32,6 +32,7 @@ class Mime
         "json" => "application/json",
         "xml" => "application/xml",
         "swf" => "application/x-shockwave-flash",
+        "md" => "text/x-markdown",
 
         // images
         "png" => "image/png",
@@ -113,7 +114,7 @@ class Mime
             "php",
             "css","scss","sass",
             "js","json",
-
+            "md",
             "svg"
         ],
 

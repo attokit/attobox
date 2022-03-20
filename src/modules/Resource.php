@@ -290,8 +290,12 @@ class Resource
     {
         //get resource content
         $this->getContent();
+        
         //sent header
-        $this->sentHeader();
+        //$this->sentHeader();
+        Mime::header($this->rawExt, $this->rawBasename);
+        Response::headersSent();
+
         //echo
         echo $this->content;
         exit;

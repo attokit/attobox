@@ -22,21 +22,19 @@ if (file_exists($af)) {
          */
         if (is_dir(APP_PATH)) {
             $apps_dh = opendir(APP_PATH);
+            $psr_app = [APP_PATH];
             while (($app = readdir($apps_dh)) !== false) {
                 if ($app == "." || $app == "..") continue;
                 $app_dir = APP_PATH . DS . $app;
                 if (is_dir($app_dir)) {
                     
-                    $alo->addPsr4('Atto\\Box\\APP\\', [
-                        APP_PATH, 
-                        $app_dir
-                    ]);
-                    $alo->addPsr4('Atto\\Box\\APP\\'.$app.'\\', [
+                    $psr_app[] = $app_dir;
+                    $alo->addPsr4('Atto\\Box\\App\\'.$app.'\\', [
                         $app_dir, 
                         $app_dir.DS.'library',
                         $app_dir.DS.'modules'
                     ]);
-                    $alo->addPsr4('Atto\\Box\\APP\\'.ucfirst(strtolower($app)).'\\', [
+                    $alo->addPsr4('Atto\\Box\\App\\'.ucfirst(strtolower($app)).'\\', [
                         $app_dir, 
                         $app_dir.DS.'library',
                         $app_dir.DS.'modules'
@@ -52,6 +50,7 @@ if (file_exists($af)) {
             
                 }
             }
+            $alo->addPsr4('Atto\\Box\\App\\', $psr_app);
             closedir($apps_dh);
         }
 

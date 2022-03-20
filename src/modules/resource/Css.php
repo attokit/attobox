@@ -41,7 +41,9 @@ class Css extends Resource
         $this->content = $cnt;
 
         //sent header
-        $this->sentHeader();
+        //$this->sentHeader();
+        Mime::header($this->rawExt, $this->rawBasename);
+        Response::headersSent();
 
         //echo
         echo $this->content;

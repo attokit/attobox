@@ -75,8 +75,8 @@ function path_find(
     $appDir = [];
     if (!empty($inDir)) {
         $parr = explode(DS, $path);
-        if (strtolower($parr[0]) == "app") {
-            array_shift($parr);
+        if (strtolower($parr[0]) == "app" || !is_null(cls("App/".ucfirst(strtolower($parr[0]))))) {
+            if (strtolower($parr[0]) == "app") array_shift($parr);
             if (is_dir(APP_PATH.DS.$parr[0])) {
                 $app = array_shift($parr);
                 foreach ($inDir as $i => $dir) {
