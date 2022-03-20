@@ -24,8 +24,9 @@ class Base extends Route
      */
     public function defaultMethod()
     {
-        var_dump("\\Atto\\Box\\route\\Base::defaultMethod()");
-        var_dump(func_get_args());
+        //var_dump("\\Atto\\Box\\route\\Base::defaultMethod()");
+        //var_dump(func_get_args());
+        trigger_error("test::foo,bar", E_USER_ERROR);
     }
 
     /**

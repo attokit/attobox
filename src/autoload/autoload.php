@@ -18,7 +18,7 @@ if (file_exists($af)) {
     if (!empty($alo)) {
 
         /**
-         * patch app autoload
+         * patch app classes autoload
          */
         if (is_dir(APP_PATH)) {
             $apps_dh = opendir(APP_PATH);
@@ -41,6 +41,14 @@ if (file_exists($af)) {
                         $app_dir.DS.'library',
                         $app_dir.DS.'modules'
                     ]);
+                    
+                    //error class
+                    $alo->addPsr4('Atto\\Box\\error\\'.$app.'\\', [
+                        $app_dir.DS.'error'
+                    ]);
+                    $alo->addPsr4('Atto\\Box\\error\\'.ucfirst(strtolower($app)).'\\', [
+                        $app_dir.DS.'error'
+                    ]);
             
                 }
             }
@@ -48,7 +56,7 @@ if (file_exists($af)) {
         }
 
         /**
-         * patch modules autoload
+         * patch module classes autoload
          */
         $mdp = BOX_PATH . DS . "modules";
         if (is_dir($mdp)) {
@@ -60,12 +68,23 @@ if (file_exists($af)) {
                 if (is_dir($md_dir)) {
                     
                     $ds[] = $md_dir.DS."route";
+                    
+                    //error class
+                    $alo->addPsr4('Atto\\Box\\error\\'.$md.'\\', $md_dir.DS."error");
             
                 }
             }
             closedir($dh);
             $alo->addPsr4('Atto\\Box\\route\\', $ds);
         }
+
+        /**
+         * patch error classes
+         */
+        $alo->addPsr4('Atto\\Box\\error\\', [
+            BOX_PATH.DS."error", 
+            ROOT_PATH.DS."error"
+        ]);
 
     }
 }
@@ -134,6 +153,7 @@ function clspre($path = "")
 }
 
 
+
 /**
  * global util functions autoload
  * func dir = BOX_PATH/util/func
@@ -148,11 +168,18 @@ autoRequireFiles(BOX_PATH . DS . "util");
  */
 require_once(BOX_PATH . DS . "autoload" . DS . "Box" . EXT);
 
-
 /**
  * configration
  */
 Box::defaultConf();
+
+
+
+/**
+ * global error handler
+ */
+\Atto\Box\Error::setHandler();
+
 
 
 /**

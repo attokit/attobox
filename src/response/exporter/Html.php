@@ -16,11 +16,17 @@ class Html extends Exporter
     //准备输出的数据
     public function prepare()
     {
-        if (is_associate($this->data["data"])) {
-            $this->content = a2j($this->data["data"]);
+        $d = $this->data["data"];
+        if (empty($d)) {
+            $this->content = "";
         } else {
-            $this->content = str($this->data["data"]);
+            if (is_associate($d)) {
+                $this->content = a2j($d);
+            } else {
+                $this->content = str($d);
+            }
         }
+        //var_dump($this->content);
         return $this;
     }
 

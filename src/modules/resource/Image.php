@@ -168,7 +168,9 @@ class Image extends Resource
         $m = str_replace("/", "", $this->rawMime);   // imagejpeg, imagepng, imagegif, imagewebp, imagebmp
         if (function_exists($m)) {
             //sent header
-            $this->sentHeader();
+            //$this->sentHeader();
+            Mime::header($this->rawExt, $this->rawBasename);
+            Response::headersSent();
             //echo
             if ($this->rawExt == "png") {
                 $m($im);

@@ -16,18 +16,6 @@ use MatthiasMullie\Minify;  //JS/CSS文件压缩
 
 class Vue extends Resource
 {
-    //original vue content
-    //public $realContent = "";
-
-    //content 原始内容
-    /*public $content = [
-        "template" => "",
-        "script" => "",
-        "style" => [],
-        "profile" => "",
-        "custom" => []
-    ];*/
-
     //export extension
     protected $expExt = null;
 
@@ -39,18 +27,6 @@ class Vue extends Resource
 
     //自定义的 vue 文件说明，在 <profile></profile> 中定义，json形式
     public $profile = [];
-
-    /*public function __construct($realPath)
-    {
-        $this->realPath = $realPath;
-        $this->realContent = file_get_contents($realPath);
-        //$this->parse();
-        $this->parseTemplate();
-        $this->parseScript();
-        $this->parseStyle();
-        $this->parseCustom();
-        $this->parseProfile();
-    }*/
 
     /**
      * @override getContent

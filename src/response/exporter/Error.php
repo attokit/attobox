@@ -1,13 +1,13 @@
 <?php
 /*
- *  CPHP框架  Exporter数据输出类
- *  输出error数据
+ * Attobox Framework / Response Exporter
+ * throw error
  */
 
-namespace CGY\CPhp\response\exporter;
+namespace Atto\Box\response\exporter;
 
-use CGY\CPhp\response\Exporter;
-use CGY\CPhp\Response;
+use Atto\Box\response\Exporter;
+use Atto\Box\Response;
 
 class Error extends Exporter
 {

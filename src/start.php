@@ -35,6 +35,7 @@ define("ROOT_PATH", __DIR__ . DS . ".." . DS . ".." . DS . ".." . DS . "..");
 define("VENDOR_PATH", ROOT_PATH . DS . "vendor");
 define("ATTO_PATH", VENDOR_PATH . DS . "attokit");
 define("BOX_PATH", VENDOR_PATH . DS . "attokit" . DS . "attobox" . DS . "src");
+define("MODULE_PATH", BOX_PATH . DS . "modules");
 define("APP_PATH", ROOT_PATH . DS . "app");
 define("ROUTE_PATH", ROOT_PATH . DS . "route");
 define("ASSET_PATH", ROOT_PATH . DS . "asset");

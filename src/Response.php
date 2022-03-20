@@ -8,6 +8,7 @@ namespace Atto\Box;
 
 use Atto\Box\Request;
 use Atto\Box\Router;
+use Atto\Box\Error;
 use Atto\Box\traits\staticCurrent;
 
 //use GuzzleHttp\Psr7;
@@ -114,6 +115,24 @@ class Response
         exit;
     }
 
+    /**
+     * throw error
+     */
+    public function throwError($error = null)
+    {
+        if (is_object($error) && $error instanceof Error) {
+            $this->setError($error);
+            if ($error->mustThrow()) {
+                $this->setData($error->data);
+                //$this->setExporter("error");
+                $exporter = $this->createExporter();
+                $exporter->prepare();
+                return $exporter->export();
+            }
+        }
+        exit;
+    }
+
 
     /**
      * set response params
@@ -175,9 +194,11 @@ class Response
      * 设定 errors
      * @return Response
      */
-    public function setErrors($error = null)
+    public function setError($error = null)
     {
-        //...
+        if (is_object($error) && $error instanceof Error) {
+            $this->errors[] = $error;
+        }
         return $this;
     }
     

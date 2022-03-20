@@ -7,7 +7,7 @@
 namespace Atto\Box\response;
 
 use Atto\Box\Response;
-//use Atto\Box\Error;
+use Atto\Box\Error;
 
 class Exporter
 {
@@ -66,6 +66,9 @@ class Exporter
         foreach ($errs as $i => $err) {
             if ($err instanceof Error) {
                 $this->data["errors"][] = $err->data;
+                if ($err->mustThrow()) {
+                    $this->data["error"] = true;
+                }
             }
         }
         return $this;
@@ -83,7 +86,7 @@ class Exporter
         //$this->prepare();
         $this->response->sentHeaders();
         echo $this->content;
-        return $this->content;
+        //return $this->content;
         exit;
     }
     
