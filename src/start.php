@@ -31,20 +31,11 @@ define("IS_WIN", strpos(PHP_OS, "WIN") !== false);
 define("NS", "\\Atto\\Box\\");
 
 //目录
-define("ROOT_PATH", __DIR__ . DS . ".." . DS . ".." . DS . ".." . DS . "..");
-define("VENDOR_PATH", ROOT_PATH . DS . "vendor");
+define("PRE_PATH", __DIR__ . DS . ".." . DS . ".." . DS . ".." . DS . "..");
+define("VENDOR_PATH", PRE_PATH . DS . "vendor");
 define("ATTO_PATH", VENDOR_PATH . DS . "attokit");
 define("BOX_PATH", VENDOR_PATH . DS . "attokit" . DS . "attobox" . DS . "src");
 define("MODULE_PATH", BOX_PATH . DS . "modules");
-define("APP_PATH", ROOT_PATH . DS . "app");
-define("ROUTE_PATH", ROOT_PATH . DS . "route");
-define("ASSET_PATH", ROOT_PATH . DS . "asset");
-define("SRC_PATH", ROOT_PATH . DS . "asset");
-//define("LIB_PATH", ROOT_PATH . DS . "library");
-define("MODEL_PATH", ROOT_PATH . DS . "model");
-//define("OPR_PATH", ROOT_PATH . DS . "operater");
-define("PAGE_PATH", ROOT_PATH . DS . "page");
-//define("PLUGIN_PATH", ROOT_PATH . DS . "plugin");
 
 
 
