@@ -6,7 +6,7 @@
 
 namespace Atto\Box;
 
-use Atto\Box\Request\Url;
+use Atto\Box\request\Url;
 use Atto\Box\traits\staticCurrent;
 
 class Request
