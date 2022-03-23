@@ -89,8 +89,23 @@ function path_find(
                     "checkDir" => $checkDir
                 ], $local);
             }
-        } else if (!is_null(path_cnst($parr[0]))) {
+        /*} else if (!is_null(path_cnst($parr[0]))) {
             $cnst = array_shift($parr);
+            foreach ($inDir as $i => $dir) {
+                $cnstDir[] = "$cnst/$dir";
+            }
+            $npath = implode(DS, $parr);
+            $gl = _path_findarr($npath, [
+                "inDir" => $cnstDir,
+                "subDir" => $subDir,
+                "checkDir" => $checkDir
+            ], $local);*/
+        } else {
+            if (!is_null(path_cnst($parr[0]))) {
+                $cnst = array_shift($parr);
+            } else {
+                $cnst = "root";
+            }
             foreach ($inDir as $i => $dir) {
                 $cnstDir[] = "$cnst/$dir";
             }

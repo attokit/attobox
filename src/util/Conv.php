@@ -85,6 +85,7 @@ function a2u($var = [])
     } else {
         $vars = [];
         foreach ($var as $k => $v) {
+            if (empty($v)) continue;
             $vars[] = $k."=".urlencode(str($v));
         }
         return empty($vars) ? "" : implode("&", $vars);
