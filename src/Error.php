@@ -159,6 +159,7 @@ class Error
 		$errline	//发生错误的行号
 	) {
 		if ($errno > 1024 || $errno < 256) {	//php system error
+			//var_dump(func_get_args());
 			$cls = self::cls("base/php");
 			$msg = [ $errstr ];
 		} else {	//customize error
@@ -234,6 +235,7 @@ class Error
 			$idx = 0;
 			for ($i=count($arr); $i>=1; $i--) {
 				$subarr = array_slice($arr, 0, $i);
+				$subarr[count($subarr)-1] = ucfirst(strtolower(array_slice($subarr, -1)[0]));
 				$cls = cls("error/".implode("/",$subarr));
 				if (!is_null($cls)) {
 					$idx = $i;
