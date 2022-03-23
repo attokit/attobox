@@ -98,6 +98,14 @@ class Doc
         return $doc;
     }
 
+    /**
+     * default doc cover method
+     */
+    public static function index()
+    {
+        return self::dir("root/index.md");
+    }
+
 
 
     /**

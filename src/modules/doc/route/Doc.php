@@ -27,6 +27,9 @@ class Doc extends Base
     public function defaultMethod()
     {
         $args = func_get_args();
+        if (empty($args)) {
+            return DocCls::index();
+        }
         $docarr = DocCls::parse($args);
         if (!is_null($docarr)) {
             $doc = DocCls::create($docarr[0]);

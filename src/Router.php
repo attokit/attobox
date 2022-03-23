@@ -103,6 +103,7 @@ class Router
         $a = [];
 
         if (empty($path)) {     //空路由
+            if (class_exists(cls("route/Web"))) return [cls("route/Web"), "emptyMethod", []];
             return [$r, "emptyMethod", []];
         }
         
