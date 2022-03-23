@@ -152,8 +152,14 @@ class Router
                     //return ["\\CPHP\\route\\Base", "page", [$page]];
                     return [cls("route/Base"), "page", [$page]];
                 } else {
-                    $cls = $clspre."Base";
-                    return array_merge([$cls], self::seekMethod($cls, $path));
+                    //check base route
+                    $cls_web = $clspre."Web";
+                    $cls_base = $clspre."Base";
+                    if (!class_exists($cls_web)) {
+                        return array_merge([$cls_base], self::seekMethod($cls_base, $path));
+                    } else {
+                        return array_merge([$cls_web], self::seekMethod($cls_web, $path));
+                    }
                 }
             }
         }

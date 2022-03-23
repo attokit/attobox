@@ -138,6 +138,14 @@ class Box
                                 $app_dir.DS.'library',
                                 $app_dir.DS.'modules'
                             ]);
+
+                            //route class
+                            /*$alo->addPsr4($ns.'\\route\\'.$app.'\\', [
+                                $app_dir.DS.'route'
+                            ]);
+                            $alo->addPsr4($ns.'\\route\\'.ucfirst(strtolower($app)).'\\', [
+                                $app_dir.DS.'route'
+                            ]);*/
                             
                             //error class
                             $alo->addPsr4($ns.'\\error\\'.$app.'\\', [
@@ -175,6 +183,13 @@ class Box
                     closedir($dh);
                     $alo->addPsr4($ns.'\\route\\', $ds);
                 }
+
+                /**
+                 * patch web route
+                 */
+                $alo->addPsr4($ns.'\\route\\', [
+                    ROOT_PATH.DS."route"
+                ]);
 
                 /**
                  * patch error classes
