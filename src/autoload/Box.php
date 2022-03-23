@@ -192,6 +192,13 @@ class Box
                 ]);
 
                 /**
+                 * patch web library
+                 */
+                $alo->addPsr4($ns.'\\', [
+                    ROOT_PATH, ROOT_PATH.DS."library"
+                ]);
+
+                /**
                  * patch error classes
                  */
                 $alo->addPsr4($ns.'\\error\\', [
