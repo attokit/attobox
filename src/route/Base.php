@@ -43,7 +43,7 @@ class Base extends Route
      * 直接调用本地 php 页面
      * @return void
      */
-    public function page($page = "")
+    public function page($page = "", $p = [])
     {
         $page = path_find($page);
         if (empty($page)) {
@@ -51,9 +51,9 @@ class Base extends Route
                 "status" => 404
             ];
         }
-        return [
+        return arr_extend([
             "data" => $page,
             "format" => "page"
-        ];
+        ], $p);
     }
 }
