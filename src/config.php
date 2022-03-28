@@ -27,7 +27,7 @@ return [
     //dirs
     "LIB_DIRS"      => "modules,library,model,operater,plugin,route,asset",
     "DB_DIRS"       => "db,library/db",
-    "ASSET_DIRS"    => "asset,asset/library,src,src/library,public,page",
+    "ASSET_DIRS"    => "assets,assets/library,asset,asset/library,src,src/library,public,page",
 
 
     //不受WEB_PAUSE影响的route

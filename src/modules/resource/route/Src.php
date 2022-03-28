@@ -9,6 +9,7 @@
 namespace Atto\Box\route;
 
 use Atto\Box\Resource;
+use Atto\Box\resource\Uploader;
 
 class Src extends Base
 {
@@ -46,6 +47,17 @@ class Src extends Base
         //var_dump($resource->info());
         
         exit;
+    }
+
+
+
+    /**
+     * upload resource
+     */
+
+    public function upload()
+    {
+
     }
     
 }

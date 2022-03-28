@@ -43,6 +43,20 @@ class Box
             $f = BOX_PATH.DS."config".EXT;
             if (file_exists($f));
             $conf = require($f);
+            //load modules configs
+            $mds = MODULE_PATH;
+            $mdh = opendir($mds);
+            while(($md = readdir($mdh)) !== false) {
+                if ($md=="." || $md=="..") continue;
+                $mdp = $mds.DS.$md;
+                if (!is_dir($mdp)) continue;
+                $cf = $mdp.DS."config".EXT;
+                if (file_exists($cf)) {
+                    $_conf = require($cf);
+                    $conf = arr_extend($conf, $_conf);
+                }
+            }
+            closedir($mdh);
         }
         if (is_notempty_arr($conf) && is_associate($conf)) {
             self::$_TEMP_CONF = arr_extend(self::$_TEMP_CONF, $conf);
