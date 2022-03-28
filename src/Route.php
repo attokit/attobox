@@ -55,5 +55,23 @@ class Route
         
     }
 
+
+
+    /**
+     * tools
+     */
+
+    /**
+     * call other exists route method
+     * @param String $uri       like foo/bar/jaz/...
+     * @return Mixed return data
+     */
+    public static function exec($uri)
+    {
+        $uarr = arr($uri);
+        $route = Router::seek($uarr);
+        return Router::exec($route);
+    }
+
     
 }
