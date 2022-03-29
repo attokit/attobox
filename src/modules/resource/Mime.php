@@ -123,7 +123,9 @@ class Mime
             "png",
             "gif",
             "bmp",
-            "webp"
+            "webp",
+
+            'svg'
         ],
 
         "audio" => [

@@ -100,7 +100,8 @@ class Url
 
     public static function uristr($url = "")
     {
-        if (!self::legal($url)) return $_SERVER["REQUEST_URI"];
+        if (!self::legal($url)) return urldecode($_SERVER["REQUEST_URI"]);  //$_SERVER["REQUEST_URI"]
+        /*add*/$url = urldecode($url);
         return str_replace(self::domain($url), "", $url);
     }
 
@@ -109,7 +110,8 @@ class Url
      */
     public static function uri($url = "")
     {
-        $uristr = self::legal($url) || empty($url) ? self::uristr($url) : $url;
+        //$uristr = self::legal($url) || empty($url) ? self::uristr($url) : $url;
+        $uristr = self::legal($url) || empty($url) ? self::uristr($url) : urldecode($url);
         $ua = strpos($uristr, "?") !== false ? explode("?", $uristr) : [ $uristr ];
         $ups = ltrim($ua[0], "/");
         $upath = !empty($ups) ? explode("/", $ups) : [];

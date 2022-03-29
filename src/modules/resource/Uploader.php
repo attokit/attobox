@@ -8,6 +8,7 @@
 
 namespace Atto\Box\resource;
 
+use Atto\Box\Request;
 use Atto\Box\Response;
 use Atto\Box\Resource;
 use Atto\Box\resource\Mime;
@@ -32,10 +33,12 @@ class Uploader
     //当前上传参数
     //允许上传的类型
     public $mime = "image";
-    //允许上传的size，10M
-    public $maxsize = 10*1024*1024; 
+    //允许上传的size，100M
+    public $maxsize = 100*1024*1024; 
     //保存路径，只能在 asset 路径下
     public $upath = UPLOAD_DIR;
+    //是否改名
+    public $rename = true;
 
     //获取的 $_FILES，处理后结果
     public $files = [];
@@ -66,19 +69,25 @@ class Uploader
     }
 
     //上传主方法
-    public function upload()
+    public function upload($fieldname = null)
     {
         //解析 $_FILES
-        $this->parse();
+        $this->parse($fieldname);
         if (!empty($this->files)) {
             //写入
             $rst = [];
             for ($i=0; $i<count($this->files); $i++) {
                 $fo = $this->files[$i];
                 if (is_uploaded_file($fo["tmp_name"])) {
+                    //create savename
+                    if ($this->rename) {
+                        $fo["savename"] = $this->newFileName($fo["name"], $i+1);
+                    } else {
+                        $fo["savename"] = $fo["name"];
+                    }
                     if (move_uploaded_file($fo["tmp_name"], $this->upath.DS.$fo["savename"])) {
                         //上传成功
-                        $rst[] = $fo["savename"];
+                        $rst[] = $fo;   //$fo["savename"];
                         continue;
                     } else {
                         trigger_error("upload/movefileerror", E_USER_ERROR);
@@ -93,10 +102,12 @@ class Uploader
     }
 
     //解析 $_FILES
-    protected function parse()
+    protected function parse($fieldname = null)
     {
-        $fs = $_FILES;
+        $fs = Request::files($fieldname); //$_FILES;
         $mimes = $this->acceptMimes();
+        //var_dump($mimes);exit;
+        $this->files = [];
         foreach ($fs as $fn => $fo) {
             if ($fo["error"]>0) {
                 $err = self::$uperr[$fo["error"]];
@@ -105,7 +116,6 @@ class Uploader
                 break;
             }
             if (in_array($fo["type"], $mimes) && $fo["size"] <= $this->maxsize) {
-                $fo["savename"] = date("YmdHis",time()).".".pathinfo($fo["name"])["extension"];
                 $this->files[] = $fo;
             }
         }
@@ -121,6 +131,8 @@ class Uploader
         foreach ($mime as $i => $mi) {
             if (isset(Mime::$processable[$mi])) {
                 array_push($ms, ...Mime::$processable[$mi]);
+            } else if (isset(Mime::$mimes[$mi])) {
+                array_push($ms, $mi);
             }
         }
         if (empty($ms)) return [];
@@ -131,6 +143,14 @@ class Uploader
             }
         }
         return $mimes;
+    }
+
+    //rename
+    protected function newFileName($filename = "", $idx = 0)
+    {
+        $pi = pathinfo($filename);
+        $idxs = str_pad((string)$idx, 3, "0", STR_PAD_LEFT);
+        return date("YmdHis",time())."_".$idxs.".".$pi["extension"];
     }
 
 

@@ -108,6 +108,49 @@ class Request
         }
     }
 
+    //$_FILES
+    public static function files($fieldname = [])
+    {
+        if (is_notempty_str($fieldname)) {
+            if (!isset($_FILES[$fieldname])) return [];
+            $fall = $_FILES[$fieldname];
+            $fs = [];
+            if (is_indexed($fall["name"])) {
+                $ks = array_keys($fall);
+                $ci = count($fall["name"]);
+                for ($i=0;$i<$ci;$i++) {
+                    $fs[$i] = [];
+                    foreach ($ks as $ki => $k) {
+                        $fs[$i][$k] = $fall[$k][$i];
+                    }
+                }
+            } else {
+                $fs[] = $fall;
+            }
+            return $fs;
+        }
+        //if (is_indexed($fieldname) && !empty($fieldname)) {
+        if (is_notempty_arr($fieldname)) {
+            $fds = $fieldname;
+            $fs = [];
+            for ($i=0; $i<count($fds); $i++) {
+                $fsi = self::files($fds[$i]);
+                if (!empty($fsi)) {
+                    $fs = array_merge($fs, $fsi);
+                }
+            }
+            return $fs;
+        }
+        $fs = [];
+        foreach ($_FILES as $fdn => $fdo) {
+            $fsi = self::files($fdn);
+            if (!empty($fsi)) {
+                $fs = array_merge($fs, $fsi);
+            }
+        }
+        return $fs;
+    }
+
     //php://input，输入全部转为json，返回array
     public static function input($in = "json")
     {

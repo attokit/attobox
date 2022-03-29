@@ -74,7 +74,8 @@ class Error
     }
     protected function setFile($file, $line = 0)
 	{
-		$this->file = path_relative($file);
+		$rf = path_relative($file);
+		$this->file = is_null($rf) ? $file : $rf;
 		$this->line = $line;
 		return $this;
 	}

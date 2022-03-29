@@ -190,7 +190,8 @@ class Box
                             $ds[] = $md_dir.DS."route";
                             
                             //error class
-                            $alo->addPsr4($ns.'\\error\\'.$md.'\\', $md_dir.DS."error");
+                            //$alo->addPsr4($ns.'\\error\\'.$md.'\\', $md_dir.DS."error");
+                            $alo->addPsr4($ns.'\\error\\', $md_dir.DS."error");
                     
                         }
                     }

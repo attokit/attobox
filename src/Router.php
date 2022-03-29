@@ -145,23 +145,49 @@ class Router
                 return [$cls, $m, $a];
             } else {
                 $cls = $clspre.ucfirst(strtolower($path[0]));
+                $cls_web = $clspre."Web";
+                $cls_base = $clspre."Base";
                 $page = ROOT_PATH.DS."page".DS.implode(DS, $path).EXT;
                 if (class_exists($cls)) {
                     array_shift($path);
                     return array_merge([$cls], self::seekMethod($cls, $path));
-                } else if (file_exists($page)) {
+                } 
+                if (class_exists($cls_web)) {
+                    $rcls = new \ReflectionClass($cls_web);
+                    if ($rcls->hasMethod($path[0])) {
+                        return [$cls_web, array_shift($path), $path];
+                    }
+                }
+                if (class_exists($cls_base)) {
+                    $rcls = new \ReflectionClass($cls_base);
+                    if ($rcls->hasMethod($path[0])) {
+                        return [$cls_base, array_shift($path), $path];
+                    }
+                }
+                if (file_exists($page)) {
+                    //return ["\\CPHP\\route\\Base", "page", [$page]];
+                    return [cls("route/Base"), "page", [$page]];
+                }
+                if (!class_exists($cls_web)) {
+                    return array_merge([$cls_base], self::seekMethod($cls_base, $path));
+                }
+                return array_merge([$cls_web], self::seekMethod($cls_web, $path));
+                
+                /*else if (file_exists($page)) {
                     //return ["\\CPHP\\route\\Base", "page", [$page]];
                     return [cls("route/Base"), "page", [$page]];
                 } else {
                     //check base route
-                    $cls_web = $clspre."Web";
-                    $cls_base = $clspre."Base";
+                    if (class_exists($cls_web)) {
+                        $rcls = new ReflectionClass($cls_web);
+                        if ($rcls->hasMethod($path[0]))
+                    }
                     if (!class_exists($cls_web)) {
                         return array_merge([$cls_base], self::seekMethod($cls_base, $path));
                     } else {
                         return array_merge([$cls_web], self::seekMethod($cls_web, $path));
                     }
-                }
+                }*/
             }
         }
     }
