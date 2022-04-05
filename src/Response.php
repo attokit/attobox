@@ -44,7 +44,8 @@ class Response
     public $headers = [
         "Content-Type" => "text/html; charset=utf-8",
         "User-Agent" => "Attobox/Response",
-        "X-Framework" => "attokit/attobox"
+        "X-Framework" => "attokit/attobox",
+        "Access-Control-Allow-Origin" => "*"
     ];
     public $protocol = "1.1";
     //other

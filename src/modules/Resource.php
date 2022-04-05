@@ -153,6 +153,7 @@ class Resource
         $ext = $this->rawExt;
         if (Mime::isPlain($ext)) {
             $this->content = file_get_contents($this->realPath);
+            //var_dump($this->content);
         }
     }
     protected function getCompileContent() {
@@ -288,6 +289,7 @@ class Resource
      */
     public function export($params = [])
     {
+        //var_dump(Mime::isPlain($this->rawExt));exit;
         //get resource content
         $this->getContent();
         
@@ -295,7 +297,7 @@ class Resource
         //$this->sentHeader();
         Mime::header($this->rawExt, $this->rawBasename);
         Response::headersSent();
-
+        
         //echo
         echo $this->content;
         exit;

@@ -12,6 +12,7 @@ namespace Atto\Box\resource;
 use Atto\Box\Resource;
 use Atto\Box\Request;
 use Atto\Box\Response;
+use Atto\Box\resource\Mime;
 use MatthiasMullie\Minify;  //JS/CSS文件压缩
 
 class Vue extends Resource
@@ -75,7 +76,10 @@ class Vue extends Resource
         if (is_null($this->expExt)) $this->expExt = $this->rawExt;
 
         //sent header
-        $this->sentHeader($this->expExt);
+        //$this->sentHeader($this->expExt);
+        Mime::header($this->expExt);
+        Response::headersSent();
+
 
         //echo
         echo $this->content;
@@ -306,6 +310,11 @@ class Vue extends Resource
     {
         $name = $this->name();
         $sarr = $this->script["script"];
+
+        /** Vue 对象可能需要先 import **/
+        //$js_z = "import Vue from '/src/atto/requires/vue.js';";
+        //$js_z = "console.log(atto);";
+
         $js_a = $sarr[0];
         $js_b = $sarr[1];
         $js_b = substr($js_b, 0, -1).",template:`".$this->inline($this->template["content"])."`}";
@@ -322,7 +331,7 @@ class Vue extends Resource
             $js_c = "let sty = document.createElement('div');sty.innerHTML='<style>".$js_c."</style>';sty=sty.childNodes[0];document.querySelector('head').appendChild(sty);";
         }
         $this->expExt = "js";
-        return $js_a.";".$js_b.$js_c."export default comp;";
+        return /*$js_z.*/$js_a.";".$js_b.$js_c."export default comp;";
     }
 
     //输出根组件的内容，export 到 cgy.option.vue.root
