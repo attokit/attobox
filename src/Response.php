@@ -57,6 +57,9 @@ class Response
     //数据输出类
     public $exporter = null;
 
+    //是否只输出 data，默认 false，输出 [error=>false, errors=>[], data=>[]]
+    public $exportOnlyData = false;
+
 
     /**
      * 构造
@@ -233,20 +236,26 @@ class Response
      */
     public function setParams($params = [])
     {
+        //var_dump($params);
         if (isset($params["headers"]) && is_array($params["headers"]) && !empty($params["headers"])) {
             $this->setHeaders($params["headers"]);
         }
         if (isset($params["headers"])) unset($params["headers"]);
-        foreach (["data","format","status"] as $k => $v) {
+        foreach (["data","format","status","exportOnlyData"] as $k => $v) {
             if (isset($params[$v])) {
                 $m = "set".ucfirst($v);
-                $this->$m($params[$v]);
+                if (method_exists($this, $m)) {
+                    $this->$m($params[$v]);
+                } else {
+                    $this->$v = $params[$v];
+                }
                 unset($params[$v]);
             }
         }
         foreach ($params as $k => $v) {
             //if (property_exists($this, $k)) $this->$k = $v;
             if (!property_exists($this, $k)) $this->$k = $v;
+            //$this->$k = $v;
         }
         
         return $this;

@@ -85,6 +85,7 @@ class Exporter
     {
         //$this->prepare();
         $this->response->sentHeaders();
+        //var_dump($this->response);
         echo $this->content;
         //return $this->content;
         exit;

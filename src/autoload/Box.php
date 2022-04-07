@@ -79,6 +79,7 @@ class Box
             "ROUTE_PATH"    => $root . DS . "route",
             "ASSET_PATH"    => $root . DS . "asset",
             "SRC_PATH"      => $root . DS . "asset",
+            "ASSETS_PATH"   => $root . DS . "assets",
             "LIB_PATH"      => $root . DS . "library",
             "MODEL_PATH"    => $root . DS . "model",
             "OPR_PATH"      => $root . DS . "operater",

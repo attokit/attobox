@@ -8,6 +8,6 @@
 return [
 
     //upload configs
-    "UPLOAD_DIR" => "asset/upload",
+    "UPLOAD_DIR" => "assets/upload",
 
 ];

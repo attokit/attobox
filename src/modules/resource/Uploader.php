@@ -9,6 +9,7 @@
 namespace Atto\Box\resource;
 
 use Atto\Box\Request;
+use Atto\Box\request\Url;
 use Atto\Box\Response;
 use Atto\Box\Resource;
 use Atto\Box\resource\Mime;
@@ -38,7 +39,12 @@ class Uploader
     //保存路径，只能在 asset 路径下
     public $upath = UPLOAD_DIR;
     //是否改名
-    public $rename = true;
+    public $rename = false;     //true;
+    //访问 URL 前缀
+    public $urlpre = [
+        "download" => "/src/upload",
+        "delete" => "/src/delete/upload"
+    ];
 
     //获取的 $_FILES，处理后结果
     public $files = [];
@@ -48,14 +54,17 @@ class Uploader
         if (is_notempty_str($upath)) {
             $upath = path_find($upath, ["inDir"=>ASSET_DIRS,"checkDir"=>true]);
             if (!is_null($upath)) {
-                $this->upath = $upath;
+                $this->upath = path_fix($upath);
             } else {
                 $this->upath = path_find($this->upath, ["inDir"=>ASSET_DIRS,"checkDir"=>true]);
                 if (is_null($this->upath)) {
                     trigger_error("upload/errsavepath", E_USER_ERROR);
                     exit;
                 }
+                $this->upath = path_fix($this->upath);
             }
+        } else if ($upath=="") {
+            $this->upath = path_fix(ASSETS_PATH);
         }
     }
 
@@ -68,6 +77,13 @@ class Uploader
         return true;
     }
 
+    //设置 URL 前缀
+    public function setUrlPrefix($urlpre)
+    {
+        $this->urlpre = arr_extend($this->urlpre, $urlpre);
+        return $this;
+    }
+
     //上传主方法
     public function upload($fieldname = null)
     {
@@ -78,6 +94,7 @@ class Uploader
             $rst = [];
             for ($i=0; $i<count($this->files); $i++) {
                 $fo = $this->files[$i];
+                if ($fo["error"]!=0) continue;
                 if (is_uploaded_file($fo["tmp_name"])) {
                     //create savename
                     if ($this->rename) {
@@ -86,9 +103,14 @@ class Uploader
                         $fo["savename"] = $fo["name"];
                     }
                     if (move_uploaded_file($fo["tmp_name"], $this->upath.DS.$fo["savename"])) {
-                        //上传成功
-                        $rst[] = $fo;   //$fo["savename"];
-                        continue;
+                        //上传成功，写入要返回的数据到 fo array
+                        $this->files[$i] = arr_extend($fo, [
+                            "url"           => $this->getFileUrl($fo),
+                            "thumbnailUrl"  => $this->getFileUrl($fo)."?thumb=auto",
+                            "deleteUrl"     => $this->getFileUrl($fo, "delete"),
+                            "deleteType"    => "GET"
+                        ]);
+                        //continue;
                     } else {
                         trigger_error("upload/movefileerror", E_USER_ERROR);
                     }
@@ -96,9 +118,9 @@ class Uploader
                     trigger_error("upload/notupfile", E_USER_ERROR);
                 }
             }
-            return $rst;
+            //return $rst;
         } 
-        return false;
+        return $this->files;
     }
 
     //解析 $_FILES
@@ -109,18 +131,52 @@ class Uploader
         //var_dump($mimes);exit;
         $this->files = [];
         foreach ($fs as $fn => $fo) {
-            if ($fo["error"]>0) {
-                $err = self::$uperr[$fo["error"]];
-                $errinfo = isset($err[0]) ? $err[0] : "未知错误";
-                trigger_error("upload/syserr::".$errinfo, E_USER_ERROR);
-                break;
-            }
-            if (in_array($fo["type"], $mimes) && $fo["size"] <= $this->maxsize) {
-                $this->files[] = $fo;
-            }
+            $this->files[] = $this->checkFile($fo);
         }
-        if (empty($this->files)) trigger_error("upload/nolegalfile", E_USER_ERROR);
+        //if (empty($this->files)) trigger_error("upload/nolegalfile", E_USER_ERROR);
         return $this;
+    }
+
+    /**
+     * check files error
+     * @param Array $fo     file obj array
+     * @return Array file obj been checked
+     */
+    protected function checkFile($fo)
+    {
+        $errs = self::$uperr;
+        $mimes = $this->acceptMimes();
+        if ($fo["error"]>0) {
+            $err = $errs[$fo["error"]];
+            $errinfo = (isset($err) && isset($err[0])) ? $err[0] : "未知错误";
+            $fo["error"] = $errinfo;
+        } else if (!in_array($fo["type"], $mimes)) {
+            $fo["error"] = "不支持上传此格式文件 ".$fo["type"];
+        } else if ($fo["size"] > $this->maxsize) {
+            $fo["error"] = "文件大小不能超过 ".$fo["size"];
+        } else {
+            $fo["error"] = 0;
+        }
+        return $fo;
+    }
+
+    /**
+     * get file url after move file successful
+     * @param Array $fo         file obj array
+     * @param String $urltype   url type default download
+     * @return String url
+     */
+    protected function getFileUrl($fo, $urltype = "download")
+    {
+        $sn = $fo["savename"];
+        $pre = $this->urlpre;
+        $pre = isset($pre[$urltype]) ? $pre[$urltype] : $pre["download"];
+        $host = Url::current()->domain();
+        $us = [];
+        $us[] = rtrim($host, "/");
+        if ($pre!="") $us[] = $pre;
+        $us[] = $sn;
+        return implode("/", $us);
     }
 
     //返回允许上传的 mime 数组

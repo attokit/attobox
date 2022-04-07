@@ -16,7 +16,11 @@ class Json extends Exporter
     //准备输出的数据
     public function prepare()
     {
-        $this->content = a2j($this->data);
+        if ($this->response->exportOnlyData) {
+            $this->content = a2j($this->data["data"]);
+        } else {
+            $this->content = a2j($this->data);
+        }
     }
 
 }
