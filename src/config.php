@@ -29,14 +29,13 @@ return [
     "DB_DIRS"       => "db,library/db",
     "ASSET_DIRS"    => "assets,assets/library,asset,asset/library,src,src/library,public,page",
 
-
-    //不受WEB_PAUSE影响的route
-    //"UNPAUSE_ROUTE" => "src",	
-
-    
+    //Response config
     "EXPORT_FORMATS"    => "html,page,json,xml,str,dump",
     "EXPORT_FORMAT"     => "html",
     "EXPORT_LANG"       => "zh-CN",     //输出语言
     "RESPONSE_PSR7"     => false,		//是否以Psr-7标准返回响应
+
+    //DB config
+    "DB_TYPE"   => "sqlite",    //default DB type, [mysql, sqlite, ...] 
 
 ];

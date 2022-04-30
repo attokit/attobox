@@ -225,6 +225,8 @@ class Resource
             }
         }
 
+        if (is_null($rawExt)) return null;
+
         $rst = [
             "rawPath"   => $rawPath,
             "rawExt"    => $rawExt,

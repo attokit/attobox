@@ -167,7 +167,7 @@ class Error
 			if (is_notempty_str($errstr)) {
 				$arr = explode("::", $errstr);
 				$cls = self::cls($arr[0]);
-				$msg = count($arr)>1 ? arr($arr[1]) : [];
+				$msg = count($arr)>1 ? explode(",", $arr[1])/*arr($arr[1])*/ : [];
 			} else {
 				$cls = self::cls("base/unknown");
 				$msg = [];

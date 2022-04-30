@@ -201,9 +201,9 @@ class Src extends Base
      * upload resource
      */
 
-    public function upload()
+    /*public function upload()
     {
         
-    }
+    }*/
     
 }
