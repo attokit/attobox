@@ -5,6 +5,32 @@
  */
 
 
+/**
+ * 判断类型
+ * @param Mixed $any 要判断类型的数据
+ * @param String $types is_***() 星号部分，多个用,隔开
+ * @param String $logic 多个类型之间的逻辑关系，默认 '||'，可选 '&&'
+ */
+function iss($any, $types, $logic="||")
+{
+    $tps = explode(",", $types);
+    $rst = array_map(function($tpi) use ($any) {
+        $func = "is_".strtolower($tpi);
+        if (!function_exists($func)) return false;
+        return $func($any);
+    }, $tps);
+    $type = $logic=="&&";
+    for ($i=0;$i<count($rst);$i++) {
+        if ($logic=="&&") {
+            $type = $type && $rst[$i];
+            if ($type===false) break;
+        } else {
+            $type = $type || $rst[$i];
+        }
+    }
+    return $type;
+}
+
 
 /*
  *  Array
@@ -177,4 +203,18 @@ function is_remote($file = null)
 {
     if (!is_notempty_str($file)) return false;
     return false !== strpos($file, "://");
+}
+
+//is_set 判断变量是否已定义，
+//当 var==null 时 isset(var) == false，但是 is_set(var) == true
+function is_set($var) 
+{
+    return isset($var) || is_null($var);
+}
+
+//判断 key 是否存在，部分情况下代替 isset($arr[$key])
+function is_def($arr, $key)
+{
+    if (!is_array($arr) || empty($arr)) return false;
+    return in_array($key, array_keys($arr));
 }

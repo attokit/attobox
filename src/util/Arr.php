@@ -16,7 +16,7 @@ function arr_last($arr = [])
     return array_slice($arr, -1)[0];
 }
 
-//按 a/b/c... 形式搜索多维数组，返回找到的值，未找到则返回null
+//按 a/b/c or a.b.c 形式搜索多维数组，返回找到的值，未找到则返回null
 function arr_item($arr = [], $key = "")
 {
     if (is_int($key)) {
@@ -28,6 +28,7 @@ function arr_item($arr = [], $key = "")
     }
     if (!is_array($arr) || empty($arr)) return null;
     $ctx = $arr;
+    $key = trim(str_replace(".","/",trim($key,".")), "/");
     $karr = explode("/", $key);
     $rst = null;
     for ($i=0; $i<count($karr); $i++) {
@@ -217,4 +218,52 @@ function arr_indexed($arr=[], $key="children")
     }
     return $arr;
 }*/
+
+/**
+ * 版本号组成的数组排序
+ * @param Array $vers 要排序的版本号数组，like：[ 2.0, 1.3.9, 1.13.8, 4.0 ]
+ * @param String $order 排序方式，默认 asc，可选 desc
+ * @param Int $dig 版本号每一节最大位数，默认 5 位
+ * @return Array 排序后的数组
+ */
+function arr_sort_version($vers = [], $order = "asc", $dig = 5)
+{
+    if (count($vers)<=1) return $vers;
+    $lvls = 0;
+    $varrs = array_map(function ($ver) use (&$lvls) {
+        $varr = explode(".", $ver);
+        if (count($varr)>$lvls) $lvls = count($varr);
+        return $varr;
+    }, $vers);
+    $nvers = array_map(function ($varr) use ($lvls, $dig) {
+        if (count($varr)<$lvls) {
+            $nvarr = array_merge($varr, array_fill(0, $lvls-count($varr), "0"));
+        } else {
+            $nvarr = $varr;
+        }
+        $vstrs = array_map(function ($nvarri) use ($dig) {
+            return str_pad($nvarri, $dig, "0", STR_PAD_LEFT);
+        }, $nvarr);
+        $vstr = implode("",$vstrs);
+        return $vstr*1;
+    }, $varrs);
+    
+    $verasso = [];
+    for ($i=0;$i<count($vers);$i++) {
+        $verasso[$nvers[$i]] = $vers[$i];
+    }
+
+    $order = strtolower($order);
+    if ($order=="asc") {
+        ksort($verasso);
+    } else if ($order=="desc") {
+        krsort($verasso);
+    }
+    /*$vs = [];
+    foreach ($verasso as $k => $v) {
+        $vs[] = $v;
+    }*/
+    return array_values($verasso);
+}
+
 

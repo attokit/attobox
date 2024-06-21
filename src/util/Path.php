@@ -1,7 +1,7 @@
 <?php
 
 /*
- *  CPHP框架  工具函数
+ *  Attobox Framework  工具函数
  *  path_xxxx 路径工具函数
  */
 
@@ -216,6 +216,30 @@ function path_traverse($path = "", $callback = null, $recursive = false)
     return $rst;
 }
 
+//创建文件夹，$path 从 root 根目录开始
+//！注意！！要创建子文件夹的路径必须有写权限，否则报错！！
+function path_mkdir($path = "")
+{
+    if (!is_notempty_str($path)) return false;
+    $parr = explode("/", $path);
+    $root = path_fix(path_find("root"));
+    $temp = $root;
+    for ($i=0;$i<count($parr);$i++) {
+        $pi = $parr[$i];
+        $temp = $temp.DS.$pi;
+        if (!is_dir($temp)) {
+            try {
+                @mkdir($temp, 0777, true);
+            } catch (\Exception $e) {
+                trigger_error("php::无法创建路径 [ ".$temp." ]", E_USER_ERROR);
+                return false;
+                break;
+            }
+        }
+    }
+    return true;
+}
+
 
 
 
@@ -251,4 +275,16 @@ function path_up($path = "", $dv = DS)
     }
     $path = array_merge(array_diff($path, [null,".."]), []);
     return str_replace("__empty__", "", implode($dv, $path));
+}
+
+//递归删除目录，rmdir() 只能删除空文件夹，因此需要先删除内部内容
+function path_del($dir)
+{
+    $dir = path_find($dir, ["inDir"=>[], "checkDir"=>true]);
+    if (empty($dir)) return false;
+    $files = array_diff(scandir($dir), [".", ".."]);
+    foreach ($files as $file) {
+       (is_dir("$dir/$file")) ? path_del("$dir/$file") : unlink("$dir/$file");
+    }
+    return rmdir($dir);
 }

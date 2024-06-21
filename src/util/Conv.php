@@ -145,31 +145,9 @@ function a2x($var = [], $dom = null, $item = null)
 function x2a($var = null)
 {
     if (!is_xml($var)) return [];
-    $ta = [];
     $xo = simplexml_load_string($var);
-    $ma = (array)$xo;
-    foreach ($ma as $key => $val) {
-        if (is_string($val)) {
-            $ta[$key] = $val;
-        } elseif (is_object($val) && !empty($val)) {
-            $ta[$key] = x2a($val->asXML());
-        } elseif (is_array($val) && !empty($val)) {
-            foreach ($val as $zkey => $zval) {
-                $zval = x2a($zval->asXML());
-                if (is_numeric($zkey)) {
-                    $ta[$key][] = $zval;
-                }
-                if (is_string($zkey)) {
-                    $ta[$key][$zkey] = $zval;
-                }
-            }
-        } else {
-            if (empty($val)) {
-                $ta[$key] = "";
-            }
-        }
-    }
-    return $ta;
+    $json = json_encode($xo);
+    return json_decode($json, TRUE);
 }
 
 //arr to html property   like:  `[pre-]data="value" [pre-]data2="value" ...`

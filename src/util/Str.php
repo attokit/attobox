@@ -53,6 +53,16 @@ function replace($search, $replace, $str)
     }
 }
 
+//replace all，$kv = [ [$search, $replace], [], ... ]
+function replace_all($kv = [], $str)
+{
+    for ($i=0;$i<count($kv);$i++) {
+        $ki = $kv[$i];
+        $str = replace($ki[0], $ki[1], $str);
+    }
+    return $str;
+}
+
 //tocamelcase
 function strtocamel($str, $ucfirst=false)
 {
@@ -70,6 +80,13 @@ function strtocamel($str, $ucfirst=false)
         }, $arr);
         return $fs.implode("",$arr);
     }
+}
+
+//camelcase to snakecase:  fooBar --> foo-bar
+function strtosnake($str, $glup="_")
+{
+    $snakeCase = strtolower(preg_replace('/([a-z])([A-Z])/', '$1'.$glup.'$2', $str));
+    return $snakeCase;
 }
 
 //has
