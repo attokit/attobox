@@ -43,9 +43,12 @@ class Response
     public $status = 200;
     public $headers = [
         "Content-Type" => "text/html; charset=utf-8",
+        "Access-Control-Allow-Origin" => "*",
+        "Access-Control-Allow-Headers" => "*",
+        "Access-Control-Allow-Methods" => "POST,GET,OPTIONS",
+        //"Access-Control-Allow-Credentials" => "true",
         "User-Agent" => "Attobox/Response",
         "X-Framework" => "attokit/attobox",
-        "Access-Control-Allow-Origin" => "*"
     ];
     public $protocol = "1.1";
     //other
@@ -67,7 +70,16 @@ class Response
     public function __construct($params = [])
     {
         $this->req = Request::current();
+        //将 request->responseHeaders 写入 response->headers
+        $hds = $this->req->responseHeaders;
+        if (!empty($hds)) {
+            foreach ($hds as $k => $v){
+                $this->headers[$k] = $v;
+            }
+        }
+        
         $this->rou = Router::current();
+        
         $this->setFormat();
         $this->setParams($params);
     }
@@ -81,10 +93,17 @@ class Response
         $rou = $this->rou;
         //WEB_PAUSE == true
         if (WEB_PAUSE && !$rou->unpause) {
-            $page = path_exists([
-                "pause.php",
-                "box/pause.php"
-            ]);
+            $pauseFile = "pause".EXT;
+            $pausePages = [];
+            if (!is_null($this->req->app)) {
+                $app = strtolower($this->req->app);
+                $pausePages[] = "app/$app/page/$pauseFile";
+            } else {
+                $pausePages[] = "root/$pauseFile";
+            }
+            $pausePages[] = $pauseFile;
+            $pausePages[] = "box/$pauseFile";
+            $page = path_exists($pausePages);
             $params = arr_extend($params, [
                 "format" => "page",
                 "data" => $page,
@@ -127,7 +146,11 @@ class Response
         if (is_object($error) && $error instanceof Error) {
             $this->setError($error);
             if ($error->mustThrow()) {
-                $this->setData($error->data);
+
+                $errdata = $error->data;
+                $errdata["exporter"] = $this->exporter;
+                $this->setData($errdata);
+                
                 //$this->setExporter("error");
                 $exporter = $this->createExporter();
                 $exporter->prepare();
@@ -343,6 +366,11 @@ class Response
     {
         return self::_export("html", $html, $params);
     }
+    
+    public static function dump(...$todump)
+    {
+        return self::_export("dump", count($todump)==1 ? $todump[0] : $todump);
+    }
 
     public static function code($code = 404)
     {
@@ -353,6 +381,24 @@ class Response
     {
         $path = path_find($path, ["inDir"=>"page"]);
         if (empty($path)) return self::code(404);
+        return self::_export("page", $path, $params);
+    }
+
+    public static function error($errmsg=[], $errtype="custom")
+    {
+        if (is_notempty_str($errmsg)) $errmsg = [$errmsg];
+        $errtit = $errtype."::".implode(",",$errmsg);
+        trigger_error($errtit, E_USER_ERROR);
+        exit;
+    }
+
+    public static function errpage($params = [])
+    {
+        $path = path_find("box/page/error.php");
+        $params = arr_extend([
+            "title" => "发生错误",
+            "msg" => "发生错误"
+        ], $params);
         return self::_export("page", $path, $params);
     }
     

@@ -97,9 +97,9 @@ class Error
         $this->msg = $msg;
         return $this;
     }
-    protected function setCode()
+    protected function setCode($key)
     {
-
+		$this->code = $key;
         return $this;
     }
     protected function setData()
@@ -140,7 +140,7 @@ class Error
     {
         if (!class_exists($cls)) return null;
         $err = new $cls();
-		return $err->setLevel($level)->setFile($file, $line)->setMsg($key, $msg)->setData();
+		return $err->setLevel($level)->setFile($file, $line)->setMsg($key, $msg)->setCode($key)->setData();
 	}
 
 

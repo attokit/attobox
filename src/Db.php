@@ -2,389 +2,444 @@
 
 /**
  * Attobox Framework / Db
+ * connect to db & return current db instance
  */
 
 namespace Atto\Box;
 
-use Atto\Box\db\Table;
-use Atto\Box\db\Curd;
 use Medoo\Medoo;
+use Atto\Box\db\Convertor;
+use Atto\Box\db\Query;
+use Atto\Box\db\Vfparser;
+//use Atto\Box\db\Curd;
+use Atto\Box\db\Dsn;
+use Atto\Box\db\Table;
 
-class Db
+class Db 
 {
-    //loaded DB instances list
-    public static $_DBS = [];
+    /**
+     * db instance array
+     */
+    public static $LIST = [];
 
     /**
-     * DB config structure
+     * Dsn instance
      */
-    public static $_CONF = [
-        "db" => [
-            "title" => "",
-            "desc" => "",
-            "maintable" => null
-        ],
-        "table" => [
-            "title" => "",
-            "desc" => "",
-            "creation" => [],   //表结构
-            "view" => [         //用于前端组件生成的预设参数
-                "form" => [     //生成前端表单界面
-                    "copy" => [],       //从其他记录复制信息
-                    "fieldGroup" => [   //字段分组
-                        /*[
-                            "label" => "生效以及时间信息",
-                            "info" => "设置货品的生效以及时间信息",
-                            "fields" => ["ctime","mtime","enable"]
-                        ],*/
-                    ],
-                    "header" => [       //表单头参数
-                        "info" => [
+    public $dsn = null;
+
+    /**
+     * db type (in DB_TYPES)
+     * must override by db driver
+     */
+    public $type = "";
     
-                        ],
-                    ],
-                ],
-                "list" => [     //生成前端数据表界面
-                    "hashpre" => "",    //hash 跳转的 hash 前缀
-                    "exp" => "",        //列表输出名称 "\${sku} - \${gid}",
-                    "fields" => [       //列表输出的其他列
-                        /*[
-                            "field" => "category",
-                            "style" => "width:10%",
-                            "label" => "类型",
-                            "value" => "row.category.slice(-1)[0]"
-                        ]*/
-                    ],
-                    "sign" => [         //列表输出的 sign 列
-                        "width" => "20%",   //列宽
-                        "fields" => [       //sign 的内容
-                            "enable" => ["\${enable}==0","失效"],
-                            /*"buyonline" => ["==1","网购"],
-                            "storage" => ["!='常温保存'","\${storage}"],
-                            "redline" => [">0","\${redline}"]*/
-                        ]
-                    ],
-                ],
-                "item" => [     //生成前端详情页
-    
-                ],
-            ],
-            "operater" => [     //前端 operater 组件的 config 参数
-                "form" => [],       //表单组件参数
-                "lister" => [],     //列表组件参数
-                "detail" => []      //详情页组件参数
-            ],
-            /*"detail" => [       //前端详情页组件参数
-                "times" => null,
-                "exptitle" => null,
-                "ctrl" => null,
-                "links" => null,
-                "signs" => null,
-                "norms" => null,
-                "info" => null,
-                "img" => null,
-                "header" => [],
-            ],*/
-            "exportfield" => null,
-            "primaryfield" => null,
-            "idfield" => null,
-            "hash" => null,
-            //"computed" => [],   //计算字段（vue计算属性）
-            "search" => [],
-            //"filter" => [],
-            //"sort" => [],
-            //"showfields" => [],    //前端显示的字段
-            //"subtable" => [],
-            //"mastertable" => "self",
-            //"default" => [],
-            //"fields" => [],
-            //"field" => []
-        ],
-        "field" => [
-            "name" => "",
-            "title" => "",
-            "desc" => "",
-            //"savetype" => "",
-            //"vartype" => "default",  //字段值在 输出前、写入前 根据此参数调用 dp\model\Parser类 进行处理
-            "link" => [
-                "model" => null,
-                "field" => null,
-                "export" => null,
-                "enable" => true,
-                "where" => null
-            ],
-            "editable" => true,     //字段值是否可手动修改
-            "inptype" => "default",     // =false则在form中不显示
-            "inpoption" => [],          //针对inptype的参数
-            "inputer" => null,          //处理后的前端输入组件参数
-            "values" => [           //字段可选值
-                "values" => [
-                    //["label"=>"", "value"=>""],...
-                ],
-                "type" => null,     //可选 settings / tree / query
-                "model" => null,    //来源的数据模型
-                "field" => [
-                    "label" => null,
-                    "value" => null
-                ],
-                "where" => null,     //来源 sql
-                "enable" => true
-            ],
-            "multival" => false,
-            "multiadd" => false,
-            "multiflt" => false,
-            "computed" => false,   //计算字段（vue计算属性）
-            "conv" => "",
-            "default" => null,  //字段默认值
-            "showintable" => true,
-            "placeholder" => "",
-            "validate" => [],   //表单验证
-            "width" => 0    //在前端显示时，此字段占据的宽度，%
-        ]
+    /**
+     * db connection options (structure)
+     * must override by db driver
+     */
+    protected $connectOptions = [
+        
     ];
 
     /**
-     * DB attributes
+     * medoo instance
      */
-    public $type = "";          //DB driver, mysql  or  sqlite  or  ...
-    protected $dsn = "";        //Data Source Name, mysql:host=127.0.0.1;dbname=dbname  or  sqlite:/foo/bar/db.sqlite
-    public $key = "";           //unique DB key, host_127_0_0_1_dbname  or  foo_bar_db
-    public $name = "";          //DB name, dbname  or  dbfile name
-    public $pathinfo = [];      //DB pathinfo, [host,port,username,password]  or  pathinfo(dbfile path)
+    public $_medoo = null;
 
     /**
-     * DB config
+     * db config cache
      */
-    public $title = "";         //DB title
-    public $desc = "";          //DB desc
-    public $creation = [];      //db table creation sql, [tbn => sql, ...]
-    public $tables = [];        //table name list
-    public $table = [];         //table instance list
-    public $maintable = null;   //default table instance
+    public $config = null;
 
     /**
-     * DB config (manual config in file dbpath/dbname.php)
+     * loaded table instance
      */
-    protected $config = [];
+    public $tables = [];
 
-    /**
-     * connect options for Medoo
-     * Medoo Version 2.1.4
-     * must override by sub class
-     */
-    protected $connectOption = [];
-
-    /**
-     * instance
-     */
-    protected $pdo = null;      //PDO instance
-    protected $medoo = null;  //Medoo instance
-    protected $curd = null;     //current curd operate
-
-    /**
-     * construct
-     */
-    public function __construct($dsn, $conf = null)
-    {
-        $this->getConnectOption($dsn);
-        $this->connect()->init($conf);
-    }
+    //虚拟标记，true 表示此数据库中的表均为 虚拟表
+    public $isVirtual = false;
 
 
 
     /**
-     * connect methods
+     * db config methods
      */
 
     /**
-     * get connect options for Medoo
-     * must override by sub class
-     * @param String $dsn   dsn string
+     * init db config from config/dbname.json
      * @return $this
      */
-    protected function getConnectOption($dsn)
+    protected function initConfig()
     {
-        //must override by sub class
-        //...
-        return $this;
-    }
-
-    /**
-     * connect db by using Medoo
-     * @return $this
-     */
-    protected function connect()
-    {
-        $this->medoo = new Medoo($this->connectOption);
-        return $this;
-    }
-
-    /**
-     * init db instance: get db info, create table instances, ...
-     * must override by sub class
-     * @param String | Array $conf      config file path  or  config array
-     * @return $this
-     */
-    protected function init($conf = null)
-    {
-        //must override by sub class
-        //...
-        return $this;
-    }
-
-
-
-    /**
-     * curd & medoo methods
-     */
-
-    /**
-     * create curd operate instance
-     * db->curd(table)->field()->where()->order()->limit()->select();
-     * @param Array | String $params        curd creation params
-     * @return Curd instance
-     */
-    public function curd($params = null)
-    {
-        if (is_null($this->curd)) {
-            if (is_notempty_str($params) || (is_associate($params) && isset($params["table"]))) {
-                if (is_string($params)) $params = ["table"=>$params];
-                $this->curd = new Curd($this, $params);
-                return $this->curd;
-            } else {
-                trigger_error("db/needtable", E_USER_ERROR);
+        $cf = $this->dsn->config;
+        if ($cf["exists"]) {
+            $f = $cf["file"];
+            $conf = j2a(file_get_contents($f));
+            $this->config = $conf;
+            $ks = ["xpath","title","desc"];
+            for ($i=0;$i<count($ks);$i++) {
+                $ki = $ks[$i];
+                $this->$ki = $conf[$ki];
             }
-        } else {
-            if (is_null($params)) return $this->curd;
-            return $this->curd->reset($params);
+            $this->tables = array_keys($conf["table"]);
         }
+        return $this;
     }
 
     /**
-     * get Medoo instance  or  call Medoo methods
-     * @param String $method    Medoo method name
-     * @param Array $param      Medoo method needed param
-     * @return Mixed
+     * get db or tb configs
+     * @param String $tbn   if null return db config, or  [property]  or  [tbname]/[property]
      */
-    public function medoo($method = "", $param = [])
+    public function conf($tbn = null)
     {
-        if (empty($method)) return $this->medoo;
-        return call_user_func_array([$this->_medoo,$method], $param);
+        if (is_null($this->config)) $this->initConfig();
+        $conf = $this->config;
+        if (!is_notempty_str($tbn)) return $conf;
+        $arr = explode("/", $tbn);
+        if ($this->hasTable($arr[0])) {
+            $tbn = array_shift($arr);
+            $tb = $this->table($tbn);
+            return $tb->conf(implode("/",$arr));
+        }
+        return arr_item($conf, implode("/", $arr));
     }
 
     /**
-     * call medoo->query()
+     * get db driver class full name
+     * @return String
      */
-    public function query(...$args)
+    public function driver()
     {
-        return $this->medoo()->query(...$args);
+        //return self::_driver($this->dsn());
+        return $this->dsn->driver;
+    }
+
+    /**
+     * 获取 兄弟数据库
+     * @return Array config data
+     */
+    public function sibling()
+    {
+        $dsn = $this->dsn;
+        $conf = $dsn->config;
+        $cp = $conf["path"];
+        //var_dump($cp);
+        if (!is_dir($cp)) return [];
+        $sdb = [];
+        $dh = opendir($cp);
+        while(($cf = readdir($dh))!==false) {
+            //if (strpos($cf, ".json")===false) continue;
+            if (substr($cf, -5)!==".json") continue;
+            $cfp = $cp.DS.$cf;
+            //var_dump($cfp);
+            $ca = j2a(file_get_contents($cfp));
+            //var_dump(array_keys($ca["table"]));
+            $sdb[$ca["name"]] = [
+                "name" => $ca["name"],
+                "title" => $ca["title"],
+                "xpath" => $ca["xpath"],
+                "tables" => array_keys($ca["table"])
+            ];
+        }
+        closedir($dh);
+        return $sdb;
+    }
+
+    /**
+     * 当数据库结构发生修改时，重建数据库，保持已有的数据记录
+     * 执行此方法时，config.json 必须已经修改完成
+     * use for dev
+     * must override by db driver
+     * @return Db instance
+     */
+    public function reinstall()
+    {
+        //...
+
+        return $this;
+    }
+
+    /**
+     * 备份数据库
+     * must override by db driver class
+     * @param Array $opt 备份参数
+     * @return Bool
+     */
+    public function backup($opt = [])
+    {
+        //override by db driver class
+        //...
+        return true;
+    }
+
+    /**
+     * 恢复数据库
+     * must override by db driver class
+     * @param Array $opt 恢复参数
+     * @return Bool
+     */
+    public function restore($opt = [])
+    {
+        //override by db driver class
+        //...
+        return true;
     }
 
 
 
     /**
-     * common db methods
+     * table methods
      */
 
     /**
      * create table instance
-     * must override by sub class
-     * @param String $tbn       table name
-     * @param Array $conf       table config array
-     * @return Table | null
+     * @param String $tbn
+     * @return Table instance  or  null
      */
-    protected function createTableInstance($tbn, $conf = [])
+    public function table($tbn)
     {
-        //must override by sub class
-        //...
-        return null;
-    }
-
-    /**
-     * get(create) table instance
-     * @param String $tbn   table name
-     * @param Array $conf   custom table load config
-     * @param Bool $reload  if force reload
-     * @return Table
-     */
-    public function table($tbn, $conf = [], $reload = false)
-    {
-        $tbn = strtolower($tbn);
-        if ($reload || !isset($this->table[$tbn]) || is_null($this->table[$tbn])) {
-            $this->table[$tbn] = $this->createTableInstance($tbn, $conf);
+        if (!is_notempty_str($tbn) || !$this->hasTable($tbn)) return null;
+        if (!isset($this->table[$tbn]) || empty($this->table[$tbn])) {
+            $tb = new Table();
+            $tb->db = $this;
+            $tb->name = $tbn;
+            //$tb->xpath = $this->name."/".$tbn;
+            $tb->xpath = $this->xpath."/".$tbn;
+            //写入基本 config
+            $conf = $this->conf("table/$tbn");
+            $ks = ["title","desc","fields"];
+            for ($i=0;$i<count($ks);$i++) {
+                $ki = $ks[$i];
+                $tb->$ki = $conf[$ki];
+            }
+            //创建数据格式转换器
+            $tb->convertor = new Convertor($tb);
+            //创建查询器
+            $tb->query = new Query($tb);
+            //创建 table-setting-lang 数据库设置语言解析器
+            $tb->vfparser = new Vfparser($tb);
+            $this->table[$tbn] = $tb;
         }
         return $this->table[$tbn];
     }
 
     /**
-     * create not-cached table instance, not cached in db->table[tbn]
-     * @param String $tbn   table name
-     * @param Array $conf   custom table load config
-     * @return Table
+     * 遍历 tables 执行 callback
+     * @param Callable $callback 对每一个数据表要执行的方法
+     * @return Array result
      */
-    public function unCachedTable($tbn, $conf = [])
+    public function eachTable($callback = null)
     {
-        return $this->createTableInstance($tbn, $conf);
+        if (!is_callable($callback)) return [];
+        $tbs = $this->tables;
+        $rst = [];
+        for ($i=0;$i<count($tbs);$i++) {
+            $tbi = $tbs[$i];
+            $rsti = $callback($this, $tbi);
+            if ($rsti===false) break;
+            if ($rsti===true) continue;
+            $rst[$tbi] = $rsti;
+        }
+        return $rst;
     }
 
     /**
-     * check if has table
-     * @param String $tbn   table name
+     * get default value  or  arr_extend($dftval, $data)
+     * @param String $tbfdn     tbn  or  tbn/fdn
+     * @param Array $data       data need tobe modified by dftval
+     * @return Mixed
+     */
+    public function dft($tbfdn, $data = [])
+    {
+        if (!is_notempty_str($tbfdn)) return null;
+        $arr = explode("/", $tbfdn);
+        $tbn = $arr[0];
+        $cr = $this->conf("$tbn/creation");
+        if (count($arr)>1) {
+            $fdn = $arr[1];
+            $cri = $cr[$fdn];
+            if (strpos($cri, "DEFAULT ")===false) {
+                if (strpos($cri, " NOT NULL ")===false) return null;
+                return "";
+            }
+            $dft = explode("DEFAULT ", $cri)[1];
+            if (strpos($dft,"'")!==false) {
+                $dft = str_replace("'","",$dft);
+            } else {
+                $dft = $dft*1;
+            }
+            return $dft;
+        } else {
+            $dft = [];
+            foreach ($cr as $fdn => $cri) {
+                if (strpos($cri, "AUTOINCREMENT")!==false) {
+                    //跳过自增主键 id
+                    continue;
+                }
+                $dft[$fdn] = $this->dft("$tbn/$fdn");
+                /*$dfti = $this->dft("$tbn/$fdn");
+                if (!is_null($dfti)) {
+                    $dft[$fdn] = $dfti;
+                }*/
+            }
+        }
+        if (!is_notempty_arr($data)) return $dft;
+        return arr_extend($dft, $data);
+    }
+
+    /**
+     * get table autoincrement field name
+     * @param String $tbn
+     * @return String field name  or  null
+     */
+    public function autoIncrementKey($tbn)
+    {
+        if (!$this->hasTable($tbn)) return null;
+        $cr = $this->conf("$tbn/creation");
+        foreach ($cr as $fdn => $cri) {
+            if (strpos($cri, "AUTOINCREMENT")!==false) {
+                return $fdn;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * get table primary key field
+     * @param String $tbn
+     * @return String field name  or  null
+     */
+    public function primaryKey($tbn)
+    {
+        if (!$this->hasTable($tbn)) return null;
+        $cr = $this->conf("$tbn/creation");
+        foreach ($cr as $fdn => $cri) {
+            if (strpos($cri, "PRIMARY KEY")!==false) {
+                return $fdn;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * has table
+     * @param String $tbn
      * @return Bool
      */
-    public function hasTable($tbn)
+    public function hasTable($tbn = null)
     {
         if (!is_notempty_str($tbn)) return false;
-        return in_array(strtolower($tbn), $this->tables);
+        return in_array($tbn, $this->tables);
+    }
+
+    /**
+     * has table field
+     * @param String $tbfdn     like: tablename/fieldname
+     * @return Bool
+     */
+    public function hasField($tbfdn = null)
+    {
+        if (!is_notempty_str($tbfdn)) return false;
+        $arr = explode("/", $tbfdn);
+        if (count($arr)<2) return false;
+        $tbn = $arr[0];
+        $fdn = $arr[1];
+        if (!$this->hasTable($tbn)) return false;
+        $fds = $this->conf($tbn)["fields"];
+        return in_array($fdn, $fds);
+    }
+
+    /**
+     * 删除库中某数据表
+     * for dev
+     * override in db driver if necessary
+     * @param String $tbn table name
+     * @return Bool
+     */
+    public function dropTable($tbn)
+    {
+        return $this->medoo("drop", $tbn);
+    }
+
+    /**
+     * 当数据表结构发生改变时，重建数据表，保持已有数据记录
+     * 执行此方法时，config.json 必须已经修改完成
+     * use for dev
+     * must override by db driver
+     * @param String $tbn table name
+     * @return Bool
+     */
+    public function recreateTable($tbn)
+    {
+        //...
+
+        return true;
     }
 
 
 
     /**
-     * magic method
+     * curd methods
      */
 
     /**
-     * __get
-     * get  table, info
+     * connect db by using Medoo
+     * must override by db driver class
+     * @param Array $opt    extra connect options
+     * @return Medoo instance
      */
-    public function __get($key)
+    protected function medooConnect($opt = [])
     {
-        if ($this->hasTable($key)) {
-            return $this->table($key);
-        }
-
+        //override by db driver class
+        //...
         return null;
     }
 
-
-
     /**
-     * load DB entrence
-     * @param String $dsn       dsn or dbfile path
-     * @return Db instance or null
+     * get medoo instance  or  call medoo methods
+     * @param String $method
+     * @param Array $params
+     * @return Mixed
      */
-    public static function load($dsn = "")
+    public function medoo($method = null, ...$params)
     {
-        $darr = str_has($dsn, ":") ? explode(":", $dsn) : [DB_TYPE, $dsn];
-        $dbtype = strtolower($darr[0]);
-        if (!self::support($dbtype)) trigger_error("db/unsupport",E_USER_ERROR);
-        $cls = cls("db/driver/".ucfirst($dbtype));
-        $dbkey = $cls::getKey($dsn);
-        if (is_notempty_str($dbkey)) {
-            if (!isset(Db::$_DBS[$dbkey]) || is_null(Db::$_DBS[$dbkey])) {
-                Db::$_DBS[$dbkey] = new $cls($darr[1]);
-            }
-            return Db::$_DBS[$dbkey];
-        }
+        if (is_null($this->_medoo)) $this->medooConnect();
+        if (!is_notempty_str($method)) return $this->_medoo;
+        if (method_exists($this->_medoo, $method)) return $this->_medoo->$method(...$params);
         return null;
     }
+
+    /**
+     * create a CURD operation, return Curd instance
+     */
+    /*public function curd($params = [])
+    {
+        if (is_null($this->_curd)) {
+            $params = $this->curdParams($params);
+            $this->_curd = new Curd($this, $params);
+            return $this->_curd;
+        } else {
+            if (empty($params)) return $this->_curd;
+            $params = $this->curdParams($params);
+            return $this->_curd->reset($params);
+        }
+    }
+    protected function curdParams($params)
+    {
+        if (is_notempty_str($params)) {
+            if (!$this->hasTable($params)) trigger_error("db/curd/needtb::".$this->co("originalDsn"), E_USER_ERROR);
+            $params = [
+                "table" => $params
+            ];
+        } else if (is_associate($params) && is_notempty_arr($params)) {
+            if (!isset($params["table"])) trigger_error("db/curd/needtb::".$this->co("originalDsn"), E_USER_ERROR);
+        } else {
+            trigger_error("db/curd/needtb::".$this->co("originalDsn"), E_USER_ERROR);
+        }
+        return $params;
+    }*/
+
     
-    /**
-     * create db
-     * must override by sub class
-     * @param String $option    
-     */
 
 
 
@@ -393,16 +448,21 @@ class Db
      */
 
     /**
-     * get db key from dsn
-     * must override by sub class
-     * @param String $dsn   dsn string
-     * @return String unique db key  or  null
+     * create Db instance
+     * @param string | Dsn $dsn     db connection string or instance
+     * @param array $opt            db connection options
+     * @return Db instance  or  trigger error
      */
-    public static function getKey($dsn)
+    public static function load($dsn = "", $opt = []) 
     {
-        //must override by sub class
-        //...
-        return null;
+        $odsn = $dsn;
+        $dsn = Dsn::load($dsn);
+        if ($dsn->dbNotExists) {
+            trigger_error("db/dsn/illegal::".$odsn, E_USER_ERROR);
+        }
+        $key = $dsn->dbkey;
+        if (isset(self::$LIST[$key]) && self::$LIST[$key] instanceof $dsn->driver) return self::$LIST[$key];
+        return $dsn->driver::initialize($dsn, $opt);
     }
 
     /**
@@ -412,7 +472,56 @@ class Db
      */
     public static function support($dbtype = "sqlite")
     {
-        $dbtypes = explode(",", strtolower(DB_TYPES));
-        return in_array(strtolower($dbtype), $dbtypes) && !is_null(cls("db/driver/".ucfirst($dbtype)));
+        return Dsn::support($dbtype);
+    }
+
+    /**
+     * db initialize
+     * must override by db driver class
+     * @param String $dsn   Dsn instance
+     * @param Array $opt    db connection options
+     * @return Db instance  or  null
+     */
+    protected static function initialize($dsn, $opt = [])
+    {
+        //override by db driver class
+        //...
+        return null;
+    }
+
+    /**
+     * install db (dev)
+     * must override by db driver
+     * @param String | Dsn $dsn
+     * @param Array $opt    extra db create options
+     * @return Bool
+     */
+    public static function install($dsn, $opt = [])
+    {
+        //override by db driver
+        //...
+        return true;
+    }
+
+    /**
+     * get all installed db
+     * must override by db driver
+     * @return Array | null
+     */
+    public static function existentDb()
+    {
+        //override by db driver
+        //...
+        return [];
+    }
+
+    /**
+     * 检查 $dsn 是否存在某个数据库
+     * @param String $dsn
+     * @return Bool
+     */
+    public static function exists($dsn)
+    {
+        return Dsn::exists($dsn);
     }
 }

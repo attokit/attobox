@@ -36,10 +36,9 @@ define("VENDOR_PATH", PRE_PATH . DS . "vendor");
 define("ATTO_PATH", VENDOR_PATH . DS . "attokit");
 define("BOX_PATH", VENDOR_PATH . DS . "attokit" . DS . "attobox" . DS . "src");
 define("MODULE_PATH", BOX_PATH . DS . "modules");
-define("DB_PATH", PRE_PATH . DS . ".." . DS . "db");
 
 //DB
-define("DB_TYPES", "mysql,sqlite");
+define("DB_TYPES", "mysql,sqlite,vtable");
 
 //special value
 define("ORIGINAL", null);

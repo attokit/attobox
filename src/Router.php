@@ -90,6 +90,27 @@ class Router
         ];
     }
 
+    /**
+     * 是否 app route
+     * @return Bool
+     */
+    public function isAppRoute()
+    {
+        $route = strtolower($this->route);
+        return strpos($route, "\\atto\\box\\app\\")!==false;
+    }
+
+    /**
+     * 从 route 中获取 app name （如果存在）
+     * @return String app name  or  null
+     */
+    public function getAppFromRoute()
+    {
+        if (!$this->isAppRoute()) return null;
+        $route = strtolower($this->route);
+        return explode("\\", explode("\\app\\", $route)[1])[0];
+    }
+
 
     /**
      * 根据 request 解析获取 route 类
@@ -166,6 +187,9 @@ class Router
                 }
                 if (file_exists($page)) {
                     //return ["\\CPHP\\route\\Base", "page", [$page]];
+                    if (!is_null(cls("route/Web"))) {
+                        return [cls("route/Web"), "page", [$page]];
+                    }
                     return [cls("route/Base"), "page", [$page]];
                 }
                 if (!class_exists($cls_web)) {
@@ -226,8 +250,14 @@ class Router
                 "data" => "undefined route"
             ];
         }
+        $callParams = [
+            "route" => $route,
+            "method" => $method,
+            "args" => $args
+        ];
         $route = new $route();
-        //if($route->allNeedAuthority === true) $route->authVerify();
+        //缓存 router call params
+        $route->routerCallParams = $callParams;
         return call_user_func_array([$route,$method],$args);
     }
 
