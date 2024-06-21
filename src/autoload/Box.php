@@ -19,6 +19,7 @@ class Box
      * 核心流程
      */
     public static $request = null;
+    public static $uac = null;
     public static $router = null;
     public static $response = null;
 
@@ -61,6 +62,30 @@ class Box
         if (is_notempty_arr($conf) && is_associate($conf)) {
             self::$_TEMP_CONF = arr_extend(self::$_TEMP_CONF, $conf);
         }
+
+        //加载 app/.../library/config.php
+        if ($conf=="app") {
+            $appdir = self::$_TEMP_CONF["APP_PATH"];
+            $appconf = [];
+            if (is_dir($appdir)) {
+                $adh = opendir($appdir);
+                while(($ad = readdir($adh))!==false) {
+                    if ($ad=="." || $ad=="..") continue;
+                    $cnf = $appdir.DS.$ad.DS."library".DS."config".EXT;
+                    if (!file_exists($cnf)) continue;
+                    $cnfi = require($cnf);
+                    if (!empty($cnfi)) {
+                        foreach ($cnfi as $k => $v) {
+                            $appconf["APP_".strtoupper($ad)."_".strtoupper($k)] = $v;
+                        }
+                    }
+                }
+                closedir($adh);
+            }
+            if (!empty($appconf)) {
+                self::$_TEMP_CONF = arr_extend(self::$_TEMP_CONF, $appconf);
+            }
+        }
     }
 
     /**
@@ -78,10 +103,12 @@ class Box
             "APP_PATH"      => $root . DS . "app",
             "ROUTE_PATH"    => $root . DS . "route",
             "ASSET_PATH"    => $root . DS . "asset",
-            "SRC_PATH"      => $root . DS . "asset",
+            "SRC_PATH"      => $root . DS . "assets",
             "ASSETS_PATH"   => $root . DS . "assets",
             "LIB_PATH"      => $root . DS . "library",
-            "MODEL_PATH"    => $root . DS . "model",
+            "DB_PATH"       => $root . DS . "library/db",
+            //"MODEL_PATH"    => $root . DS . "model",
+            "RECORD_PATH"   => $root . DS . "record",
             "OPR_PATH"      => $root . DS . "operater",
             "PAGE_PATH"     => $root . DS . "page",
             "PLUGIN_PATH"   => $root . DS . "plugin",
@@ -153,6 +180,16 @@ class Box
                                 $app_dir.DS.'library',
                                 $app_dir.DS.'modules'
                             ]);
+                            $alo->addPsr4($ns.'\\app\\'.$app.'\\', [
+                                $app_dir, 
+                                $app_dir.DS.'library',
+                                $app_dir.DS.'modules'
+                            ]);
+                            $alo->addPsr4($ns.'\\app\\'.ucfirst(strtolower($app)).'\\', [
+                                $app_dir, 
+                                $app_dir.DS.'library',
+                                $app_dir.DS.'modules'
+                            ]);
 
                             //route class
                             /*$alo->addPsr4($ns.'\\route\\'.$app.'\\', [
@@ -173,6 +210,7 @@ class Box
                         }
                     }
                     $alo->addPsr4($ns.'\\App\\', $psr_app);
+                    $alo->addPsr4($ns.'\\app\\', $psr_app);
                     closedir($apps_dh);
                 }
 
@@ -238,6 +276,13 @@ class Box
         self::$request = \Atto\Box\Request::current();
         self::$router = \Atto\Box\Router::current();
         //var_dump(self::$router->info());
+        self::$request->app = self::$router->getAppFromRoute();
+        //var_dump(self::$request->app);
+        if (\Atto\Box\Uac::required()) {
+            self::$uac = \Atto\Box\Uac::start();
+            self::$request->uac = self::$uac;
+            //var_dump(self::$uac);
+        }
         self::$response = \Atto\Box\Response::current();
         //var_dump(self::$response->info());
         self::$response->create()->export();
@@ -257,6 +302,8 @@ class Box
         self::conf($conf);
         //set path constant
         self::_path();
+        //set app config
+        self::conf("app");
         //define constant
         self::_define();
         //patch composer autoload

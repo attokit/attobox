@@ -60,6 +60,42 @@ function clspre($path = "")
     $path = trim($path, "/");
     return NS . str_replace("/","\\", $path) . "\\";
 }
+function cls_no_ns($obj)
+{
+    try {
+        $cls = get_class($obj);
+        $carr = explode("\\", $cls);
+        return array_pop($carr);
+    } catch(Exception $e) {
+        return null;
+    }
+
+}
+
+/**
+ * 从某个类中筛选出符合指定条件的 methods
+ * 返回 Reflection Method 对象数组
+ *  [
+ *      methodName => ReflectionMethod 实例
+ *      ...
+ *  ]
+ */
+function cls_methods_filter($cls, $condition, $filter=\ReflectionMethod::IS_PROTECTED)
+{
+    if (!class_exists($cls)) return [];
+    $rcls = new \ReflectionClass($cls);
+    $methods = $rcls->getMethods($filter);
+    $ms = [];
+    for ($i=0;$i<count($methods);$i++) {
+        $mi = $methods[$i];
+        //执行判断函数，返回 true 则符合条件
+        if ($condition($mi)===true) {
+            $name = strtolower($mi->name);
+            $ms[$name] = $mi;
+        }
+    }
+    return $ms;
+}
 
 
 
