@@ -33,7 +33,7 @@ class Vue extends Resource
      * @override getContent
      * @return null
      */
-    protected function getContent()
+    protected function getContent(...$args)
     {
         $rtp = $this->resType;
         $m = "get".ucfirst($rtp)."Content";
@@ -65,7 +65,15 @@ class Vue extends Resource
 
         //process
         $cnt = $this->content;
-        $ps = $this->params;
+        //$ps = $this->params;
+        $ps = $params;
+        
+        /** 在输出之前 注入 profile 数据 **/
+        if (isset($ps["profile"])) {
+            $this->profile = arr_extend($this->profile, $ps["profile"]);
+            unset($ps["profile"]);
+        }
+
         if (isset($ps["export"])) {
             $m = "export".ucfirst($ps["export"]);
             if (method_exists($this, $m)) {

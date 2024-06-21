@@ -15,6 +15,8 @@ use Atto\Box\request\Url;
 use Atto\Box\request\Curl;
 use Atto\Box\Response;
 
+use MatthiasMullie\Minify;  //JS/CSS文件压缩
+
 class Resource
 {
     //引入trait
@@ -28,6 +30,7 @@ class Resource
         "required",     //通过 require 本地 php 文件动态生成内容
         "local",        //真实存在的本地文件
         "compile",      //通过编译本地文件，生成的文件
+        "create",       //通过直接输入文本内容，创建纯文本文件 
     ];
 
     /**
@@ -76,29 +79,6 @@ class Resource
     /**
      * 构造
      */
-    /*public function __construct($path = "", $params = [])
-    {
-        if (is_indexed($path)) $path = implode(DS, $path);
-        $p = self::parse($path);
-        if (is_null($p)) return null;
-        foreach ($p as $k => $v) {
-            if (property_exists($this, $k)) {
-                $this->$k = is_array($v) ? arr_extend($this->$k, $v) : $v;
-            }
-        }
-        $this->rawMime = Mime::get($this->rawExt);
-        $pinfo = pathinfo($this->rawPath);
-        $this->rawBasename = $pinfo["basename"];
-        $this->rawFilename = $pinfo["filename"];
-        //params
-        $params = is_notempty_arr($params) ? $params : [];
-        if (!empty($_GET)) $params = arr_extend($params, $_GET);
-        $this->params = arr_extend($this->params, $params);
-        //creator
-        $this->parseCreator();
-        //exporter
-        $this->parseExporter();
-    }*/
     public function __construct($opt = [])
     {
         if (empty($opt) || !is_array($opt) || !is_associate($opt)) return null;
@@ -111,6 +91,28 @@ class Resource
         $pinfo = pathinfo($this->rawPath);
         $this->rawBasename = $pinfo["basename"];
         $this->rawFilename = $pinfo["filename"];
+
+        if (!empty($this->realPath) && file_exists($this->realPath)) {
+            $rinfo = pathinfo($this->realPath);
+            $this->extension = $rinfo["extension"];
+            $this->dirname = $rinfo["dirname"];
+            $this->basename = $rinfo["basename"];
+            $this->filename = $rinfo["filename"];
+        }
+
+        $this->afterCreated();
+    }
+
+    /**
+     * after resource created
+     * if necessary, derived class should override this method
+     * @return Resource $this
+     */
+    protected function afterCreated()
+    {
+        //do sth.
+
+        return $this;
     }
 
     /**
@@ -118,12 +120,12 @@ class Resource
      * if necessary, derived class should override this method
      * @return String $this->content
      */
-    protected function getContent()
+    protected function getContent(...$args)
     {
         $rtp = $this->resType;
         $m = "get".ucfirst($rtp)."Content";
         if (method_exists($this, $m)) {
-            $this->$m();
+            $this->$m(...$args);
         }
         return $this->content;
     }
@@ -134,7 +136,12 @@ class Resource
      * @return void
      */
     protected function getRemoteContent() {
-        $this->content = Curl::get($this->realPath);
+        $isHttps = strpos($this->realPath, "https")!==false;
+        if ($isHttps) {
+            $this->content = Curl::get($this->realPath, "ssl");
+        } else {
+            $this->content = Curl::get($this->realPath);
+        }
     }
     protected function getBuildContent() {
         $builder = new Builder($this);
@@ -154,11 +161,18 @@ class Resource
         if (Mime::isPlain($ext)) {
             $this->content = file_get_contents($this->realPath);
             //var_dump($this->content);
+        } else {
+            $this->content = file_get_contents($this->realPath);
         }
     }
     protected function getCompileContent() {
         $compiler = new Compiler($this);
         $compiler->compile();
+    }
+    protected function getCreateContent($content = null) {
+        if (is_notempty_str($content)) {
+            $this->content = $content;
+        }
     }
 
 
@@ -181,7 +195,8 @@ class Resource
             $realPath = $rawPath;
             $rawExt = self::getExtFromPath($rawPath);
         } else {
-            $rawPath = trim(str_replace("/", DS, $path), DS);
+            //$rawPath = trim(str_replace("/", DS, $path), DS);
+            $rawPath = trim(str_replace("/", DS, str_replace("://", "/", $path)), DS);
             $rawExt = self::getExtFromPath($rawPath);
             $rawArr = explode(DS, $rawPath);
             if (in_array(strtolower($rawArr[0]), ["http", "https"])) {   //远程文件
@@ -246,15 +261,33 @@ class Resource
      */
     public static function create($path = "", $params = [])
     {
-        if (is_indexed($path)) $path = implode(DS, $path);
-        $p = self::parse($path);
-        if (is_null($p)) return null;
-        $params = is_notempty_arr($params) ? $params : [];
-        if (!empty($_GET)) $params = arr_extend($params, $_GET);
-        if (!isset($p["params"]) || !is_array($p["params"])) $p["params"] = [];
-        $p["params"] = arr_extend($p["params"], $params);
+        if (isset($params["content"])) {    //通过直接输入内容，创建纯文本文件
+            $content = $params["content"];
+            unset($params["content"]);
+            $params = is_notempty_arr($params) ? $params : [];
+            if (!empty($_GET)) $params = arr_extend($_GET, $params);
+            if (strpos($path, ".")===false) $path .= ".txt";
+            $p = [
+                "rawPath"   => $path,
+                "rawExt"    => Mime::ext($path),
+                "resType"   => 'create',
+                "realPath"  => '',
+                "params"    => $params,
+
+                "content"   => $content
+            ];
+        } else {
+            if (is_indexed($path)) $path = implode(DS, $path);
+            $p = self::parse($path);
+            if (is_null($p)) return null;
+            $params = is_notempty_arr($params) ? $params : [];
+            if (!empty($_GET)) $params = arr_extend($_GET, $params);
+            if (!isset($p["params"]) || !is_array($p["params"])) $p["params"] = [];
+            $p["params"] = arr_extend($p["params"], $params);
+        }
         //find specific resource class
         $cls = self::resCls($p);
+        //var_dump($cls);
         if (is_null($cls)) return null;
         $res = new $cls($p);
         return $res;
@@ -285,6 +318,10 @@ class Resource
 
 
     /**
+     * export
+     */
+
+    /**
      * export resource directly
      * if necessary, derived class should override this method
      * @return void exit
@@ -294,6 +331,9 @@ class Resource
         //var_dump(Mime::isPlain($this->rawExt));exit;
         //get resource content
         $this->getContent();
+
+        //输出之前，如果需要，保存文件到本地
+        $this->saveRemoteToLocal();
         
         //sent header
         //$this->sentHeader();
@@ -316,6 +356,19 @@ class Resource
     }
 
     /**
+     * return content
+     * 用于非输出到前端时调用，相当于 export
+     * @return Mixed
+     */
+    public function returnContent($params = [])
+    {
+        $params = empty($params) ? $this->params : arr_extend($this->params, $params);
+        //get resource content
+        $this->getContent();
+        return $this->content;
+    }
+
+    /**
      * sent header before export echo
      * @param String $ext       if export resource in different extension
      * @return Resource $this
@@ -333,7 +386,6 @@ class Resource
         return $this;
     }
 
-
     /**
      * 输出资源 info
      */
@@ -349,6 +401,33 @@ class Resource
             "rawFilename"    => $this->rawFilename
 
         ];
+    }
+
+
+
+    /**
+     * save file to local
+     */
+    public function saveToLocal($filepath)
+    {
+        $fo = @fopen($filepath, "w");
+        fwrite($fo, $this->getContent());
+        fclose($fo);
+    }
+
+    /**
+     * 如果 resType == remote 且 $params["saveToLocal"] == "file path"
+     * 将远程文件保存到本地
+     */
+    public function saveRemoteToLocal()
+    {
+        if (isset($this->params["saveToLocal"]) && !empty($this->params["saveToLocal"])) {
+            $cnt = $this->content;
+            $lcf = $this->params["saveToLocal"];
+            $fo = @fopen($lcf, "w");
+            fwrite($fo, $cnt);
+            fclose($fo);
+        }
     }
 
 
@@ -372,7 +451,19 @@ class Resource
             $pstr = $path;
         }
         $pathinfo = pathinfo($pstr);
-        return isset($pathinfo["extension"]) ? strtolower($pathinfo["extension"]) : null;
+        if (isset($pathinfo["extension"])) return strtolower($pathinfo["extension"]);
+        if (strpos($pstr, "http".DS)!==false || strpos($pstr, "https".DS)!==false) {
+            $pu = str_replace(DS,"/",$pstr);
+            if (strpos($pstr, "http/")!==false) {
+                $pu = str_replace("http/","http://", $pu);
+            } else {
+                $pu = str_replace("https/","https://", $pu);
+            }
+            $finfo = self::getRemoteFileInfo($pu);
+            if (isset($finfo["ext"])) return $finfo["ext"];
+        }
+        return null;
+        //return isset($pathinfo["extension"]) ? strtolower($pathinfo["extension"]) : null;
     }
 
     /**
@@ -387,6 +478,60 @@ class Resource
         } else {
             return file_exists($file);
         }
+    }
+
+    /**
+     * 解析远程文件 文件头 获取文件信息，ext/size/ctime/thumb/...
+     * 通过 get_headers 获取的
+     * @param String $url 文件 url
+     * @return Array
+     */
+    public static function getRemoteFileInfo($url="")
+    {
+        if (!is_notempty_str($url)) return [];
+        $fh = get_headers($url);
+        //var_dump($fh);
+        $hd = [];
+        for ($i=0;$i<count($fh);$i++) {
+            $fhi = trim($fh[$i]);
+            if (strpos($fhi, ": ")!==false) {
+                $fa = explode(": ", $fhi);
+                if (count($fa)<2) {
+                    $hd["Http"] = $fa[0];
+                } else {
+                    $k = array_shift($fa);
+                    $v = implode(": ", $fa);
+                    $hd[$k] = $v;
+                }
+            }
+        }
+        $fi = [];
+        $fi["headers"] = $hd;
+        $mime = $hd["Content-Type"];
+        $fi["mime"] = $mime;
+        $ext = Mime::extOfMime($mime);
+        $fi["ext"] = $ext;
+        $size = $hd["Content-Length"]*1;
+        $fi["size"] = $size;
+        $fi["sizestr"] = num_file_size($size);
+        $fi["ctime"] = strtotime($hd["Last-Modified"]);
+        $pcs = Mime::$processable;
+        $ks = array_keys($pcs);
+        foreach ($ks as $ki) {
+            $fi["is".ucfirst($ki)] = in_array($ext, $pcs[$ki]);
+        }
+        if ($fi["isImage"]===true) {
+            $fi["thumb"] = "/src"."/".str_replace("https://", "https/", str_replace("http://", "http/", $url))."?thumb=auto";
+        }
+        $name = array_pop(explode("/", $url));
+        if (strpos($name, ".$ext")!==false) {
+            $fi["basename"] = $name;
+            $fi["name"] = str_replace(".$ext", "", $name);
+        } else {
+            $fi["name"] = $name;
+            $fi["basename"] = "$name.$ext";
+        }
+        return $fi;
     }
 
     /**
@@ -410,11 +555,28 @@ class Resource
         if ($relative=="") return "";
         $rarr = explode(DS, $relative);
         $spc = explode("/", str_replace(",","/",ASSET_DIRS));
-        $spc = array_merge($spc,["app","cphp"]);
+        //$spc = array_merge($spc,["app","cphp"]);
+        $spc = array_merge($spc,["app","atto"]);
         $nrarr = array_diff($rarr, $spc);
         $src = implode("/", $nrarr);
         $src = "/src".($src=="" ? "" : "/".$src);
         return $src;
+    }
+
+    /**
+     * 压缩 JS/CSS/JSON 文件
+     */
+    public static function minify($cnt, $type="js")
+    {
+        if ($type=="js" || $type=="json") {
+            $minifier = new Minify\JS();
+        } else if ($type=="css") {
+            $minifier = new Minify\CSS();
+        } else {
+            return $cnt;
+        }
+        $minifier->add($cnt);
+        return $minifier->minify();
     }
     
 

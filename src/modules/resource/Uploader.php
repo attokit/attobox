@@ -51,6 +51,7 @@ class Uploader
 
     public function __construct($upath=null)
     {
+        $upath = is_null($upath) ? $this->upath : $upath;
         if (is_notempty_str($upath)) {
             $upath = path_find($upath, ["inDir"=>ASSET_DIRS,"checkDir"=>true]);
             if (!is_null($upath)) {
@@ -124,10 +125,10 @@ class Uploader
     }
 
     //解析 $_FILES
-    protected function parse($fieldname = null)
+    public function parse($fieldname = null)
     {
         $fs = Request::files($fieldname); //$_FILES;
-        $mimes = $this->acceptMimes();
+        //$mimes = $this->acceptMimes();
         //var_dump($mimes);exit;
         $this->files = [];
         foreach ($fs as $fn => $fo) {
@@ -176,7 +177,11 @@ class Uploader
         $us[] = rtrim($host, "/");
         if ($pre!="") $us[] = $pre;
         $us[] = $sn;
-        return implode("/", $us);
+        //return implode("/", $us);
+        /** 去除 assets **/
+        $u = implode("/", $us);
+        $u = str_replace("/assets"."/", "/", $u);
+        return $u;
     }
 
     //返回允许上传的 mime 数组

@@ -20,7 +20,7 @@ class Video extends Resource
      * @override getContent
      * @return null
      */
-    protected function getContent()
+    protected function getContent(...$args)
     {
         return null;
     }

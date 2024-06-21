@@ -34,7 +34,7 @@ class Image extends Resource
     public $queue = [
         ["zoom", 100],
         ["resize", "256,192"],
-        ["thumb", "96,96"],
+        ["thumb", "256,256"],
         ["watermark", "dommyphp,right,bottom,25"]    //水印
     ];
 
@@ -43,7 +43,7 @@ class Image extends Resource
      * create source image from $realPath
      * @return Image $source
      */
-    protected function getContent()
+    protected function getContent(...$args)
     {
         $is = getimagesize($this->realPath);
         $this->width = $is[0];

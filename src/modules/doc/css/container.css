@@ -1,0 +1,501 @@
+/* lib container page style */
+/* vars */
+/* common class */
+/** cgy-scroll **/
+html, [class*=nice-scroll] {
+  scroll-behavior: smooth;
+}
+
+[class*=nice-scroll_][class*=_x] {
+  overflow-x: overlay;
+  overflow-y: hidden;
+}
+
+[class*=nice-scroll_][class*=_y] {
+  overflow-x: hidden;
+  overflow-y: overlay;
+}
+
+[class*=nice-scroll_][class*=_xy] {
+  overflow-x: overlay;
+  overflow-y: overlay;
+}
+
+[class*=nice-scroll_]::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[class*=nice-scroll_][class*=_bold]::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[class*=nice-scroll_][class*=_thin]::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+[class*=nice-scroll_]::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  -webkit-transition: all 0.5s;
+  transition: all 0.5s;
+}
+
+[class*=nice-scroll_][class*=_radiu]::-webkit-scrollbar-thumb {
+  border-radius: 50%;
+}
+
+[class*=nice-scroll]:hover::-webkit-scrollbar-thumb {
+  background-color: #c3c6d1;
+}
+
+[class*=nice-scroll]::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/** element-ui fix **/
+.el-menu.el-menu--horizontal {
+  border: none;
+}
+
+.el-button {
+  border: none;
+  color: #183153;
+}
+.el-button.el-button--small {
+  font-size: 16px;
+}
+.el-button.el-button--small:hover {
+  background-color: #74c0fc;
+  color: #183153;
+}
+
+.el-select-dropdown {
+  border-color: #f0f1f3;
+  box-shadow: 0 2px 12px 0 #c3c6d1;
+}
+.el-select-dropdown .el-select-dropdown__item {
+  color: #5f697d;
+}
+.el-select-dropdown .el-select-dropdown__item:hover {
+  background-color: #f0f1f3;
+  color: #183153;
+}
+
+/* body */
+body {
+  margin: 0;
+  padding: 72px 0 0 256px;
+  overflow: hidden auto;
+  color: #5f697d;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Yahei", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  background-color: #f0f1f3;
+}
+
+/* topbar */
+.lib-topbar {
+  position: fixed;
+  margin: 0;
+  padding: 0 24px 0 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100vw;
+  height: 72px;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #fff;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px #c3c6d1;
+  z-index: 100;
+}
+.lib-topbar > .sep {
+  flex: 1;
+}
+.lib-topbar > .sep-sm {
+  width: 24px;
+}
+.lib-topbar .logo-main {
+  height: 42px;
+  width: auto;
+}
+.lib-topbar .logo-main.sub {
+  height: 34px;
+}
+.lib-topbar .lib-key {
+  position: relative;
+  margin: 0 24px 0 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  color: #183153;
+  font-weight: bold;
+  line-height: 150%;
+  font-size: 16px;
+}
+.lib-topbar .el-menu-item {
+  height: 72px;
+  border: none;
+}
+.lib-topbar .el-menu-item.is-active {
+  border: none;
+}
+.lib-topbar .icon-a {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-decoration: none;
+}
+.lib-topbar .icon-a > i {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin-top: -2px;
+}
+.lib-topbar .icon-a > i:hover {
+  color: #74c0fc;
+}
+.lib-topbar .icon-a .icon-logo-main {
+  height: 42px;
+  width: auto;
+}
+.lib-topbar .icon-a .icon-logo {
+  height: 16px;
+  width: auto;
+}
+.lib-topbar .search-box {
+  width: 256px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.lib-topbar .search-box > .el-select {
+  flex: 1;
+}
+.lib-topbar .search-box > .el-select .el-input .el-input__inner {
+  border-color: #c3c6d1;
+  color: #5f697d;
+}
+.lib-topbar .search-box > .el-select .el-input.is-focus .el-input__inner {
+  border-color: #74c0fc;
+  color: #183153;
+}
+
+/* menubar */
+.lib-menubar {
+  position: fixed;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 256px;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  background-color: #e4e6e9;
+  z-index: 90;
+}
+.lib-menubar .menubar-top {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  height: 72px;
+}
+.lib-menubar .lib-assets-menu {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden overlay;
+  box-sizing: border-box;
+  width: 256px;
+  flex: 1;
+}
+.lib-menubar .lib-assets-menu .el-menu {
+  background-color: #e4e6e9;
+}
+.lib-menubar .lib-assets-menu.el-menu {
+  border: none;
+  background-color: #e4e6e9;
+}
+.lib-menubar .lib-assets-menu .el-submenu__title {
+  border: none;
+  background-color: #e4e6e9;
+  height: 48px;
+  line-height: 48px;
+  color: #5f697d;
+}
+.lib-menubar .lib-assets-menu .el-submenu__title:hover {
+  background-color: #c3c6d1;
+  color: #183153;
+}
+.lib-menubar .lib-assets-menu .el-submenu__title i:first-child {
+  color: #74c0fc;
+}
+.lib-menubar .lib-assets-menu .el-submenu {
+  border: none;
+  background-color: #e4e6e9;
+}
+.lib-menubar .lib-assets-menu .el-submenu.is-opened > .el-submenu__title {
+  color: #183153;
+  font-weight: bold;
+}
+.lib-menubar .lib-assets-menu .el-menu-item {
+  height: 48px;
+  line-height: 48px;
+  color: #5f697d;
+}
+.lib-menubar .lib-assets-menu .el-menu-item::before {
+  display: inline-block;
+  width: 14px;
+  content: "";
+}
+.lib-menubar .lib-assets-menu .el-menu-item:hover {
+  background-color: #c3c6d1;
+  color: #183153;
+}
+.lib-menubar .lib-assets-menu .el-menu-item.is-active {
+  background-color: #f0f1f3;
+  color: #183153;
+  font-weight: bold;
+}
+
+/* content */
+.lib-content {
+  position: relative;
+  margin: 0;
+  padding: 24px;
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 1200px;
+  font-size: 14px;
+  color: #5f697d;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Yahei", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+.lib-content .sep {
+  flex: 1;
+}
+.lib-content .sep-sm {
+  width: 24px;
+}
+.lib-content > .lib-cntit {
+  position: relative;
+  margin: 0 0 18px 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.lib-content > .lib-cntit > h1 {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  color: #183153;
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 150%;
+}
+.lib-content > .lib-cntit .el-button.lib-version-icon {
+  height: 38px;
+  color: #183153;
+}
+.lib-content > .lib-cntit .el-button.lib-version-icon.el-button--small {
+  font-size: 16px;
+  background-color: #ecb643;
+}
+.lib-content > .lib-cntit .el-button.lib-version-icon.el-button--small:hover {
+  background-color: #ecb643;
+  color: #183153;
+}
+.lib-content > .lib-cntit .el-button.lib-version {
+  height: 38px;
+  color: #183153;
+  font-weight: bold;
+}
+.lib-content > .lib-cntit .el-button.lib-version.el-button--small {
+  font-size: 19.2px;
+  /*padding-left: 0;*/
+}
+.lib-content > .lib-cntit .el-button.lib-version.el-button--small:hover {
+  background-color: #ffd43b;
+  color: #183153;
+}
+.lib-content > .lib-desc {
+  position: relative;
+  margin: 0 0 18px 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 12px;
+  color: #5f697d;
+}
+.lib-content > .lib-desc > p {
+  flex: 1;
+}
+.lib-content > .lib-desc .el-tag.el-tag--info {
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #e4e6e9;
+  border: none;
+  color: #183153;
+  font-weight: bold;
+}
+.lib-content > .lib-desc .el-tag--mini {
+  height: 24px;
+  padding: 0 8px;
+}
+.lib-content > .lib-desc .el-tag--mini > i {
+  margin-right: 8px;
+  color: #87c04f;
+}
+.lib-content > .lib-tabs {
+  position: relative;
+  margin: 0 0 18px 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lib-content > .lib-tabs .el-radio-group .el-radio-button .el-radio-button__inner {
+  min-width: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  color: #183153;
+  background-color: #fff;
+}
+.lib-content > .lib-tabs .el-radio-group .el-radio-button .el-radio-button__inner > i {
+  margin-right: 18px;
+  font-size: 16px;
+}
+.lib-content > .lib-tabs .el-radio-group .el-radio-button .el-radio-button__inner:hover {
+  background-color: #74c0fc;
+  color: #183153;
+}
+.lib-content > .lib-tabs .el-radio-group .el-radio-button .el-radio-button__orig-radio:checked + .el-radio-button__inner {
+  min-width: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  color: #183153;
+  background-color: #74c0fc;
+}
+.lib-content > .lib-tabs .el-radio-group .el-radio-button .el-radio-button__orig-radio:checked + .el-radio-button__inner > i {
+  margin-right: 18px;
+  font-size: 16px;
+}
+.lib-content > .lib-tabs .el-radio-group .el-radio-button .el-radio-button__orig-radio:checked + .el-radio-button__inner:hover {
+  background-color: #74c0fc;
+  color: #183153;
+}
+.lib-content > .lib-assets > .lib-asset-src {
+  position: relative;
+  margin: 0 0 18px 0;
+  padding: 0 0 0 24px;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%; /*height: $size-h-menuitem;*/
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  border-radius: 3px;
+  font-size: 14px;
+  font-family: "Cascadia Mono", "Consolas", monospace, "Courier New", sans-serif;
+  text-decoration: none;
+  color: #5f697d;
+  background-color: #fff;
+  cursor: default;
+}
+.lib-content > .lib-assets > .lib-asset-src:hover {
+  /*background-color: $color-yellow;*/
+  font-weight: 900;
+  color: #183153;
+}
+.lib-content > .lib-assets > .lib-asset-src > .asset-url {
+  flex: 1;
+}
+.lib-content > .lib-assets > .lib-asset-src .el-button {
+  height: 48px;
+}
+.lib-content > .lib-readme {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-sizing: border-box;
+  border-radius: 3px;
+  background-color: #fff;
+}
+.lib-content > .lib-readme .lib-readme-ctrl {
+  position: relative;
+  margin: 0 0 48px 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.lib-content > .lib-readme .lib-readme-body {
+  position: relative;
+  margin: 0;
+  padding: 48px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/** dark mode **/
+@media (prefers-color-scheme: dark) {
+  /*html {
+      filter: invert(1) hue-rotate(180deg);
+  }
+  .lib-topbar {
+      box-shadow: none;
+  }*/
+  /*body {
+      background-color: #f0f0f0;
+  }
+  .lib-menubar .lib-assets-menu .el-submenu__title:hover {
+      background-color: #89cff0;
+  }
+  .lib-menubar .lib-assets-menu .el-menu-item:hover {
+      background-color: #89cff0;
+  }
+  .lib-menubar .lib-assets-menu .el-menu-item.is-active {
+      background-color: #89cff0;
+  }*/
+}/*# sourceMappingURL=container.css.map */

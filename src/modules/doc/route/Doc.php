@@ -8,7 +8,9 @@
 namespace Atto\Box\route;
 
 use Atto\Box\Doc as DocCls;
+use Atto\Box\Request;
 use Atto\Box\Response;
+use Atto\Box\doc\parser\Md;
 
 class Doc extends Base
 {
@@ -26,7 +28,7 @@ class Doc extends Base
      */
     public function defaultMethod()
     {
-        $args = func_get_args();
+        /*$args = func_get_args();
         if (empty($args)) {
             return DocCls::index();
         }
@@ -47,6 +49,41 @@ class Doc extends Base
         return [
             "status" => 404
         ];
+        exit;*/
+
+        $args = func_get_args();
+        $dir = implode("/", $args);
+        $doc = DocCls::create($dir);
+        if (!is_null($doc)) {
+            return [
+                "data" => path_find("module/doc/page.php"),
+                "format" => "page",
+                "doc" => $doc
+            ];
+        }
+        return [
+            "status" => 404
+        ];
+
         exit;
+    }
+
+    /**
+     * get doc file
+     */
+    public function file(...$args)
+    {
+        $doc = DocCls::create(implode("/", $args));
+        if (!is_null($doc)) {
+            $fn = Request::get("file");
+            $fp = $doc->file($fn);
+            if (!is_null($fp)) {
+                $md = new Md(file_get_contents($fp));
+                return $md->parse();
+            } else {
+                return "$fn 未找到！";
+            }
+        }
+        Response::code(404);
     }
 }

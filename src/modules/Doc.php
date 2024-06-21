@@ -10,13 +10,36 @@ namespace Atto\Box;
 
 class Doc
 {
-    //support doc format
-    //protected static $exts = ["md","html","xml"];
-    protected static $descfile = "description.json";
+    /**
+     * document format use markdown
+     */
+    protected static $ext = ".md";
+
+    /**
+     * doc folder index file name
+     */
+    protected static $index = "index";
+
+    /**
+     * doc desc file
+     */
+    protected static $desc = "desc.json";
+
+    /**
+     * current doc instance config
+     */
+    public $dir = "";    //doc folder, realpath
+    public $uri = "";    //doc dir export in URI
+
+    /**
+     * doc directory array
+     * in desc.json
+     */
+    public $directory = [];
 
     //init params
-    protected $dir = "";
-    protected $ext = ".md";
+    //protected $dir = "";
+    //protected $ext = ".md";
 
     /**
      * runtime info
@@ -24,13 +47,27 @@ class Doc
      */
     //public $desc = [];
     //public $tree = [];
-    public $page = "";
+    //public $page = "";
 
     /**
      * construct
+     * @param String $dir   use path_find()  or  realpath
      */
     public function __construct($dir)
     {
+        if (self::exists($dir)) {
+            $this->uri = $dir;
+            $this->dir = path_find($dir, ["inDir"=>"docs,documents"]);
+
+            //load desc.json
+            $this->load();
+        }
+
+
+        /*$dir = path_find($dir, ["inDir"=>"docs,documents"]);
+        if (is_notempty_str($dir)) {
+            $this->dir = $dir;
+        }
         if (self::exists($dir)) {
             $this->dir = $dir;
             $desc = j2a(file_get_contents($dir.DS.self::$descfile));
@@ -39,8 +76,101 @@ class Doc
                     $this->$k = $v;
                 }
             }
+        }*/
+    }
+
+    /**
+     * load doc desc.json
+     * @return $this
+     */
+    public function load()
+    {
+        $desc = $this->dir.DS.self::$desc;
+        if (file_exists($desc)) {
+            $darr = j2a(file_get_contents($desc));
+            if (is_notempty_arr($darr)) {
+                foreach ($darr as $k => $v) {
+                    $this->$k = $v;
+                }
+            }
         }
     }
+
+    /**
+     * get doc file (*.ext)
+     * @param String $filepath      filepath
+     * @return String real filepath  or  null
+     */
+    public function file($filepath)
+    {
+        if (!is_notempty_str($filepath)) return null;
+        $fp = $this->dir.DS.str_replace("/", DS, $filepath);
+        if (file_exists($fp.self::$ext)) return $fp.self::$ext;
+        if (is_dir($fp)) {
+            if (self::exists($fp)) return $fp.DS.self::$index.self::$ext;
+            return self::latest($fp);
+        }
+        return null;
+    }
+
+
+
+    /**
+     * create doc instance
+     * @param String $dir       doc folder path, use path_find()
+     * @param Array $conf       extra config array
+     * @return Doc instance  or  null
+     */
+    public static function create($dir = "")
+    {
+        if (!self::exists($dir)) return null;
+        return new Doc($dir);
+    }
+
+
+
+    /**
+     * static tools
+     */
+
+    /**
+     * check if dir containes docs
+     * @param String $dir       doc location dir
+     * @return Bool
+     */
+    public static function exists($dir = "")
+    {
+        $dir = path_find($dir, ["inDir"=>"docs,documents"]);
+        if (!is_dir($dir)) return false;
+        $index = $dir.DS.self::$index.self::$ext;
+        $desc = $dir.DS.self::$desc;
+        return file_exists($index) && file_exists($desc);
+    }
+
+    /**
+     * sort *.ext file by filename, to get latest version of doc file
+     * @param String $dir   dir containes files
+     * @return String latest version file fullpath
+     */
+    public static function latest($dir = "")
+    {
+        if (!is_dir($dir)) return null;
+        $fs = [];
+        $dh = opendir($dir);
+        while( ($f = readdir($dh)) !== false ) {
+            if (strpos($f, self::$ext)===false || is_dir($dir.DS.$f)) continue;
+            $fs[] = implode(".", array_slice(explode(".", $f), 0, -1));
+        }
+        closedir($dh);
+        if (empty($fs)) return null;
+        rsort($fs);
+        return $dir.DS.$fs[0];
+    }
+
+
+
+
+
 
     /**
      * set init params
@@ -87,18 +217,6 @@ class Doc
     }
 
     /**
-     * create doc instance
-     */
-    public static function create($dirkey = "")
-    {
-        $dir = self::dir($dirkey);
-        if (is_null($dir)) return null;
-        $doc = new Doc($dir);
-
-        return $doc;
-    }
-
-    /**
      * default doc cover method
      */
     public static function index()
@@ -125,35 +243,10 @@ class Doc
     }
 
     /**
-     * check if doc exists
-     * @param String $dir       doc location dir
-     * @return Boolean
-     */
-    public static function exists($dir = "")
-    {
-        return is_dir($dir) && file_exists($dir.DS.self::$descfile);
-    }
-
-    /**
      * get latest file in dir by filename
      * @param String $dir       dir real path
      * @return String latest file full path  or  null
      */
-    public static function latest($dir = "")
-    {
-        if (!is_dir($dir)) return null;
-        $fs = [];
-        $dh = opendir($dir);
-        while( ($f = readdir($dh)) !== false ) {
-            $fp = $dir.DS.$f;
-            if (is_dir($fp)) continue;
-            $fs[] = implode(".", array_slice(explode(".", $f), 0, -1));
-        }
-        closedir($dh);
-        if (empty($fs)) return null;
-        rsort($fs);
-        return $dir.DS.$fs[0];
-    }
 
     /**
      * check if doc ext is supported

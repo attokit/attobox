@@ -1,0 +1,461 @@
+/* lib container page style */
+
+@mixin pmp($po: relative, $mg: 0, $pd: 0, $ov: hidden) {
+    position: $po; margin: $mg; padding: $pd; overflow: $ov;
+    box-sizing: border-box;
+}
+@mixin flex-x($x: flex-start, $y: center) {
+    display: flex; align-items: $y; justify-content: $x;
+}
+@mixin flex-y($x: flex-start, $y: flex-start) {
+    display: flex; flex-direction: column;
+    align-items: $x; justify-content: $y;
+}
+
+/* vars */
+$color-bg-dark:     #c3c6d1;
+$color-bg:          #f0f1f3;
+$color-bg-light:    #fff;
+$color-bg-blue:     #e7f1f9;
+$color-bg-shadow:   #e4e6e9;
+$color-f-dark:      #102037;
+$color-f:           #183153;
+$color-f-light:     #5f697d;
+$color-primary:     #74c0fc;
+$color-blue:        #74c0fc;
+$color-yellow:      #ffd43b;
+$color-red:         #eb4c42;
+$color-cyan:        #63e6be;
+$color-green:       #87c04f;
+
+$size-f-sm:     12px;
+$size-f:        14px;
+$size-f-xl:     16px;
+$size-f-xxl:    28px;
+$size-f-xxxl:   32px;
+$size-h-topbar:     72px;
+$size-w-menubar:    256px;
+$size-w-pagetab:    128px;
+$size-h-menuitem:   48px;
+$size-h-sign:       36px;
+$size-sep-xs:   12px;
+$size-sep-sm:   18px;
+$size-sep:      24px;
+$size-sep-xl:   48px;
+$size-logo-sm:  16px;
+$size-logo-sub: 34px;
+$size-logo:     42px;
+$size-logo-xl:  64px;
+$size-scroll-thin:  4px;
+$size-scroll:       6px;
+$size-scroll-bold:  8px;
+
+$font-fml:          -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft Yahei",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+$font-fml-code:     'Cascadia Mono', 'Consolas', monospace, 'Courier New', sans-serif;
+
+/* common class */
+
+/** cgy-scroll **/
+html,[class*="nice-scroll"] {scroll-behavior: smooth;}
+[class*="nice-scroll_"][class*="_x"] {overflow-x: overlay; overflow-y: hidden;}
+[class*="nice-scroll_"][class*="_y"] {overflow-x: hidden; overflow-y: overlay;}
+[class*="nice-scroll_"][class*="_xy"] {overflow-x: overlay; overflow-y: overlay;}
+[class*="nice-scroll_"]::-webkit-scrollbar {width: $size-scroll; height: $size-scroll;}
+    [class*="nice-scroll_"][class*="_bold"]::-webkit-scrollbar {
+        width: $size-scroll-bold; height: $size-scroll-bold;
+    }
+    [class*="nice-scroll_"][class*="_thin"]::-webkit-scrollbar {
+        width: $size-scroll-thin; height: $size-scroll-thin;
+    }
+[class*="nice-scroll_"]::-webkit-scrollbar-thumb  {
+    background-color: transparent;
+    transition: all .5s;
+}
+    [class*="nice-scroll_"][class*="_radiu"]::-webkit-scrollbar-thumb  {border-radius: 50%;}
+    [class*="nice-scroll"]:hover::-webkit-scrollbar-thumb  {background-color: $color-bg-dark;}
+[class*="nice-scroll"]::-webkit-scrollbar-track {background-color: transparent; }
+
+/** element-ui fix **/
+.el-menu.el-menu--horizontal {
+    border: none;
+}
+.el-button {
+    border: none;
+    color: $color-f;
+    &.el-button--small {
+        font-size: $size-f-xl;
+        &:hover {
+            background-color: $color-primary;
+            color: $color-f;
+        }
+    }
+}
+.el-select-dropdown {
+    border-color: $color-bg;
+    box-shadow: 0 2px 12px 0 $color-bg-dark;
+
+    .el-select-dropdown__item {
+        color: $color-f-light;
+        &:hover {
+            background-color: $color-bg;
+            color: $color-f;
+        }
+    }
+}
+
+
+
+/* body */
+body {
+    margin: 0; padding: $size-h-topbar 0 0 $size-w-menubar; overflow: hidden auto;
+    color: $color-f-light;
+    font: {
+        size: $size-f;
+        family: $font-fml;
+    }
+    background-color: $color-bg;
+}
+
+/* topbar */
+.lib-topbar {
+    @include pmp($po: fixed, $pd: 0 $size-sep 0 0);
+    width: 100vw; height: $size-h-topbar; left: 0; top: 0;
+    @include flex-x;
+    background-color: $color-bg-light;
+    box-sizing: border-box;
+    box-shadow: 0 4px 8px $color-bg-dark;
+    z-index: 100;
+
+    &>.sep {flex: 1;}
+    &>.sep-sm {width: $size-sep;}
+
+    .logo-main {
+        height: $size-logo; width: auto;
+        &.sub {
+            height: $size-logo-sub;
+        }
+    }
+
+    .lib-key {
+        @include pmp($mg: 0 $size-sep 0 0);
+        color: $color-f; font-weight: bold; line-height: 150%;
+        font: {
+            size: $size-f-xl;
+        }
+    }
+
+    .el-menu-item {
+        height: $size-h-topbar;
+        border: none;
+        &.is-active {
+            border: none;
+        }
+
+    }
+
+    .icon-a {
+        height: $size-h-topbar;
+        @include flex-x;
+        text-decoration: none;
+
+        &>i {
+            @include pmp;
+            margin-top: -2px;
+            &:hover {
+                color: $color-primary;
+            }
+        }
+
+        .icon-logo-main {
+            height: $size-logo; width: auto;
+        }
+        .icon-logo {
+            height: $size-logo-sm; width: auto;
+        }
+    }
+
+    .search-box {
+        width: $size-w-menubar;
+        @include flex-x;
+        &>.el-select {
+            flex: 1;
+            .el-input {
+                .el-input__inner {
+                    border-color: $color-bg-dark;
+                    color: $color-f-light;
+                }
+                &.is-focus {
+                    .el-input__inner {
+                        border-color: $color-primary;
+                        color: $color-f;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+/* menubar */
+.lib-menubar {
+    @include pmp($po: fixed);
+    width: $size-w-menubar; height: 100vh; left: 0; top: 0;
+    @include flex-y;
+    box-sizing: border-box;
+    background-color: $color-bg-shadow;
+    z-index: 90;
+
+    .menubar-top {
+        @include pmp;
+        width: 100%; height: $size-h-topbar;
+    }
+    .lib-assets-menu {
+        @include pmp($ov: hidden overlay);
+        width: $size-w-menubar; flex: 1;
+
+        .el-menu {
+            background-color: $color-bg-shadow;
+        }
+
+        &.el-menu {
+            border: none;
+            background-color: $color-bg-shadow;
+        }
+
+        .el-submenu__title {
+            border: none;
+            background-color: $color-bg-shadow;
+            height: $size-h-menuitem;
+            line-height: $size-h-menuitem;
+            color: $color-f-light;
+            &:hover {
+                background-color: $color-bg-dark;
+                color: $color-f;
+            }
+            i:first-child {
+                color: $color-primary;
+            }
+        }
+
+        .el-submenu {
+            border: none;
+            background-color: $color-bg-shadow;
+            &.is-opened {
+                &>.el-submenu__title {
+                    color: $color-f;
+                    font-weight: bold;
+                }
+            }
+        }
+        .el-menu-item {
+            height: $size-h-menuitem;
+            line-height: $size-h-menuitem;
+            color: $color-f-light;
+            &::before {
+                display: inline-block;
+                width: 14px;
+                content: ""
+            }
+
+            &:hover {
+                background-color: $color-bg-dark;
+                color: $color-f;
+            }
+
+            &.is-active {
+                background-color: $color-bg;
+                color: $color-f;
+                font-weight: bold;
+            }
+        }
+    }
+}
+
+/* content */
+.lib-content {
+    @include pmp($pd: $size-sep);
+    max-width: 1200px;
+    font-size: $size-f; color: $color-f-light;
+    font-family: $font-fml;
+
+    .sep {flex: 1;}
+    .sep-sm {width: $size-sep;}
+
+    &>.lib-cntit {
+        @include pmp($mg: 0 0 $size-sep-sm 0);
+        width: 100%; height: $size-h-topbar;
+        @include flex-x;
+
+        &>h1 {
+            @include pmp;
+            color: $color-f;
+            font-size: $size-f-xxxl;
+            font-weight: bold;
+            line-height: 150%;
+        }
+        .el-button.lib-version-icon {
+            height: 38px;
+            color: $color-f;
+            &.el-button--small {
+                font-size: $size-f-xl;
+                background-color: #ecb643;
+                &:hover {
+                    background-color:  #ecb643;
+                    color: $color-f;
+                }
+            }
+        }
+        .el-button.lib-version {
+            height: 38px;
+            color: $color-f;
+            font-weight: bold;
+            &.el-button--small {
+                font-size: $size-f-xl * 1.2;
+                /*padding-left: 0;*/
+                &:hover {
+                    background-color: $color-yellow;
+                    color: $color-f;
+                }
+            }
+        }
+    }
+    
+    &>.lib-desc {
+        @include pmp($mg: 0 0 $size-sep-sm 0);
+        @include flex-x;
+        font-size: $size-f-sm;
+        color: $color-f-light;
+        &>p {
+            flex: 1;
+        }
+        .el-tag.el-tag--info {
+            margin-left: $size-sep-xs;
+            @include flex-x;
+            background-color: $color-bg-shadow;
+            border: none;
+            color: $color-f;
+            font-weight: bold;
+        }
+        .el-tag--mini {
+            height: $size-sep;
+            padding: 0 8px;
+            &>i {
+                margin-right: 8px;
+                color: $color-green;
+            }
+        }
+    }
+
+    &>.lib-tabs {
+        @include pmp($mg: 0 0 $size-sep-sm 0);
+        width: 100%; height: $size-h-topbar;
+        @include flex-x($x: center);
+
+        .el-radio-group {
+            .el-radio-button {
+                .el-radio-button__inner {
+                    min-width: $size-w-pagetab;
+                    @include flex-x($x: center);
+                    border: none;
+                    color: $color-f;
+                    background-color: $color-bg-light;
+                    &>i {
+                        margin-right: $size-sep-sm;
+                        font-size: $size-f-xl;
+                    }
+                    &:hover {
+                        background-color: $color-primary;
+                        color: $color-f;
+                    }
+                }
+                .el-radio-button__orig-radio:checked+.el-radio-button__inner {
+                    min-width: $size-w-pagetab;
+                    @include flex-x($x: center);
+                    border: none;
+                    color: $color-f;
+                    background-color: $color-primary;
+                    &>i {
+                        margin-right: $size-sep-sm;
+                        font-size: $size-f-xl;
+                    }
+                    &:hover {
+                        background-color: $color-primary;
+                        color: $color-f;
+                    }
+                }
+            }
+        }
+    }
+    
+    &>.lib-assets {
+        &>.lib-asset-src {
+            @include pmp($mg: 0 0 $size-sep-sm 0, $pd: 0 0 0 $size-sep);
+            width: 100%; /*height: $size-h-menuitem;*/
+            @include flex-x;
+            box-sizing: border-box;
+            border-radius: 3px;
+            font: {
+                size: $size-f;
+                family: $font-fml-code;
+            }
+            text-decoration: none;
+            color: $color-f-light;
+            background-color: $color-bg-light;
+            cursor: default;
+            &:hover {
+                /*background-color: $color-yellow;*/
+                font-weight: 900;
+                color: $color-f;
+            }
+    
+            &>.asset-url {
+                flex: 1;
+            }
+            
+            .el-button {
+                height: $size-h-menuitem;
+            }
+        }
+    }
+
+    &>.lib-readme {
+        @include pmp;
+        box-sizing: border-box;
+        border-radius: 3px;
+        background-color: $color-bg-light;
+
+        .lib-readme-ctrl {
+            @include pmp($mg: 0 0 $size-sep-xl 0);
+            width: 100%;
+            @include flex-x($x: flex-end);
+
+        }
+        .lib-readme-body {
+            @include pmp($pd: $size-sep-xl);
+        }
+    }
+}
+
+
+
+/** dark mode **/
+@media (prefers-color-scheme: dark) {
+    /*html {
+        filter: invert(1) hue-rotate(180deg);
+    }
+    .lib-topbar {
+        box-shadow: none;
+    }*/
+    /*body {
+        background-color: #f0f0f0;
+    }
+    .lib-menubar .lib-assets-menu .el-submenu__title:hover {
+        background-color: #89cff0;
+    }
+    .lib-menubar .lib-assets-menu .el-menu-item:hover {
+        background-color: #89cff0;
+    }
+    .lib-menubar .lib-assets-menu .el-menu-item.is-active {
+        background-color: #89cff0;
+    }*/
+}

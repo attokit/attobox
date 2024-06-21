@@ -57,9 +57,13 @@ class Js extends Resource
         }
         $this->content = $cnt;
 
+        //输出之前，如果需要，保存文件到本地
+        $this->saveRemoteToLocal();
+
         //sent header
         //$this->sentHeader();
         Mime::header($this->rawExt, $this->rawBasename);
+        //var_dump(Response::$current->headers);
         Response::headersSent();
 
         //echo

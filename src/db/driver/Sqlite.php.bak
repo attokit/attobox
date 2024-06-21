@@ -1,0 +1,354 @@
+<?php
+
+/**
+ * Attobox Framework / Db Driver
+ */
+
+namespace Atto\Box\db\driver;
+
+use Atto\Box\Db;
+//use Atto\Box\db\Config;
+//use Atto\Box\db\Table;
+
+use Medoo\Medoo;
+
+class Sqlite extends Db
+{
+    /**
+     * DB attributes
+     */
+    public $type = "sqlite";
+
+    /**
+     * connect options
+     * Medoo Version 2.1.4
+     * must override by sub class
+     */
+    protected $connectOption = [
+        "type" => "sqlite",
+        "database" => ""
+    ];
+
+
+
+    /**
+     * connect methods
+     */
+
+    /**
+     * get connect options for Medoo
+     * must override by sub class
+     * @param String $dsn   dsn string
+     * @return $this
+     */
+    protected function getConnectOption($dsn)
+    {
+        $dbf = self::getDbPath($dsn);
+        if (is_null($dbf)) trigger_error("db/notexists::$dsn",E_USER_ERROR);
+        $dbf = path_fix($dbf);
+        $key = self::getKey($dsn);
+        $dbfi = pathinfo($dbf);
+        $this->connectOption["database"] = $dbf;
+        $this->dsn = "sqlite:".$dbf;
+        $this->key = $key;
+        $this->name = $dbfi["filename"];
+        $this->pathinfo = $dbfi;
+        return $this;
+    }
+
+
+
+    /**
+     * db init methods 
+     */
+
+    /**
+     * init db config when db instance created
+     * must override by sub class
+     * @param String | Array $conf      config file path  or  config array
+     * @return Array db config array
+     */
+    protected function initDbConfig($conf = null)
+    {
+        //get sqlite config from sqlite_master
+        $rs = $this->medoo()->select("sqlite_master", "*", [
+            "type" => "table",
+            "name[!~]" => "sqlite",
+            "ORDER" => "name"
+        ]);
+        $cfg = [
+            "db" => [
+                "tables" => [],
+                "creation" => []
+            ]
+        ];
+        for ($i=0;$i<count($rs);$i++) {
+            $rsi = $rs[$i];
+            $cfg["db"]["tables"][] = $rsi["name"];
+            $cfg["db"]["creation"][$rsi["name"]] = $rsi["sql"];
+        }
+
+        //get manual config from file (dbpath/dbname.php)
+        $cf = $this->pathinfo["dirname"].DS.$this->pathinfo["filename"].EXT;
+        if (file_exists($cf)) {
+            $mcfg = require($cf);
+            $cfg = arr_extend($cfg, $mcfg);
+        }
+        if (is_notempty_str($conf)) {
+            $cf = path_find($conf);
+            if (!is_null($cf)) {
+                $mcfg = require($cf);
+                $cfg = arr_extend($cfg, $mcfg);
+            }
+        } else if (is_notempty_arr($conf)) {
+            $cfg = arr_extend($cfg, $conf);
+        }
+        
+        return $cfg;
+    }
+
+
+
+    /**
+     * table init methods
+     */
+
+    /**
+     * init table config called when table construct
+     * must override by sub class
+     * @param String $tbn   table name
+     * @return Array table config
+     */
+    public function initTbConfig($tbn)
+    {
+        $cfg = [
+            "creation" => $this->creation($tbn),
+            "default" => [],
+            "fields" => [],
+            "field" => [],
+            "primaryfield" => ""
+        ];
+        $rs = $this->query("PRAGMA table_info(`".$tbn."`)")->fetchAll();
+        for($i=0;$i<count($rs);$i++){
+            $rsi = $rs[$i];
+            $fdn = $rsi["name"];
+            $dft = is_null($rsi["dflt_value"]) || is_numeric($rsi["dflt_value"]) ? $rsi["dflt_value"] : str_replace("'","",$rsi["dflt_value"]);
+            if ($rsi["pk"]!=1 && !is_null($dft)) $cfg["default"][$fdn] = $dft;
+            $cfg["fields"][] = $fdn;
+            $cfg["field"][$fdn] = [
+                "name" => $fdn,
+                "type" => $rsi["type"],
+                "cid" => $rsi["cid"],
+                "notnull" => $rsi["notnull"]==1,
+                "pk" => $rsi["pk"]==1,
+                "default" => $dft
+            ];
+            if ($rsi["pk"]==1) $cfg["primaryfield"] = $fdn;
+        }
+        return $cfg;
+    }
+
+
+
+    /**
+     * static
+     */
+
+    /**
+     * get db key from dsn
+     * must override by sub class
+     * @param String $dsn   dsn string, sqlite:foo/bar/db.db  or  foo/bar/db
+     * @return String unique db key  or  null
+     */
+    public static function getKey($dsn)
+    {
+        $dbf = self::getDbPath($dsn);
+        if (is_null($dbf)) return null;
+        $key = str_replace(".db", "", $dbf);
+        $dp = self::getDbBasePath();
+        if (strpos($key, $dp.DS)!==false) $key = str_replace($dp.DS, "", $key);
+        $key = trim(str_replace(DS, "_", $key), "_");
+        return $key;
+    }
+
+    /**
+     * check if db path is existed
+     * must override by sub class
+     * @param String $dsn       dsn or db path like: sqlite:foo/bar/db  or  foo/bar/db
+     * @return Bool
+     */
+    public static function exists($dsn)
+    {
+        return !is_null(self::getDbPath($dsn, false));
+    }
+
+    /**
+     * create sqlite db
+     * must override by sub class
+     * @param String $dsn       dsn or db path like: sqlite:foo/bar/db  or  foo/bar/db
+     * @param Array $conf       db config array
+     * @return Db instance
+     */
+    public static function create($dsn, $conf = [])
+    {
+        //prepare dbpath & dbname
+        $path = strpos($dsn, ":")!==false ? explode(":", $dsn)[1] : $dsn;
+        if (!is_notempty_str($path)) trigger_error("db/errornewpath::".$path, E_USER_ERROR);
+        $path = str_replace(["\\","-","_"], "/", $path);
+        $parr = explode("/", trim($path, "/"));
+        $dbn = str_replace(".db", "", array_pop($parr));
+        $dp = self::getDbBasePath().(empty($parr) ? "" : DS.implode(DS, $parr));
+        if (!is_dir($dp)) {
+            $md = mkdir($dp, 0777);
+            if (!$md) trigger_error("db/errornewpath::".$path, E_USER_ERROR);
+        }
+
+        //create db file
+        $dbf = $dp.DS.$dbn.".db";
+        if (file_exists($dbf)) trigger_error("db/errornewpath::".$path, E_USER_ERROR);
+        $fh = fopen($dbf, "w");
+        if (!$fh) trigger_error("db/errornew::".$path, E_USER_ERROR);
+        fclose($fh);
+
+        //create db config file
+        if (is_notempty_arr($conf)) {
+            $dbcf = $dp.DS.$dbn.EXT;
+            $fh = fopen($dbcf, "w");
+            var_export($conf);
+            $confcnt = ob_get_contents();
+            ob_clean();
+            $cnt = "<?php\r\nreturn ".$confcnt.";";
+            fwrite($fh, $cnt);
+            fclose($fh);
+        }
+
+        //connect to new db
+        $dsn = "sqlite:".(empty($parr) ? "" : implode("/", $parr)."/").$dbn;
+        $db = self::load($dsn);
+
+        //create tables if $conf["table"] exists
+        if (isset($conf["table"]) && is_notempty_arr($conf["table"])) {
+            $tbconf = $conf["table"];
+            foreach ($tbconf as $tbn => $tbc) {
+                $db->newTable($tbn);
+            }
+            $db->updateConfig();
+        }
+
+        //return db instance
+        return $db;
+    }
+
+    /**
+     * temp connect db
+     * must override by sub class
+     * @param String $dsn   db connect dsn
+     * @param Array $args   specific query type
+     * @return Medoo instance  or  query data
+     */
+    public static function tempConnect($dsn, ...$args)
+    {
+        $dbf = self::getDbPath($dsn);
+        $connOpt = [
+            "type" => "sqlite",
+            "database" => path_fix($dbf)
+        ];
+        $medoo = new Medoo($connOpt);
+        if (empty($args)) return $medoo;
+        $query = array_shift($args);
+        //specific query
+        switch ($query) {
+            case "tables" : //get tables name array
+                $cfg = self::getConfigFromSqliteMaster($medoo);
+                return array_keys($cfg);
+                break;
+            
+            default :
+                return $medoo;
+                break;
+        }
+    }
+
+
+
+    /**
+     * get dbfile path
+     * @param String $dsn           dsn string, sqlite:foo/bar/db.db  or  foo/bar/db
+     * @param Bool $throwError      if throw error, default true
+     * @return String dbfile path  or  null
+     */
+    public static function getDbPath($dsn, $throwError = true)
+    {
+        if (self::isLegalDsn($dsn)) {
+            if (str_has($dsn, ":")) $dsn = explode(":",$dsn)[1];
+            $dbf = explode(";", trim($dsn, ";"))[0];
+            if (strpos($dbf, "=")!==false) $dbf = explode("=", $dbf)[1];
+            $dp = self::getDbBasePath();
+            if (substr($dbf, 0, 1)=="/") {
+                $dbf = str_replace("/", DS, $dbf);
+            } else {
+                $dbf = $dp.DS.str_replace("/", DS, $dbf);
+            }
+            if (strpos($dbf, ".db")===false) $dbf .= ".db";
+            //if (!file_exists($dbf)) trigger_error("db/notexists::$dsn",E_USER_ERROR);
+            if (!file_exists($dbf)) {
+                if ($throwError) trigger_error("db/notexists::$dsn",E_USER_ERROR);
+                return null;
+            }
+            return $dbf;
+        }
+        trigger_error("db/errordsn::$dsn",E_USER_ERROR);
+        //return null;
+    }
+
+    /**
+     * get dbfile base path, check DB_BASE first, if not exists use DB_PATH
+     * @return String db base path (realpath)
+     */
+    protected static function getDbBasePath()
+    {
+        if (!is_notempty_str(DB_BASE)) return DB_PATH.DS."sqlite";
+        $dp = path_find(DB_BASE);
+        if (!is_null($dp)) return $dp;
+        return DB_PATH.DS."sqlite";
+    }
+
+    /**
+     * check if dsn is legal
+     * @param String $dsn       dsn string, sqlite:foo/bar/db.db  or  foo/bar/db
+     * @return Bool
+     */
+    public static function isLegalDsn($dsn)
+    {
+        if (!is_notempty_str($dsn)) return false;
+        if (str_has($dsn, ":")) {
+            if (!str_has($dsn, "sqlite:")) return false;
+        }
+        return true;
+    }
+
+    /**
+     * get tables config array by using medoo instance
+     * @param String $medoo     medoo instance
+     * @return Array tables config like: [ tbn => [config array], ... ]
+     */
+    protected static function getConfigFromSqliteMaster(&$medoo)
+    {
+        if ($medoo instanceof Medoo) {
+            $rs = $medoo->select("sqlite_master", "*", [
+                "type" => "table",
+                "name[!~]" => "sqlite",
+                "ORDER" => "name"
+            ]);
+            $cfg = [];
+            for ($i=0;$i<count($rs);$i++) {
+                $rsi = $rs[$i];
+                $tbn = $rsi["name"];
+                $cfg[$tbn] = $rsi;
+            }
+            return $cfg;
+        }
+        return [];
+    }
+
+}

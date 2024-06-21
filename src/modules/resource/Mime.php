@@ -25,14 +25,22 @@ class Mime
 		"tpl" => "text/html",
         "php" => "text/html",
         "css" => "text/css",
-        "scss" => "text/css",
-        "sass" => "text/css",
+        //"scss" => "text/css",
+        //"sass" => "text/css",
+        "scss" => "text/x-scss",
+        "sass" => "text/x-sass",
         "csv" => "text/csv",
         "js" => "text/javascript",
         "json" => "application/json",
+        "map" => "application/json",
         "xml" => "application/xml",
         "swf" => "application/x-shockwave-flash",
         "md" => "text/x-markdown",
+
+        //font
+        "ttf" => "font/ttf",
+        "woff" => "font/woff",
+        "woff2" => "font/woff2",
 
         // images
         "png" => "image/png",
@@ -113,7 +121,7 @@ class Mime
             "tpl",
             "php",
             "css","scss","sass",
-            "js","json",
+            "js","json","map",
             "md",
             "svg"
         ],
@@ -151,7 +159,8 @@ class Mime
             "xls","xlsx",
             "ppt","pptx",
             "csv",
-            "pdf"
+            "pdf",
+            "txt"
         ]
     ];
 
@@ -171,6 +180,20 @@ class Mime
         $info = pathinfo($path);
         if (!isset($info["extension"])) return null;
         return strtolower($info["extension"]);
+    }
+
+    /**
+     * 根据 mime 获取 ext
+     * @param String $mime
+     * @return String 
+     */
+    public static function extOfMime($mime)
+    {
+        if (!is_notempty_str($mime)) return null;
+        $mimes = self::$mimes;
+        $fms = array_flip($mimes);
+        if (isset($fms[$mime])) return $fms[$mime];
+        return null;
     }
 
     /**
@@ -287,6 +310,23 @@ class Mime
 
 
         return null;
+    }
+
+    /**
+     * 获取远程文件的 mime
+     */
+    public static function getRemoteFileMime($url="")
+    {
+        if (!is_notempty_str($url)) return "";
+        $https = strpos($url,"https://")!==false;
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($ch);
+
+        $rst = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+
+        return $rst;
     }
 
 

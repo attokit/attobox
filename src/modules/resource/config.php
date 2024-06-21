@@ -8,6 +8,6 @@
 return [
 
     //upload configs
-    "UPLOAD_DIR" => "assets/upload",
+    "UPLOAD_DIR" => "uploads",  //在 assets 路径下
 
 ];

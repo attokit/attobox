@@ -27,7 +27,8 @@ class Base extends Error
         "zh-CN" => [
             "unknown"   => ["未知错误",         "发生未知错误"],
             "php"       => ["PHP 系统错误",     "%{1}%"],
-            "test"      => ["Global Error Handle Test", "%{1}%, %{2}%"]
+            "custom"    => ["发生错误",         "%{1}%"],
+            "auth"      => ["权限验证失败",      "%{1}%"],
         ]
         
 	];

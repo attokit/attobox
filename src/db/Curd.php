@@ -98,7 +98,7 @@ class Curd
     public function ready($throwError = true)
     {
         if (!$this->db instanceof Db || !$this->_medoo instanceof Medoo || !is_notempty_str($this->table)) {
-            if ($throwError) trigger_error("db/nocurd::".$this->db->info("name"),E_USER_ERROR);
+            if ($throwError) trigger_error("db/curd/nocurd::".$this->db->conf("name").",".$this->table, E_USER_ERROR);
             return false;
         }
         return true;
@@ -117,7 +117,7 @@ class Curd
                 return $this->field($tarr[1]);
             }
         }else{
-            trigger_error("db/incurd::".$this->db->info("name"), E_USER_ERROR);
+            trigger_error("db/curd/incurd::".$this->db->conf("name"), E_USER_ERROR);
         }
     }
 
@@ -276,7 +276,7 @@ class Curd
                         }
                     }
                 } else if (in_array($arg, ["DESC", "ASC"])) {
-                    $id = $this->db->autoIncrementField($this->table);
+                    $id = $this->db->autoIncrementKey($this->table);
                     $odr[$id] = $arg;
                 } else {
                     $odr[] = $arg;
@@ -489,6 +489,7 @@ class Curd
         $reset = is_bool(array_slice($args,-1)[0]) ? array_pop($args) : true;
         //$opt = call_user_func_array([$this, "parseMedooOptions"], $args);
         $opt = $this->parseMedooOptions(...$args);
+        //if ($args[0]=="has") var_dump($opt);
         $rs = $this->medoo($args[0], $opt);
         $this->rs = $rs;
         if($reset) $this->reset($this->table);
@@ -517,9 +518,10 @@ class Curd
     {
         if(!$this->ready()) return null;
         
-        //$pk = $this->db->autoIncrementField($this->table);
-        $tb = $this->db->table($this->table);
-        $pk = $tb->id(false);
+        //$pk = $this->db->autoIncrementKey($this->table);
+        //$tb = $this->db->table($this->table);
+        //$pk = $tb->id(false);
+        $pk = $this->db->primaryKey($this->table);
 
         $this->order($pk." DESC")->limit(1);
         $rs = $this->select($reset);
