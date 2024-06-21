@@ -19,13 +19,15 @@ class Page extends Exporter
     public function prepare()
     {
         $page = $this->data["data"];
-        
+        if (!is_notempty_str($page)) {
+            var_dump($page);
+            exit;
+        }
         if (!file_exists($page)) {
             http_response_code(404);
             exit;
         }
         
-        //$_CPHP = CP::class("CP");
         $_Request = Request::current();
         $_Response = $this->response;
         $_Router = Router::current();
@@ -36,6 +38,7 @@ class Page extends Exporter
         foreach ($vars as $k => $v) {
             if (!isset($dps[$k])) {
                 $_Params[$k] = $v;
+                $$k = $v;
             }
         }
 

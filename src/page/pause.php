@@ -3,11 +3,13 @@
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head></head>
+<head>
+
+</head>
 <body>
     <?php
     //var_dump(CPHP::$request);
-    echo $_Params["extra"];
+    echo "Web Paused!";
     ?>
 </body>
 </html>

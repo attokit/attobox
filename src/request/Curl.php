@@ -187,12 +187,21 @@ class Curl
     public static function post($url, $data = null)
     {
         $curl = new Curl($url);
-        $curl->addUsage(["post", $data]);
-        if (func_num_args() > 2) {
-            $args = func_get_args();
-            array_shift($args);
-            call_user_func_array([$curl, "addUsage"], $args);
-        }
+        $args = func_get_args();
+        $aa = array_slice($args, 2);
+        $aa0 = ["post", $data];
+        array_unshift($aa, $aa0);
+        $curl->addUsage(...$aa);
+        //$curl->addUsage(["post", $data]);
+        //if (func_num_args() > 2) {
+        //    $args = func_get_args();
+        //    array_shift($args); //$url
+        //    array_shift($args); //$data
+        //    call_user_func_array([$curl, "addUsage"], $args);
+        //}
+        //var_dump($curl->options);
+        //return $curl->options;
+        //return $aa;
         $result = $curl->exec();
         $curl->close();
         return $result;

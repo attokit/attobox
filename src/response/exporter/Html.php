@@ -17,16 +17,27 @@ class Html extends Exporter
     public function prepare()
     {
         $d = $this->data["data"];
-        if (empty($d)) {
-            $this->content = "";
+        if (!empty($d) && isset($d["type"]) && $d["type"]=="Error") {
+            //输出错误提示
+            $error = $d;
+            //调用 box/page/error.php
+            require(path_find("box/page/error.php"));
+            //从 输出缓冲区 中获取内容
+            $this->content = ob_get_contents();
+            //清空缓冲区
+            ob_clean();
         } else {
-            if (is_associate($d)) {
-                $this->content = a2j($d);
+            if (empty($d)) {
+                $this->content = "";
             } else {
-                $this->content = str($d);
+                if (is_associate($d)) {
+                    $this->content = a2j($d);
+                } else {
+                    $this->content = str($d);
+                }
             }
+            //var_dump($this->content);
         }
-        //var_dump($this->content);
         return $this;
     }
 
