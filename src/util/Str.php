@@ -54,7 +54,7 @@ function replace($search, $replace, $str)
 }
 
 //replace all，$kv = [ [$search, $replace], [], ... ]
-function replace_all($kv = [], $str)
+function replace_all($kv, $str)
 {
     for ($i=0;$i<count($kv);$i++) {
         $ki = $kv[$i];
