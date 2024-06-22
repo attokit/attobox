@@ -1,0 +1,449 @@
+{
+    "path": "library/db",
+    "dsn": "sqlite:usr",
+    "xpath": "usr",
+    "name": "usr",
+    "title": "员工数据库",
+    "desc": "记录员工信息、角色权限、登录session等数据",
+
+    "table": {
+        
+        "usr": {
+            "name": "usr",
+            "title": "员工信息表",
+            "desc": "记录员工信息数据",
+            "__directedit": false,
+            "fields": [
+                "id",
+                "uid",
+                "openid",
+                "name",
+                "pwd",
+                "alias",
+                "avator",
+                "mobile",
+                "sfz",
+                "role",
+                "auth",
+                "wx",
+                "info",
+                "extra",
+                "enable"
+            ],
+            "virtual": {
+                "fields": [],
+                "field": {
+                    "__fullname": {
+                        "title": "员工",
+                        "desc": "员工信息(自动生成)",
+                        "width": 8,
+                        "value": "[%{uid}%] %{name}% [%{role}%]"
+                    },
+                    "__authority": {
+                        "title": "权限",
+                        "desc": "员工角色权限(自动生成)",
+                        "width": 10,
+                        "value": "%{role}% [%{auth}%]"
+                    }
+                }
+            },
+            "creation": {
+                "id":       "integer PRIMARY KEY AUTOINCREMENT",
+                "uid":      "varchar NOT NULL",
+                "openid":   "varchar",
+                "name":     "varchar NOT NULL",
+                "pwd":      "varchar",
+                "alias":    "varchar",
+                "avator":   "varchar",
+                "mobile":   "varchar NOT NULL",
+                "sfz":      "varchar NOT NULL",
+                "role":     "varchar NOT NULL DEFAULT '[1]'",
+                "auth":     "varchar NOT NULL DEFAULT '[]'",
+                "wx":       "varchar NOT NULL DEFAULT '{}'",
+                "info":     "varchar",
+                "extra":    "varchar DEFAULT '{}'",
+                "enable":   "integer NOT NULL DEFAULT 1"
+            },
+            "meta": {
+                "id":       ["ID","自增序号",3],
+                "uid":      ["员工编号","员工唯一编号",4],
+                "openid":   ["OPENID","员工微信公众号Openid",10],
+                "name":     ["姓名","员工全名",4],
+                "pwd":      ["密码","员工登录系统的密码",3],
+                "alias":    ["别名","员工的别名昵称",3],
+                "avator":   ["头像","员工头像，一般来自微信",3],
+                "mobile":   ["手机号","员工手机号，在系统中唯一",5],
+                "sfz":      ["身份证","员工身份证号",3],
+                "role":     ["角色","员工账号角色，赋予的操作权限",3],
+                "auth":     ["权限","除员工角色权限外，此员工还拥有的操作权限",3],
+                "wx":       ["微信账号","员工微信登录乾耀小程序的 Openid，用以身份识别",3],
+                "info":     ["备注","员工备注",3],
+                "extra":    ["更多","更多的员工信息，键值对",3],
+                "enable":   ["生效","此员工信息是否生效",3]
+            },
+            "mode": {
+                "default": {
+                    "title": "默认模式",
+                    "isClassic": true,
+                    "fields": ["uid", "openid", "name", "alias", "mobile", "enable"]
+                },
+                "minimum": {
+                    "title": "极简模式",
+                    "isClassic": true,
+                    "fields": ["uid", "openid", "name", "enable"]
+                }
+            },
+            "hideintable":  ["pwd","avator","sfz","wx","info","extra"],
+            "__hideinform":  ["role","auth"],
+            "sort": ["uid"],
+            "filter": ["role","auth"],
+            "search": ["name","alias","mobile","sfz"],
+            "__times": {},
+            "selectors": {
+                "role": {
+                    "dynamic": true,
+                    "multiple": true,
+                    "source": {
+                        "table": "app/pms/usr/role",
+                        "__where": {
+                            "name[~]": "超级"
+                        },
+                        "label": "name",
+                        "value": "id",
+                        "__special": [
+                            {"label": "默认用户", "value": 0}
+                        ]
+                    }
+                },
+                "auth": {
+                    "dynamic": true,
+                    "multiple": true,
+                    "source": {
+                        "api": "pms/uac/operations/pms/values"
+                    }
+                },
+                "__status": {
+                    "values": [
+                        {"label": "待入职", "value": "待入职"},
+                        {"label": "试用期", "value": "试用期"},
+                        {"label": "在职", "value": "在职"},
+                        {"label": "休假中", "value": "休假中"},
+                        {"label": "停薪未离职", "value": "停薪未离职"},
+                        {"label": "离职交接中", "value": "离职交接中"},
+                        {"label": "已离职", "value": "已离职"},
+                        {"label": "待定", "value": "待定"}
+                    ]
+                }
+            },
+            "files": {
+                "avator": {
+                    "inputFilesMaxLength": 0,
+                    "uploadTo": "${uid}",
+                    "accept": "image/*,.svg",
+                    "showListMode": "item"
+                }
+            },
+            "__numbers": {},
+            "__switchs": ["enable"],
+            "jsons": {
+                "__alias": "indexed",
+                "role": {
+                    "type": "indexed",
+                    "default": [0]
+                },
+                "auth": "indexed",
+                "wx": {
+                    "type": "associate",
+                    "default": {
+                        "qypms": "",
+                        "qyoms": ""
+                    }
+                },
+                "extra": "associate"
+            },
+            "validators": {
+                "mobile": ["mobile","手机号格式错误"],
+                "sfz": ["sfz","身份证号格式错误"]
+            },
+            "__generators": {
+                "uid": "uid"
+            }
+        },
+
+        "role": {
+            "name": "role",
+            "title": "员工角色表",
+            "desc": "记录员工角色数据，赋予员工操作权限",
+            "__directedit": true,
+            "fields": [
+                "id",
+                "name",
+                "desc",
+                "auth",
+                "info",
+                "extra",
+                "enable"
+            ],
+            "creation": {
+                "id":       "integer PRIMARY KEY AUTOINCREMENT",
+                "name":     "varchar NOT NULL",
+                "desc":     "varchar",
+                "auth":     "varchar NOT NULL DEFAULT '[]'",
+                "info":     "varchar",
+                "extra":    "varchar DEFAULT '{}'",
+                "enable":   "integer NOT NULL DEFAULT 1"
+            },
+            "meta": {
+                "id":       ["ID","自增序号",4],
+                "name":     ["角色","角色名称",4],
+                "desc":     ["说明","角色说明",5],
+                "auth":     ["权限","此角色拥有的操作权限",4],
+                "info":     ["备注","角色备注",5],
+                "extra":    ["更多","更多的角色信息，键值对",2],
+                "enable":   ["生效","此角色是否生效",2]
+            },
+            "hideintable":  ["info","extra"],
+            "__hideinform":  [],
+            "__sort": [],
+            "__filter": [],
+            "__search": [],
+            "__times": {},
+            "selectors": {
+                "auth": {
+                    "dynamic": true,
+                    "multiple": true,
+                    "source": {
+                        "api": "pms/uac/operations/pms/values",
+                        "__table": "usr/auth",
+                        "__label": "[%{id}%] %{name}%",
+                        "__value": "id"
+                    }
+                }
+            },
+            "__numbers": {},
+            "__switchs": [],
+            "jsons": {
+                "auth": "indexed",
+                "extra": "associate"
+            },
+            "__validators": {},
+            "__generators": {}
+        },
+
+        "auth": {
+            "name": "auth",
+            "title": "操作权限表",
+            "desc": "记录员工可以拥有的全部操作权限",
+            "fields": [
+                "id",
+                "fid",
+                "name",
+                "desc",
+                "auth",
+                "info",
+                "extra",
+                "enable"
+            ],
+            "creation": {
+                "id":       "integer PRIMARY KEY AUTOINCREMENT",
+                "fid":      "integer NOT NULL DEFAULT 0",
+                "name":     "varchar NOT NULL",
+                "desc":     "varchar",
+                "auth":     "varchar NOT NULL",
+                "info":     "varchar",
+                "extra":    "varchar DEFAULT '{}'",
+                "enable":   "integer NOT NULL DEFAULT 1"
+            },
+            "meta": {
+                "id":       ["ID","自增序号",4],
+                "fid":      ["上级操作","当前操作的上级操作",4],
+                "name":     ["操作名称","当前操作名称",4],
+                "desc":     ["说明","操作说明",5],
+                "auth":     ["权限","操作权限内容",8],
+                "info":     ["备注","此操作权限备注",5],
+                "extra":    ["更多","更多的操作权限信息，键值对",2],
+                "enable":   ["生效","此操作权限是否生效",2]
+            },
+            "hideintable":  ["info","extra"],
+            "__hideinform":  [],
+            "__sort": [],
+            "__filter": [],
+            "search": ["name"],
+            "__times": {},
+            "selectors": {
+                "fid": {
+                    "dynamic": true,
+                    "cascader": true,
+                    "source": {
+                        "table": "usr/auth",
+                        "link": "fid",
+                        "label": "[%{id}%] %{name}%",
+                        "value": "id",
+                        "special": [
+                            {
+                                "label": "根操作",
+                                "value": 0
+                            }
+                        ]
+                    }
+                }
+            },
+            "__numbers": {},
+            "__switchs": [],
+            "jsons": {
+                "extra": "associate"
+            },
+            "__validators": {},
+            "__generators": {}
+        },
+
+        "msg": {
+            "name": "msg",
+            "title": "用户消息表",
+            "desc": "记录发送给用户的所有消息",
+            "__directedit": true,
+            "fields": [
+                "id",
+                "msgid",
+                "touid",
+                "fromuid",
+
+                "content",
+                "attach",
+
+                "issys",
+                "isreply",
+                "remsgid",
+
+                "isreaded",
+                "needdeal",
+                "isdealed",
+
+                "ctime",
+                "rtime",
+                "dtime",
+
+                "info",
+                "extra",
+                "enable"
+            ],
+            "virtual": {
+                "fields": ["_summary"],
+                "field": {
+                    "_summary": {
+                        "title": "消息概述",
+                        "desc": "此消息的概述",
+                        "width": 8,
+                        "value": "(_c_['issys']==1?'[系统消息]':'[来自'._c_['fromuid'].']')"
+                    }
+                }
+            },
+            "creation": {
+                "id":       "integer PRIMARY KEY AUTOINCREMENT",
+                "msgid":    "varchar NOT NULL",
+                "touid":    "varchar NOT NULL",
+                "fromuid":  "varchar",
+                "content":  "varchar NOT NULL",
+                "attach":   "varchar DEFAULT '{}'",
+                "issys":    "integer DEFAULT 1",
+                "isreply":  "integer DEFAULT 0",
+                "remsgid":  "varchar",
+                "isreaded": "integer DEFAULT 0",
+                "needdeal": "integer DEFAULT 0",
+                "isdealed": "integer DEFAULT 0",
+                "ctime":    "integer NOT NULL",
+                "rtime":    "integer",
+                "dtime":    "integer",
+                "info":     "varchar",
+                "extra":    "varchar DEFAULT '{}'",
+                "enable":   "integer NOT NULL DEFAULT 1"
+            },
+            "meta": {
+                "id":       ["ID","自增序号",3],
+                "msgid":    ["消息编码","此消息在系统中的唯一编码，自动生成",4],
+                "touid":    ["发送给","此消息的目标用户",4],
+                "fromuid":  ["来自","此消息的发送者用户",4],
+                "content":  ["内容","此消息的内容",6],
+                "attach":   ["附件","此消息的附件，可以是跳转按钮",4],
+                "issys":    ["系统消息","此消息是否系统消息",3],
+                "isreply":  ["回复","此消息是否是对另一个消息的回复",3],
+                "remsgid":  ["回复给","此消息回复的另一条目标消息",4],
+                "isreaded": ["已读","此消息是否已读",3],
+                "needdeal": ["需处理","此消息是否需要后续处理",3],
+                "isdealed": ["已处理","此消息是否已被处理",3],
+                "ctime":    ["发送时间","此消息创建并发送的时间",6],
+                "rtime":    ["查看时间","此消息被查看的时间",6],
+                "dtime":    ["处理时间","此消息被处理完成的时间",6],
+                "info":     ["备注","此消息的备注",4],
+                "extra":    ["更多","此消息更多的信息，键值对",6],
+                "enable":   ["生效","此消息是否生效",3]
+            },
+            "mode": {
+                "default": {
+                    "title": "默认模式",
+                    "isClassic": true,
+                    "fields": ["msgid", "fromuid", "touid", "issys","isreply","isreaded","needdeal","isdealed", "ctime","rtime","dtime"]
+                }
+            },
+            "__form": {},
+            "__hideintable":  [],
+            "__hideinform":  [],
+            "__sort": [],
+            "filter": ["touid","fromuid","remsgid","issys","isreply","isreaded","needdeal","isdealed","ctime","rtime","dtime"],
+            "search": ["content","attach","info","extra"],
+            "times": {
+                "ctime": {
+                    "type": "datetime",
+                    "default": "now"
+                },
+                "rtime": {
+                    "type": "datetime"
+                },
+                "dtime": {
+                    "type": "datetime"
+                }
+            },
+            "selectors": {
+                "touid": {
+                    "dynamic": true,
+                    "multiple": false,
+                    "source": {
+                        "table": "app/pms/usr/usr",
+                        "label": "name",
+                        "value": "uid"
+                    }
+                },
+                "fromuid": {
+                    "dynamic": true,
+                    "multiple": false,
+                    "allow-create": true,
+                    "source": {
+                        "table": "app/pms/usr/usr",
+                        "label": "name",
+                        "value": "uid"
+                    }
+                },
+                "remsgid": {
+                    "dynamic": true,
+                    "multiple": false,
+                    "source": {
+                        "table": "app/pms/usr/msg",
+                        "label": "_summary",
+                        "value": "msgid"
+                    }
+                }
+            },
+            "__numbers": {},
+            "__money": ["price","cost"],
+            "switchs": ["issys","isreply","isreaded","needdeal","isdealed"],
+            "jsons": {
+                "attach": "associate",
+                "extra": "associate"
+            },
+            "__validators": {},
+            "generators": {
+                "msgid": "msgid"
+            }
+        }
+    }
+}

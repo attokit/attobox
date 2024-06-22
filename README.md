@@ -95,7 +95,7 @@ Basicly, each app can be treated as vhost. The usage of these folders are same t
     namespace Atto\Box\App;
 
     use Atto\Box\App;
-    
+
     class Appname extends App
     {
         //default route(controller)
@@ -122,6 +122,147 @@ You can checkout all Mimes that supported by attobox in ```vendor/attokit/attobo
 
 ### /library
 You can create your own Class here. Require namespace ```Atto\Box```. If this folder is in ```/app/appname```, namespace should be ```Atto\Box\App\appname```.
+
+### /page
+Simple PHP page can export directly. Can request like ```https://your.domain/page/pagename```, if in app folder request like ```https://your.domain/appname/page/pagename```.
+
+### /record
+See [ORM Support](#ORM-Support).
+
+### /route
+Custom route Class file. Public method can be request as controller. 
+
+Special route file ```Web.php``` ```Dbm.php``` ```Src.php``` ```Uac.php```, cannot use these file names.
+
+## ORM Support
+Attobox provide simple ORM support. Only for personal dev usage, this framework recommand using sqlite3 for database actions.
+
+Sqlite file must stored in ```/library/db``` or ```/app/appname/library/db```, for advanced usage, you also need to create some config params in ```[/app/appname]/library/db/config/dbname.json```, the sample of this config json file can be found in ```vendor/attokit/attobox/src/db/config_sample.json```.
+
+Record Class must create in ```[/app/appname]/record/dbname/Tablename.php```, must extends from ```Atto\Box\Record```. RecordSet Class must defined in same php file with Record Class. Record Object is based on table row, RecordSet contains Record Objects, and it can be used as a iterator, each item is a Record Object, result would be an indexed array.
+
+Record Class file like :
+
+    ./record/usr/Usr.php
+
+    namespace Atto\Box\record;
+
+    use Atto\Box\Record;
+    use Atto\Box\RecordSet;
+
+    class Usr extends Record
+    {
+        //generator method for auto increment ids
+        public function __generateUid()
+        {
+            //create uid
+            return $uid;
+        }
+
+        //automatically process before/after insert/update/delete
+        protected function beforeInsert() {return $this;}
+        protected function afterInsert($result) {return $this;}
+        protected function beforeUpdate() {return $this;}
+        protected function afterUpdate($result) {return $this;}
+        
+    }
+
+    class UseSet extends RecordSet
+    {
+        //custom methods
+        public function disabled()
+        {
+            //disabled all usrs in usrset
+            return $this;
+        }
+    }
+
+### CURD
+Use [catfan/Medoo](https://github.com/catfan/medoo) as db driver. 
+
+Common CURD method samples like :
+
+    use Atto\Box\route\Base;
+    use Atto\Box\Db;
+    use Atto\Box\db\Table;
+    use Atto\Box\record\Usr;
+
+    class SomeRoute extends Base
+    {
+        //method
+        public function dbtest()
+        {
+            $usrdb = Db::load("sqlite:usr");
+            $usrtb = $usrdb->table("usr");
+            //or
+            $usrtb = Table::load("usr/usr");
+
+            //get recordset
+            $usrs = $usrtb->whereEnable(1)->whereName("~","jack")->limit(10)->select();
+            //or
+            $usrs = $usrtb->query->apply([
+                "where" => [
+                    "enable" => 1,
+                    "name[~]" => "jack",    //LIKE '%jack%'
+                ],
+                "limit" => 10
+            ])->select();
+
+            //get record
+            $usr = $usrtb->whereUid("123")->single();
+
+            //read record field value as property
+            $uname = $usr->context["name"];
+            //or
+            $uname = $usr->name;
+            $unames = $usrset->name;    //[uname, uname, ...]
+            $extra = $usr->extra;       //json to array
+
+            //iterate recordset
+            for ($i=0;$i<count($usrs);$i++) {
+                //...
+            }
+            //or
+            $rst = [];
+            $usrs->each(function($usr) use (&$rst){
+                //...
+            });
+
+            //export record object to associate array
+            $usrinfo = $usr->export(
+                "show",     //export type: ctx, db, form, show, table
+                true,       //auto calc virtual field, defined in config.json
+                true,       //auto query related table record, defined in config.json
+            );
+
+            //edit record
+            $usr->setField("fieldname", "value");
+            $usr->save();
+            //edit recordset multiple edit records
+            $usrs->setField([
+                "field1" => "val1",
+                "field2" => "val2",
+                "field3" => [
+                    "jsonkey" => "jsonval"
+                ]
+            ], true);   //if contains json field, need be true
+            $usrs->save();
+
+            //insert new record
+            $newusr = $usrtb->new([
+                //init record data
+            ]);
+            $newusr->setField([
+                //record data
+            ]);
+            $newusr->save();
+
+            //delete, will automatically trigger before/afterDelete()
+            $newusr->del();
+        }
+    }
+
+
 
 
     
