@@ -18,7 +18,7 @@ trait arrayIterator
 
     //通过ArrayAccess接口实现直接访问 context 数组
     //实现接口方法
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if (is_null($offset)) {
             $this->context[] = $value;
@@ -27,24 +27,26 @@ trait arrayIterator
         }
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
-        return isset($this->context[$offset]);
+        //return isset($this->context[$offset]);
+        return array_key_exists($offset, $this->context);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->context[$offset]);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
-        return isset($this->context[$offset]) ? $this->context[$offset] : null;
+        //return isset($this->context[$offset]) ? $this->context[$offset] : null;
+        return array_key_exists($offset, $this->context) ? $this->context[$offset] : null;
     }
 
     //通过IteratorAggregate接口实现直接迭代 context 数组
     //实现接口方法
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->context);
     }
@@ -69,7 +71,7 @@ trait arrayIterator
     }
 
     //count
-    public function count()
+    public function count(): int
     {
         return count($this->context);
     }

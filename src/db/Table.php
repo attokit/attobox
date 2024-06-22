@@ -29,6 +29,11 @@ class Table
 
     //call path like: dbn/tbn
     public $xpath = "";
+
+    public $title = "";
+    public $desc = "";
+    public $fields = [];
+    public $field = [];
     
     /**
      * table info config
@@ -40,6 +45,9 @@ class Table
 
     //查询器，build 查询参数
     public $query = null;
+
+    //vfparser 虚拟字段生成器
+    public $vfparser = null;
 
     //虚拟表标记
     public $isVirtual = false;
@@ -713,7 +721,7 @@ class Table
      * @param String $field 要输出的列
      * @return Array
      */
-    public function getColumnOptions($query=[], $field)
+    public function getColumnOptions($query=[], $field="")
     {
         if (empty($query)) $query = [];
         $rs = $this->query->apply($query)->whereEnable(1)->order($this->ik(),)->select();
