@@ -92,8 +92,10 @@ Basicly, each app can be treated as vhost. The usage of these folders are same t
 
     ./app/appname/Appname.php
 
-    namespace Atto\Box\App\appname;
+    namespace Atto\Box\App;
+
     use Atto\Box\App;
+    
     class Appname extends App
     {
         //default route(controller)
@@ -116,7 +118,7 @@ All static resources should be stored here. Such as images, js, css, etc. You ca
 
 The default resource route is ```src```, you can request any resource that stored in assets folder. If you have a image file ```/assets/image/img01.jpg```, then you can request it like ```https://your.domain/src/image/img01.jpg```. You also can adjust the image a little bit by using query string like ```https://your.domain/src/image/img01.jpg?thumb=128,128```.
 
-You can checkout all Mimes that supported by attobox in ```vendor/attokit/attobox/modules/resource```.
+You can checkout all Mimes that supported by attobox in ```vendor/attokit/attobox/src/modules/resource```.
 
 ### /library
 You can create your own Class here. Require namespace ```Atto\Box```. If this folder is in ```/app/appname```, namespace should be ```Atto\Box\App\appname```.
