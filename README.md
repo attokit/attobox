@@ -4,7 +4,7 @@ Simple PHP framework for developing usage. Provide http request &amp; response p
 ## Usage
 Use composer
 
-```
+```shell
 $ cd /your/web/root
 $ composer require attokit/attobox
 ```
@@ -30,47 +30,53 @@ You also need these files in your website root:
 
 ```.htaccess``` for Apache server, cause all http requests will go through ```index.php```, so ...
 
-    ./.htaccess
+```
+# ./.htaccess
 
-    <IfModule mod_rewrite.c>
-        RewriteEngine on
-        RewriteBase /
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteBase /
 
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
-    </IfModule>
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
+</IfModule>
+```
 
 ```index.php``` is the web entrance. In this file, you need to require ```start.php``` of attobox framework.
 
-    ./index.php
+```php
+# ./index.php
 
-    require_once(__DIR__."/vendor/attokit/attobox/src/start.php");
-    Box::start([
-        //all init config goes here
-        "WEB_PROTOCOL"  => "http",
-        "WEB_DOMAIN"    => "localhost",
-        "WEB_IP"        => "127.0.0.1",
-        "WEB_DOMAIN_AJAXALLOWED" => "localhost",
-        //...
-    ]);
+require_once(__DIR__."/vendor/attokit/attobox/src/start.php");
+Box::start([
+    //all init config goes here
+    "WEB_PROTOCOL"  => "http",
+    "WEB_DOMAIN"    => "localhost",
+    "WEB_IP"        => "127.0.0.1",
+    "WEB_DOMAIN_AJAXALLOWED" => "localhost",
+    //...
+]);
+```
 
 ```/route/Web.php``` is required. All your custom controllers must be defined as a public method of Class ```\Atto\Box\route\Web``` in this file. 
 
-    ./route/Web.php
+```php
+# ./route/Web.php
 
-    namespace Atto\Box\route;
+namespace Atto\Box\route;
 
-    class Web extends Base
+class Web extends Base
+{
+    //this will define a controller named index
+    public function index(...$args)
     {
-        //this will define a controller named index
-        public function index(...$args)
-        {
-            return [
-                "hello" => "world"
-            ];
-        }
+        return [
+            "hello" => "world"
+        ];
     }
+}
+```
 
 Now you can request your website like ```https://your.domain/index```.
 
@@ -90,28 +96,30 @@ Basicly, each app can be treated as vhost. The usage of these folders are same t
 
 ```/app/appname/Appname.php``` must extends from ```Atto\Box\App```, each public method of this Class can be requested as controller like ```https://your.domain/appname[/method]```
 
-    ./app/appname/Appname.php
+```php
+# ./app/appname/Appname.php
 
-    namespace Atto\Box\App;
+namespace Atto\Box\App;
 
-    use Atto\Box\App;
+use Atto\Box\App;
 
-    class Appname extends App
+class Appname extends App
+{
+    //default route(controller)
+    //https://your.domain/appname
+    public function defaultRoute(...$args)
     {
-        //default route(controller)
-        //https://your.domain/appname
-        public function defaultRoute(...$args)
-        {
-            return "appname/indexController";
-        }
-
-        //custom route(controller)
-        //https://your.domain/appname/foobar
-        public function foobar(...$args)
-        {
-            return "appname/customController";
-        }
+        return "appname/indexController";
     }
+
+    //custom route(controller)
+    //https://your.domain/appname/foobar
+    public function foobar(...$args)
+    {
+        return "appname/customController";
+    }
+}
+```
 
 ### /assets
 All static resources should be stored here. Such as images, js, css, etc. You can makeup whatever folders you like. 
@@ -143,39 +151,41 @@ Record Class must create in ```[/app/appname]/record/dbname/Tablename.php```, mu
 
 Record Class file like :
 
-    ./record/usr/Usr.php
+```php
+# ./record/usr/Usr.php
 
-    namespace Atto\Box\record;
+namespace Atto\Box\record;
 
-    use Atto\Box\Record;
-    use Atto\Box\RecordSet;
+use Atto\Box\Record;
+use Atto\Box\RecordSet;
 
-    class Usr extends Record
+class Usr extends Record
+{
+    //generator method for auto increment ids
+    public function __generateUid()
     {
-        //generator method for auto increment ids
-        public function __generateUid()
-        {
-            //create uid
-            return $uid;
-        }
-
-        //automatically process before/after insert/update/delete
-        protected function beforeInsert() {return $this;}
-        protected function afterInsert($result) {return $this;}
-        protected function beforeUpdate() {return $this;}
-        protected function afterUpdate($result) {return $this;}
-        
+        //create uid
+        return $uid;
     }
 
-    class UseSet extends RecordSet
+    //automatically process before/after insert/update/delete
+    protected function beforeInsert() {return $this;}
+    protected function afterInsert($result) {return $this;}
+    protected function beforeUpdate() {return $this;}
+    protected function afterUpdate($result) {return $this;}
+    
+}
+
+class UseSet extends RecordSet
+{
+    //custom methods
+    public function disabled()
     {
-        //custom methods
-        public function disabled()
-        {
-            //disabled all usrs in usrset
-            return $this;
-        }
+        //disabled all usrs in usrset
+        return $this;
     }
+}
+```
 
 ### CURD
 Use [catfan/Medoo](https://github.com/catfan/medoo) as db driver. 
