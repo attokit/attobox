@@ -159,12 +159,19 @@ namespace Atto\Box\record;
 use Atto\Box\Record;
 use Atto\Box\RecordSet;
 
+use Atto\Box\Counter;
+
 class Usr extends Record
 {
     //generator method for auto increment ids
+    //this method only triggered before insert
     public function __generateUid()
     {
         //create uid
+        //use Counter in vendor/attokit/attobox/src/modules/Counter
+        $uidx = Counter::auto("usr_usr_uid");
+        $uidx = str_pad($uidx, 4, "0", STR_PAD_LEFT);
+        $uid = "U".$uidx;
         return $uid;
     }
 
@@ -176,12 +183,14 @@ class Usr extends Record
     
 }
 
-class UseSet extends RecordSet
+class UsrSet extends RecordSet
 {
     //custom methods
     public function disabled()
     {
         //disabled all usrs in usrset
+        $this->setField("enable", 0);
+        $this->save();
         return $this;
     }
 }
