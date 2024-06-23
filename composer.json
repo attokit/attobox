@@ -14,7 +14,10 @@
 	],
 	"require": {
 		"php": ">=7",
-		"catfan/medoo": "^2.0"
+		"catfan/medoo": "^2.0",
+        "monolog/monolog": "*",
+        "guzzlehttp/guzzle": "*",
+        "matthiasmullie/minify": "^1.3"
 	},
 	"require-dev": {
         
