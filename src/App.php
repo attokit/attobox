@@ -70,11 +70,15 @@ class App
     }
 
     //访问 page/foo.php
-    public function p($page)
+    public function page($page)
     {
         $pg = $this->path("page/$page".EXT);
         if (file_exists($pg)) Response::page($pg);
         Response::code(404);
+    }
+    public function p($page)
+    {
+        return $this->page($page);
     }
 
     //根据 key 获取 app 下级类全称
