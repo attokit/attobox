@@ -28,8 +28,12 @@ function arr_item($arr = [], $key = "")
     }
     if (!is_array($arr) || empty($arr)) return null;
     $ctx = $arr;
-    $key = trim(str_replace(".","/",trim($key,".")), "/");
-    $karr = explode("/", $key);
+    if (strpos($key, "/")!==false) {
+        $karr = explode("/", trim($key, "/"));
+    } else {
+        $key = trim(str_replace(".","/",trim($key,".")), "/");
+        $karr = explode("/", $key);
+    }
     $rst = null;
     for ($i=0; $i<count($karr); $i++) {
         $ki = $karr[$i];
