@@ -119,7 +119,9 @@ class Web extends Base
         //you can response a code
         Response::code(500);
 
-        //other response usage such as headers, you can check the Response Class in vendor/attokit/attobox/src/Response.php
+        //other response usage such as headers, 
+        //you can check the Response Class in 
+        // vendor/attokit/attobox/src/Response.php
     }
 }
 ```
