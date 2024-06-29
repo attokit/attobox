@@ -68,12 +68,58 @@ namespace Atto\Box\route;
 
 class Web extends Base
 {
-    //this will define a controller named index
+    /**
+     * this will define a controller named index
+     * @param Array $args URI array
+     * if request url == https://your.domain/index/foo/bar
+     * then $args = ["foo", "bar"]
+     */
     public function index(...$args)
     {
-        return [
+        $rtn = [
             "hello" => "world"
         ];
+
+        //default response type is html
+        return "string";    //echo "string"
+        return $rtn;        //echo "{'hello': 'world'}"
+
+        //you can assign response type by using query string
+
+        //...?format=json
+        return "string";    //{error:false, errors:[], data:'string'}
+        return $rtn;        //{error:false, errors:[], data: {hello: 'world'}}
+        //or
+        Response::json($rtn);
+
+        //...?format=dump
+        return $rtn;        //var_dump($rtn)
+        //or
+        Response::dump($rtn);
+
+        //...?format=str
+        return $rtn;        //echo "{hello:'world'}"
+        //or
+        Response::str($rtn);
+
+        /**
+         * !!! Use return method
+         * !!! Response::[method] is NOT Recommand
+         */
+
+        //you can response a PHP page like using view
+        //page file recommand in /page, but you can put it anywhere
+        $page = path_find("page/someView.php");
+        Response::page($page, [
+            //you can access these params in view page
+            "rtn" => $rtn,
+            //...
+        ]);
+
+        //you can response a code
+        Response::code(500);
+
+        //other response usage such as headers, you can check the Response Class in vendor/attokit/attobox/src/Response.php
     }
 }
 ```

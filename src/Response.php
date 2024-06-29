@@ -469,8 +469,8 @@ class Response
         if (Request::$current->debug) return "dump";
         $fs = arr(strtolower(EXPORT_FORMATS));
         $format = empty($format) ? Request::get("format", EXPORT_FORMAT) : $format;
-        $format = strtolower($format);
         if (is_notempty_str($format)) {
+            $format = strtolower($format);
             if (in_array($format, $fs) && !is_null(self::getExporterClass($format))) {
                 return $format;
             }

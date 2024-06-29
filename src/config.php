@@ -40,7 +40,7 @@ return [
 
     //Response config
     "EXPORT_FORMATS"    => "html,page,json,xml,str,dump",
-    "EXPORT_FORMAT"     => "json",      //默认输出形式，json
+    "EXPORT_FORMAT"     => "html",      //默认输出形式，html
     "EXPORT_LANG"       => "zh-CN",     //输出语言
     "RESPONSE_PSR7"     => false,		//是否以Psr-7标准返回响应
 
