@@ -115,7 +115,7 @@ class Dsn
             if (strpos($query, ".db")!==false) $query = str_replace(".db","",$query);
             $dbf = path_find($query.".db",["inDir"=>DB_DIRS]);
             //var_dump($dbf);
-            if (!empty($dbf) && is_file($dbf)) {
+            if (is_file($dbf)) {
                 $dbf = path_fix($dbf);
                 $coptStructure = $this->coptStructure["sqlite"];
                 $this->connectOptions = arr_extend($coptStructure, [
@@ -126,8 +126,7 @@ class Dsn
                 $this->dbkey = md5($dbf);
                 $pi = pathinfo($dbf);
                 $this->dbname = $pi["filename"];
-                //$conf = str_replace("library/db/", "library/db/config/", $dbf);
-                $conf = str_replace("library".DS."db".DS."", "library".DS."db".DS."config".DS."", $dbf);
+                $conf = str_replace("library/db/", "library/db/config/", $dbf);
                 $conf = str_replace(".db", ".json", $conf);
                 $cpi = pathinfo($conf);
                 $this->config = arr_extend($this->config, [
@@ -230,7 +229,7 @@ class Dsn
     {
         if (strpos($query, ".json")!==false) $query = str_replace(".json","",$query);
         $cf = path_find($query);
-        if (empty($cf) || !is_file($cf)) {
+        if (!is_file($cf)) {
             $qarr = explode("/", $query);
             $dbn = array_slice($qarr, -1)[0];
             if (empty($qarr)) {
@@ -240,7 +239,7 @@ class Dsn
             }
             $cf = path_find($cf);
         }
-        if (!empty($cf) && is_file($cf)) {
+        if (is_file($cf)) {
             $conf = path_fix($cf);
             $coptStructure = $this->coptStructure["vtable"];
             $this->connectOptions = arr_extend($coptStructure, [

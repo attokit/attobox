@@ -281,6 +281,17 @@ class Stream
         header("Accept-Length: " . filesize($this->path)); 
         //用来告诉浏览器，文件是可以当做附件被下载，下载后的文件名称为$file_name该变量的值。
         header("Content-Disposition: attachment; filename=" . basename($this->path));   
+
+        /**
+         * 针对特殊格式文件
+         */
+        //针对 符号字体 跨域问题
+        if (in_array($this->ext, ["ttf","woff","woff2"])) {
+            //增加 header 允许跨域访问
+            header("Access-Control-Allow-Origin: *");
+            header("Access-Control-Allow-Headers: *");
+            header("Access-Control-Allow-Methods: GET,POST,OPTIONS");
+        }
     
         //读取文件内容并直接输出到浏览器   
         echo fread($file, filesize($this->path));   

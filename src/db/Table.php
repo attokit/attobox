@@ -29,11 +29,6 @@ class Table
 
     //call path like: dbn/tbn
     public $xpath = "";
-
-    public $title = "";
-    public $desc = "";
-    public $fields = [];
-    public $field = [];
     
     /**
      * table info config
@@ -45,9 +40,6 @@ class Table
 
     //查询器，build 查询参数
     public $query = null;
-
-    //vfparser 虚拟字段生成器
-    public $vfparser = null;
 
     //虚拟表标记
     public $isVirtual = false;
@@ -292,6 +284,22 @@ class Table
                         $where["enable"] = 1;
                         return $this->reset()->where($where)->has();
                         break;
+                }
+            } else {
+                //$table->apiFoobar 通过 table 实例调用 record 实例的 api 方法
+                if (str_begin($method, "api")) {
+                    //var_dump($method);
+                    $recordCls = Record::getRecordCls($this->xpath);
+                    if (class_exists($recordCls)) {
+                        //var_dump($recordCls);
+                        //检查 record 类是否包含 方法 $method
+                        if (method_exists($recordCls, $method)) {
+                            //如果 record 类包含方法 $method 直接调用此方法
+                            $rsobj = $this->new();
+                            //var_dump($rsobj);
+                            return $rsobj->$method(...$args);
+                        }
+                    }
                 }
             }
         }
@@ -721,7 +729,7 @@ class Table
      * @param String $field 要输出的列
      * @return Array
      */
-    public function getColumnOptions($query=[], $field="")
+    public function getColumnOptions($query=[], $field)
     {
         if (empty($query)) $query = [];
         $rs = $this->query->apply($query)->whereEnable(1)->order($this->ik(),)->select();

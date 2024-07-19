@@ -301,9 +301,13 @@ class Record implements \ArrayAccess, \IteratorAggregate
                     if ($jtp=="associate") {
                         $this->context[$field] = arr_extend($od, $data);
                     } else {
+                        //indexed 数组，直接用新值覆盖旧值
+                        $this->context[$field] = $data;
+                        /*
                         $this->context[$field] = array_merge($od, $data);
                         //去重
                         $this->context[$field] = array_merge(array_flip(array_flip($this->context[$field])));
+                        */
                     }
                 } else {
                     $this->context[$field] = $data;
@@ -640,7 +644,9 @@ class Record implements \ArrayAccess, \IteratorAggregate
         $rtn = j2a($rtn);
         $sts = [];
         for ($i=0;$i<count($rtn);$i++) {
-            $sts[] = $rtn[$i]["value"];
+            if ($rtn[$i]["value"]!="") {
+                $sts[] = $rtn[$i]["value"];
+            }
         }
         return $sts;
     }
@@ -650,11 +656,11 @@ class Record implements \ArrayAccess, \IteratorAggregate
      * @param String $status 状态值
      * @return Int idx
      */
-    public function statusIdx($status = null)
+    public function statusIdx($status = null, $statusList = [])
     {
         $status = is_null($status) ? $this->context["status"] : $status;
         if (!is_notempty_str($status)) return -1;
-        $sl = $this->statusList();
+        $sl = empty($statusList) ? $this->statusList() : $statusList;
         if (empty($sl)) return -1;
         $idx = -1;
         for ($i=0;$i<count($sl);$i++) {
@@ -701,7 +707,7 @@ class Record implements \ArrayAccess, \IteratorAggregate
         $sl = $this->statusList();
         $ist = $this->context["status"];
         if (in_array($logic, [">","<",">=","<="])) {
-            $cidx = is_numeric($status[0]) ? $status[0] : $this->statusIdx($status[0]);
+            $cidx = is_numeric($status[0]) ? $status[0] : $this->statusIdx($status[0], $sl);
             switch ($logic) {
                 case ">": return $idx>$cidx; break;
                 case "<": return $idx<$cidx; break;

@@ -721,6 +721,7 @@ class Dbm extends Base
                 trigger_error("db/curd/retrieve/api::接口方法不存在,".$this->table->name.",".$qapi, E_USER_ERROR);
             }
         } else {
+            //var_dump($query);
             $rs = $this->table->R($query);
             $rsset = $rs["rs"];
             if ($rsset instanceof RecordSet) {
@@ -861,7 +862,25 @@ class Dbm extends Base
     {
         $params = Request::input("json");
         if (empty($params)) trigger_error("custom::缺少计算条件，无法计算此虚拟表", E_USER_ERROR);
-        $rs = $this->table->Calc($params);
+        if (!empty($args)) {
+            $action = $args[0];
+        } else {
+            $action = "calc";
+        }
+
+        $rs = [];
+        switch ($action) {
+            case "calc" :
+            case "save" :
+                $rs = $this->table->Calc($params);
+                if ($action=="save") {
+                    $this->table->saveVtRs($rs);
+                }
+                break;
+            case "read" :
+                $rs = $this->table->getVtRs();
+                break;
+        }
         if (is_indexed($rs)) {
             $rtn = [
                 "rs" => $rs
@@ -870,10 +889,6 @@ class Dbm extends Base
             $rtn = $rs;
         }
         $rtn["query"] = $params;
-        /*$rtn = [
-            "query" => $params,
-            "rs" => $this->table->Calc($params)
-        ];*/
         Response::json($rtn);
         exit;
     }

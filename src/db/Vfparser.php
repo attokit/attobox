@@ -156,7 +156,7 @@ class Vfparser
         $unum = $ctx[$num];
         //如果当前记录包含了规格信息，则使用当前记录的规格
         $cupkg = $ctx["extra"]["currentPackage"] ?? null;
-        $nw = is_notempty_arr($cupkg) ? $cupkg["netwt"] : $ctx[$pre."_netwt"];
+        $nw = is_notempty_arr($cupkg) ? $cupkg["netwt"] : ($ctx[$pre."_netwt"] ?? 1);
         if ($useGnum) {
             //如果输入的 $num 是克重，则计算 小包装数
             $unum = floor($unum/$nw);
@@ -185,6 +185,71 @@ class Vfparser
             return implode("+",$mus);
         }
         //(!isset(_c_['skuid_maxunit']) || _c_['skuid_maxunit']=='无')?_c_['qty']._c_['skuid_unit']:(_c_['qty']<_c_['skuid_minnum']?_c_['qty']._c_['skuid_unit']:(floor(_c_['qty']/_c_['skuid_minnum'])._c_['skuid_maxunit'].(_c_['qty']%_c_['skuid_minnum']<=0?'':'+'.(_c_['qty']%_c_['skuid_minnum'])._c_['skuid_unit'])))
+    }
+
+    //将小包装数转换为 克重/Kg
+    public function parseUnitgnum($unum="num", $pre="skuid")
+    {
+        $ctx = $this->context;
+        $unum = $ctx[$unum];
+        $nw = $ctx[$pre."_netwt"] ?? 1;
+        $wt = $nw*$unum;
+        if ($wt<1000) return $wt."克";
+        return round($wt/1000,2)."Kg";
+    }
+
+    //获取成品的配方中指定的满批重量
+    public function parseFullbatch($rppre="rpid")
+    {
+        $ctx = $this->context;
+        $extra = $ctx[$rppre."_extra"] ?? null;
+        if (is_notempty_str($extra) && is_json($extra)) {
+            $extra = j2a($extra);
+        } else {
+            $extra = null;
+        }
+        if (is_notempty_arr($extra) && is_associate($extra)) {
+            $fb = $extra["满批"] ?? null;
+            if (is_null($fb)) $fb = $extra["满批重量"] ?? null;
+        } else {
+            $fb = null;
+        }
+        if (is_null($fb) || !is_numeric($fb)) {
+            //未指定满批
+            return 0;
+        } else {
+            return $fb*1000;
+        }
+
+    }
+
+    //将小包装数转换为 Kg，并判断 == 几个满批
+    public function parseFullbatchnum($unum="num", $pre="pid")
+    {
+        $ctx = $this->context;
+        $unum = $ctx[$unum];
+        $nw = $ctx[$pre."_netwt"] ?? 1;
+        $wt = $nw*$unum;
+        $extra = $ctx["extra"];
+        if (is_string($extra) && is_json($extra)) {
+            $extra = j2a($extra);
+        }
+        if (!is_notempty_arr($extra) || !is_associate($extra)) {
+            $extra = [];
+        }
+        $fb = $extra["满批"] ?? null;
+        if (is_numeric($fb)) {
+            $fbnum = $fb*1000;
+            $dt = 10000;    //允许误差 5Kg，即 相差 10Kg 视为相等
+            if (abs($wt-$fbnum)<=$dt) {
+                $fbs = 1;
+            } else {
+                $fbs = round($wt/$fbnum, 2);
+            }
+            return $fbs." 满批 (".$fb."Kg/批)";
+        } else {
+            return "未指定满批";
+        }
     }
 
     //输出 单价，散装货品显示 ￥20.00/Kg 有包装的货品显示 ￥10/袋，￥100/箱
@@ -235,8 +300,9 @@ class Vfparser
     public function parseWarranty($wrt)
     {
         if (!is_numeric($wrt)) return "";
-        $y = $wrt/360;
-        if (is_int($y)) return $y."年";
+        //不显示 n年
+        //$y = $wrt/360;
+        //if (is_int($y)) return $y."年";
         $m = $wrt/30;
         if (is_int($m)) return $m."个月";
         return $wrt."天";
@@ -245,7 +311,17 @@ class Vfparser
     // 10000 -> 10Kg  100 -> 100g
     public function parseNetwt($wt, $dig=2)
     {
-        $wt = $wt*1;
+        if (is_string($wt) && !is_numeric($wt)) {
+            $ctx = $this->context;
+            $wt = $ctx[$wt];
+            if (!is_numeric($wt)) {
+                $wt = 0;
+            } else {
+                $wt = $wt*1;
+            }
+        } else {
+            $wt = $wt*1;
+        }
         if ($wt<1000) return $wt."克";
         $kg = round($wt/1000, $dig);
         return $kg."Kg";
@@ -273,12 +349,46 @@ class Vfparser
         return "";
     }
 
+    //获取 json 格式内容
+    public function parseJson($fdn, $key = null)
+    {
+        $ctx = $this->context;
+        $json = $ctx["json"];
+        $json = is_string($json) ? j2a($json) : (is_associate($json) ? $json : []);
+        if (empty($key) || !is_notempty_str($key)) return $json;
+        return $json[$key] ?? null;
+    }
+
     //补零
     public function parsePadzero($n, $dig=2)
     {
         if (!is_numeric($n)) return $n;
         $dig = (!is_int($dig) || $dig<2) ? 2 : $dig;
         return str_pad($n, $dig, "0", STR_PAD_LEFT);
+    }
+
+    //查询关联表内容，参数为本条记录中的 关联表字段名
+    /**
+     * 查询关联表内容
+     * @param String $rlid 本条记录中的关联表字段名，skuid / pid / ...
+     * @param Array $rlfdn 要查询的关联表记录字段名，不指定则返回整个关联表数据
+     */
+    public function parseRelated($rlid = "skuid", ...$rlfdn)
+    {
+        $ctx = $this->context;
+        $rldata = $ctx[$rlid."_related_rs"] ?? null;
+        if (empty($rldata)) return null;
+        if (empty($rlfdn)) {
+            return $rldata;
+        } else if (count($rlfdn)==1) {
+            return $rldata[$rlfdn[0]] ?? null;
+        } else {
+            $rst = [];
+            for ($i=0;$i<count($rlfdn);$i++) {
+                $rst[] = $rldata[$rlfdn[$i]] ?? null;
+            }
+            return $rst;
+        }
     }
 
     //  32袋  -->  3箱+2袋，将库存袋数转化为箱数

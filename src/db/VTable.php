@@ -38,7 +38,7 @@ class VTable /*extends Table*/
     //public $query = null;
 
     //虚拟表标记
-    public $isVirtual = false;
+    public $isVirtual = true;
 
     /**
      * construct
@@ -309,6 +309,65 @@ class VTable /*extends Table*/
 
 
 
+    /**
+     * 虚拟表数据 持久化
+     * 保存到 [dbpath]/vtable/[dbname]/[tablename].json
+     */
+    //获取虚拟数据保存的 json 文件的 物理路径，不存在则创建
+    protected function getSaveJsonFile() 
+    {
+        $cfg = $this->db->dsn->config;
+        $vtdir = str_replace("db/config/", "db/", $cfg["path"]);
+        $vtdir = path_find($vtdir, ["checkDir"=>true]);
+        if (!is_dir($vtdir)) {
+            //创建 [dbpath]/vtable 路径
+
+        }
+        $vtdir = path_fix($vtdir);
+        $dbn = $this->db->name;
+        $tbn = $this->name;
+        $vddir = $vtdir.DS.$dbn;
+        if (!is_dir($vddir)) {
+            //创建 虚拟表所在数据库 的 路径
+            mkdir($vddir, 0777);
+        }
+        $sjf = $vddir.DS.$tbn.".json";
+        if (!file_exists($sjf)) {
+            $sjfh = fopen($sjf, 'w+');
+            fclose($sjfh);
+        }
+        return $sjf;
+    }
+    //读取 虚拟表数据
+    protected function getSaveJsonData()
+    {
+        $sjf = $this->getSaveJsonFile();
+        $vd = file_get_contents($sjf);
+        if (empty($vd)) {
+            $vd = [];
+        } else {
+            $vd = j2a($vd);
+        }
+        return $vd;
+    }
+    //保存 虚拟表数据
+    public function saveVtRs($rs)
+    {
+        $sjf = $this->getSaveJsonFile();
+        if (is_array($rs) && is_indexed($rs)) {
+            $vd = a2j($rs);
+        } else {
+            $vd = "[]";
+        }
+        file_put_contents($sjf, $vd);
+        return $this;
+    }
+    //读取 虚拟表数据
+    public function getVtRs()
+    {
+        $vd = $this->getSaveJsonData();
+        return $vd;
+    }
 
 
 
