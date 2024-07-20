@@ -28,8 +28,20 @@ function arr_item($arr = [], $key = "")
     }
     if (!is_array($arr) || empty($arr)) return null;
     $ctx = $arr;
-    $key = trim(str_replace(".","/",trim($key,".")), "/");
-    $karr = explode("/", $key);
+    
+    //当 key 中既包含 / 也包含 . 则以 / 作为分隔符
+    if (strpos($key, ".")!==false && strpos($key, "/")!==false) {
+        $karr = explode("/", $key);
+    } else {
+        if (strpos($key, ".")!==false) {
+            $karr = explode('.', $key);
+        } else if (strpos($key, "/")!==false) {
+            $karr = explode("/", $key);
+        } else {
+            $karr = [$key];
+        }
+    }
+    
     $rst = null;
     for ($i=0; $i<count($karr); $i++) {
         $ki = $karr[$i];
