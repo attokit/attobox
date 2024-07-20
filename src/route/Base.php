@@ -241,6 +241,31 @@ class Base extends Route
         ];
     }
 
+    /**
+     * !!! 此方法有前端使用，不可修改
+     */
+    public function md5(...$args)
+    {
+        $mds = [];
+        if (!empty($args)) {
+            for ($i=0;$i<count($args);$i++) {
+                $mds[] = md5($args[$i]);
+            }
+        } else {
+            $pd = Request::input("json");
+            $pwds = $pd["pwds"] ?? [];
+            if (!empty($pwds)) {
+                for ($i=0;$i<count($pwds);$i++) {
+                    $mds[] = md5($pwds[$i]);
+                }
+            }
+        }
+        //Response::dump($mds);
+        Response::json([
+            "md5" => $mds
+        ]);
+    }
+
     /*public function imgview(...$args)
     {
         Response::page("/data/wwwroot/img.cgy.design/page/viewimg.php", [

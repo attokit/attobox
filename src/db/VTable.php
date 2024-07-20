@@ -372,6 +372,76 @@ class VTable /*extends Table*/
 
 
     /**
+     * 将虚拟表计算结果，输出为 csv
+     */
+    public function exportCsv($rs = [])
+    {
+        if (!is_array($rs) || !is_indexed($rs)) return "";
+        $cfg = $this->config;
+        $fds = $cfg["fields"];
+        $vfds = $cfg["virtualFields"];
+        if (!empty($vfds)) $fds = array_merge($fds, $vfds);
+        $fdc = $cfg["field"];
+        $csv = [];
+        //生成表头行
+        $fdtit = array_map(function($fdi) use ($fdc) {
+            return $fdc[$fdi]["title"];
+        }, $fds);
+        $csv[] = implode(",",$fdtit);
+
+        //循环输出各行记录
+        for ($i=0;$i<count($rs);$i++) {
+            $ric = $rs[$i];
+            $csvi = [];
+            for ($j=0;$j<count($fds);$j++) {
+                $fdi = $fds[$j];
+                $fdci = $fdc[$fdi];
+                $fdvi = $ric[$fdi];
+                //处理特殊字段类型
+                if ($fdci["isTime"]==true && is_numeric($fdvi)) {
+                    //时间日期
+                    $ft = $fdci["time"];
+                    if ($ft["type"]=="date") {
+                        $csvi[] = date("Y-m-d", $fdvi);
+                    } else if ($ft["type"]=="datetime") {
+                        $csvi[] = date("Y-m-d H:i:s", $fdvi);
+                    }
+                } else if ($fdci["isSwitch"]==true && is_numeric($fdvi)) {
+                    //布尔类型
+                    $csvi[] = $fdvi>0 ? "是" : "否";
+                } else if ($fdci["isJson"]) {
+                    //json 类型
+                    if ($fdvi=="{}" || $fdvi=="[]") {
+                        $csvi[] = "";
+                    } else if (is_string($fdvi)) {
+                        $csvi[] = str_replace(",",";",$fdvi);
+                    } else {
+                        $fdvi = a2j($fdvi);
+                        $csvi[] = str_replace(",",";",$fdvi);
+                    }
+                } else {
+                    //去除字段值中的 "," 这会影响 csv 解析
+                    if (is_string($fdvi)) {
+                        $fdvi = str_replace(",",";",$fdvi);
+                    }
+                    $csvi[] = $fdvi;
+                }
+            }
+            $csv[] = implode(",", $csvi);
+        }
+
+        //连接各行数据
+        $csv = implode("\r\n", $csv);
+
+        //增加 BOM 头，避免 excel 打开乱码
+        $csv = "\xEF\xBB\xBF".$csv;
+
+        return $csv;
+    }
+
+
+
+    /**
      * fields methods
      */
 

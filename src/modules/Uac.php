@@ -418,7 +418,42 @@ class Uac
                 }
             }
         } else if ($action=="pwd") {    //验证用户名密码
-
+            //检查用户提交的 用户名 和 密码
+            $query = Request::input('json');
+            $err = [
+                "isLogin" => false,
+                "msg" => ""
+            ];
+            if (empty($this->usrTable)) {
+                $err["msg"] = "用户数据表无法访问，请确定是否连接到合法的登录接口";
+                Response::json($err);
+                exit;
+            }
+            $uname = $query["name"] ?? null;
+            $pwd = $query["pwd"] ?? null;
+            if (!is_notempty_str($uname) || !is_notempty_str($pwd)) {
+                $err["msg"] = "用户名和密码不能为空";
+                Response::json($err);
+                exit;
+            }
+            $upwd = md5($pwd);
+            $usr = $this->usrTable->whereName($uname)->wherePwd($upwd)->whereEnable(1)->single();
+            //检查是否登录成功
+            if ($usr instanceof Record) {
+                //登录成功
+                $this->initUsr($usr);
+                //创建 jwt Token 
+                $tk = Jwt::generate([
+                    "uid" => $this->usr->_id
+                ]);
+                if (isset($tk["token"])) {
+                    $this->token = $tk["token"];
+                }
+            } else {
+                $err["msg"] = "用户名或密码不正确";
+                Response::json($err);
+                exit;
+            }
         } else if ($action=="mp") {     //小程序 qypms 业务登录
             $usr = Request::input('json');
             $uid = $usr["uid"] ?? null;

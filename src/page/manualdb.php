@@ -354,9 +354,16 @@ body {
     </div>
 </div>
 
-<script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.6/axios.min.js"></script>
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.6/axios.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.9/vue.common.dev.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.14/index.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.14/index.min.js"></script>-->
+
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.6/axios.min.js"></script>-->
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.9/vue.common.dev.min.js"></script>-->
+<!--<script src="//cdn.bootcdn.net/ajax/libs/element-ui/2.15.14/index.min.js"></script>-->
+<script src="//lib.cgy.design/axios/@/axios.min.js"></script>
+<script src="//lib.cgy.design/vue/@/dev.min.js"></script>
+<script src="//lib.cgy.design/vue/@/ui/element-ui/2.15.14/element-ui.min.js" charset="utf-8"></script>
 
 <!--<script src="https://cdn.bootcdn.net/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>-->
 
@@ -365,15 +372,15 @@ body {
     import cmJson from '//lib.cgy.design/codemirror/vue/cm-json';
     import attovue from '//cgy.design/src/atto/vue/plugin/attovue.js';
 
-    import hljs from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/core.min.js';
-    import hlJavascript from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/languages/javascript.min.js';
-    import hlJson from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/languages/json.min.js';
+    //import hljs from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/core.min.js';
+    //import hlJavascript from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/languages/javascript.min.js';
+    //import hlJson from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/languages/json.min.js';
 
     //console.log(CodeMirror);
 
     //console.log(hljs);
-    hljs.registerLanguage('javascript', hlJavascript);
-    hljs.registerLanguage('json', hlJson);
+    //hljs.registerLanguage('javascript', hlJavascript);
+    //hljs.registerLanguage('json', hlJson);
 
     //应用 codemirror 插件
     //Vue.use(codemirror, {
