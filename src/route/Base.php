@@ -122,7 +122,8 @@ class Base extends Route
         $package = !is_notempty_str($package) ? "" : "/$package";
         $cpath = "vue/components".$package;
         $comps = [];
-        $dir = path_find("box/assets/$cpath", ["inDir"=>"", "checkDir"=>true]);
+        //$dir = path_find("box/assets/$cpath", ["inDir"=>"", "checkDir"=>true]);
+        $dir = path_find("pre/assets/box/$cpath", ["inDir"=>"", "checkDir"=>true]);
         if (is_dir($dir)) {
             $dh = opendir($dir);
             while (($f = readdir($dh))!==false) {
@@ -152,7 +153,8 @@ class Base extends Route
         $package = !is_notempty_str($package) ? "" : "/$package";
         $mpath = "vue/mixins".$package;
         $mixins = [];
-        $dir = path_find("box/assets/$mpath", ["inDir"=>"", "checkDir"=>true]);
+        //$dir = path_find("box/assets/$mpath", ["inDir"=>"", "checkDir"=>true]);
+        $dir = path_find("pre/assets/atto/$mpath", ["inDir"=>"", "checkDir"=>true]);
         if (is_dir($dir)) {
             $dh = opendir($dir);
             while (($f = readdir($dh))!==false) {

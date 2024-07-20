@@ -41,8 +41,9 @@ class Src extends Base
         if ($args[0]=="atto" && count($args)>1) {
             //调用 Attobox 通用系统资源
             //资源路径 [BOX_PATH]/assets
-            array_shift($args); //atto
-            $srcpath = "box/assets/".implode("/", $args);
+            //array_shift($args); //atto
+            //$srcpath = "box/assets/".implode("/", $args);
+            $srcpath = "pre/assets/".implode("/", $args);
             $resource = Resource::create($srcpath);
         } else {
             //正常调用资源
