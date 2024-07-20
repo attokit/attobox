@@ -31,7 +31,6 @@ class Request
     //request参数
     public $headers = [];
     public $method = "";
-    public $time = 0;
     public $https = false;
     public $isAjax = false;
     public $referer = "";

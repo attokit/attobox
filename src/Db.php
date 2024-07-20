@@ -42,15 +42,6 @@ class Db
     ];
 
     /**
-     * Db params
-     */
-    public $key = "";   //db key
-    public $name = "";  //db name
-    public $xpath = "";
-    public $title = "";
-    public $desc = "";
-
-    /**
      * medoo instance
      */
     public $_medoo = null;
@@ -64,7 +55,6 @@ class Db
      * loaded table instance
      */
     public $tables = [];
-    public $table = [];
 
     //虚拟标记，true 表示此数据库中的表均为 虚拟表
     public $isVirtual = false;
