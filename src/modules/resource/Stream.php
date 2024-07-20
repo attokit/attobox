@@ -283,7 +283,7 @@ class Stream
         header("Content-Disposition: attachment; filename=" . basename($this->path)); 
         
         //特殊格式文件
-        if (in_array(strtolower($this->ext, ["ttf","woff","woff2"]))) {
+        if (in_array(strtolower($this->ext), ["ttf","woff","woff2"])) {
             //针对 图标字体 文件，增加 header 解决跨域问题
             header("Access-Control-Allow-Origin: *");
             header("Access-Control-Allow-Headers: *");
