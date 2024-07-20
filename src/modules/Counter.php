@@ -27,7 +27,12 @@ class Counter
      */
     public function __construct($key)
     {
-        $file = $this->cache."/".$key.".json";
+        if (defined("CACHE_PATH") && CACHE_PATH!="") {
+            $file = "cache/".$key.".json";
+        } else {
+            $file = $this->cache."/".$key.".json";
+        }
+        
         $file = path_find($file);
         if (empty($file)) {     //如果不存在，则创建
             $dir = path_find($this->cache, ["inDir"=>"", "checkDir"=>true]);

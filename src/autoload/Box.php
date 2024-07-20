@@ -106,12 +106,13 @@ class Box
             "SRC_PATH"      => $root . DS . "assets",
             "ASSETS_PATH"   => $root . DS . "assets",
             "LIB_PATH"      => $root . DS . "library",
-            "DB_PATH"       => $root . DS . "library/db",
+            "DB_PATH"       => $root . DS . "library" . DS ."db",
             //"MODEL_PATH"    => $root . DS . "model",
             "RECORD_PATH"   => $root . DS . "record",
             "OPR_PATH"      => $root . DS . "operater",
             "PAGE_PATH"     => $root . DS . "page",
             "PLUGIN_PATH"   => $root . DS . "plugin",
+            "CACHE_PATH"    => $root . DS . "cache",
         ];
         self::conf($path);
     }
