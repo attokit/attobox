@@ -662,9 +662,6 @@ class Dbm extends Base
         }
         $exportVirtual = $export["virtual"] ?? true;
         $exportRelated = $export["related"] ?? false;
-        if ($exportRelated) {
-            $exportTo = "show";
-        }
 
         //debug
         if ($this->debug) {
@@ -696,6 +693,7 @@ class Dbm extends Base
             ]);
         } else if (!is_null($api)) {
             //通过调用 api 执行查询
+            if ($exportRelated) $exportTo = "show";
             $qm = "api".ucfirst($qapi);
             $tb = $this->table->new();
             if (method_exists($tb, $qm)) {
@@ -725,11 +723,12 @@ class Dbm extends Base
             $rs = $this->table->R($query);
             $rsset = $rs["rs"];
             if ($rsset instanceof RecordSet) {
-                //$rsctx = $rsset->export("db", true);
-                /*if ($this->table->name=="mts") {
-                    Response::json($rsset->export($exportTo, true, false));
-                }*/
-                $rsctx = $rsset->export($exportTo, $exportVirtual, $exportRelated);
+                if ($exportTo=="csv") {
+                    $rsctx = $rsset->exportCsv();
+                } else {
+                    if ($exportRelated) $exportTo = "show";
+                    $rsctx = $rsset->export($exportTo, $exportVirtual, $exportRelated);
+                }
             } else {
                 $rsctx = $rsset;
             }
@@ -861,13 +860,17 @@ class Dbm extends Base
     protected function apiVtCalc(...$args)
     {
         $params = Request::input("json");
-        if (empty($params)) trigger_error("custom::缺少计算条件，无法计算此虚拟表", E_USER_ERROR);
+        if (empty($params)) {
+            //trigger_error("custom::缺少计算条件，无法计算此虚拟表", E_USER_ERROR);
+            $params = null;
+        }
         if (!empty($args)) {
             $action = $args[0];
         } else {
             $action = "calc";
         }
 
+        $rtn = [];
         $rs = [];
         switch ($action) {
             case "calc" :
@@ -880,11 +883,18 @@ class Dbm extends Base
             case "read" :
                 $rs = $this->table->getVtRs();
                 break;
+            case "csv" :
+                if (empty($params) || !isset($params["rs"])) {
+                    $rs = $this->table->Calc($params);
+                } else {
+                    $rs = $params["rs"];
+                }
+                //将计算结果输出为 csv
+                $rs = $this->table->exportCsv($rs);
+                break;
         }
-        if (is_indexed($rs)) {
-            $rtn = [
-                "rs" => $rs
-            ];
+        if (is_indexed($rs) || $action=="csv") {
+            $rtn["rs"] = $rs;
         } else {
             $rtn = $rs;
         }

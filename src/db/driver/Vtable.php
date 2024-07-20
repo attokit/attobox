@@ -231,6 +231,8 @@ class Vtable extends Db
             //$tb->query = new Query($tb);
             //创建 table-setting-lang 数据库设置语言解析器
             //$tb->vfparser = new Vfparser($tb);
+            //虚拟表自动执行 initConfig
+            $tb->initConfig();
             $this->table[$tbn] = $tb;
         }
         return $this->table[$tbn];
