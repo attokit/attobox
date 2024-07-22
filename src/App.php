@@ -61,12 +61,24 @@ class App
         return APP_PATH.DS.strtolower($this->name).DS.$path;
     }
 
+    //读取 app/[appname]/library/config.php 中指定的预设参数
+    //这些参数可以通过 常量 APP_[APPNAME]_[KEY] 访问
+    //这些预设参数应在 [attobox]/modules/uac/config.php
+    public function conf()
+    {
+        $conf = "";
+    }
+
     //默认路由方法
     public function defaultRoute(...$args)
     {
-        //var_dump($this instanceof \Atto\Box\app\Pms);
-        //var_dump("\\Atto\Box\\App::defaultRoute()");
-        //var_dump(func_get_args());
+        /**
+         * App 类默认入口
+         * 子类必须实现各自的方法
+         */
+
+        Response::code(404);
+
     }
 
     //访问 page/foo.php
@@ -93,8 +105,12 @@ class App
     public function hijack($args)
     {
         $route = Router::seek($args);
-        if (($route[0]=="\\Atto\\Box\\route\\Web" || $route[0]=="\\Atto\\Box\\route\\Base") && $route[1]=="defaultMethod") {  //未查找到有效 route
-            //按 空路由 执行
+        $emptyRoutes = [
+            "\\Atto\\Box\\route\\Base",
+            "\\Atto\\Box\\route\\Web"
+        ];
+        if (in_array($route[0], $emptyRoutes) && $route[1]=="defaultMethod") {
+            //未查找到有效 route
             Response::code(404);
         } else {
             //var_dump($route);
@@ -150,26 +166,40 @@ class App
      * 显示登录界面
      * 通过 Uac->jumpToUsrLogin() 方法调用
      * 当全局启用 UAC_CTRL 时，需要用户登录的时候 检查 Uac::grant(opr) 方法，未登录则会跳转到此路由
+     * 需要在 [webroot]/page  or  app/[appname]/page  创建 login.php 登录页面
+     * 如果在上述位置未找到 login.php 则会显示 vendor/attokit/attobox/page/login.php 此页面通常会出错
      * @param Array $extra 在登录界面显示的额外信息
      * @return void
      */
-    /*public function loginPage($extra=[])
+    public function loginPage($extra=[])
     {
+        $app = strtolower($this->name);
         //指定 Uac 用户数据库信息，并写入 session
-        //默认的用户数据库保存在各 app 的 library/db/ 路径下的 usr.db 
-        session_set("uac_db", "app/".strtolower($this->name)."/usr");
+        //用户数据库通常在 app/[appname]/library/config.php 中指定
+        //当出现非 app 路由访问的情况时，通过 Request::current()->appname 无法获取 appname
+        //因此指定默认的 用户数据库 为 app/[appname]/usr
+        $uacc = Uac::getAppUacConfig();
+        $uac_db = $uacc["uac_db"] ?? "app/".$app."/usr";
+        session_set("uac_db", $uac_db);
         Uac::$current->initUsrDb();
-        //下发登录界面
-        //默认登陆界面在各 app 的 page/login.php 
-        $lgf = $this->path("page/login.php");
-        //如果登录界面不存在，尝试 网站根目录的 page/login.php
-        if (!file_exists($lgf)) $lgf = path_find("page/login.php");
-        if (is_null($lgf)) Response::code(404);
+        //var_dump(session_get("uac_db"));
+
+        //下发登录界面，登录界面路径通常在 app config 中定义
+        //默认为 app/[appname]/page/login.php
+        $lgf = $uacc["uac_login"] ?? "app/$app/page/login.php";
+        $lgf = path_find($lgf);
+        if (empty($lgf)) {
+            //如果 app 下没有 login page，则使用 attobox 默认的
+            $lgf = path_find("box/page/login.php");
+        }
+        if (empty($lgf)) Response::code(404);
+        
         //跳转登录界面
         Response::page($lgf, arr_extend([
             "from" => Request::$current->url->full
         ], $extra));
-    }*/
+        
+    }
 
 
 
