@@ -74,6 +74,8 @@ class MsApp extends App
              * 数据库保存路径应与 config.php 中指定的位置一致
              * 通常应保存在
              *      app/[appname]/library/db 路径下 
+             * 要使用 uac 权限控制，还应创建路径 app/[appname]/library/jwt/secret 且要拥有写权限
+             *      此路径将保存 jwt-token 密钥
              */
             //获取 app config 中指定的 uac 参数
             $uac_ctrl = Uac::getUacConfig("ctrl");
@@ -91,7 +93,6 @@ class MsApp extends App
                         "uac" => Uac::start(),
                     ];
                     //读取当前用户有权限的 nav 导航列表
-
 
                     Response::page($index, $pps);
                 } else {
