@@ -47,6 +47,7 @@ class OperationsParser
     //定义操作类型
     public $otypes = [
         "sys",  //系统操作
+        //"nav",  //导航列表
         //"menu", //菜单项
         //"api",  //api 访问
         //"db",   //数据库操作

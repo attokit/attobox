@@ -426,7 +426,13 @@ class Uac
             ];
             //首先检查登录次数
             $sessionKey = "pwd_login_times";
+            $timeoutMsg = "尝试次数过多，请过一会再试";
             $logtimes = session_get($sessionKey, 0);
+            if ($logtimes>=5) {
+                //最多尝试 5 次
+                $err["msg"] = $timeoutMsg;
+                $err["timeout"] = true;
+            }
             $logtimes++;
             session_set($sessionKey, $logtimes);
             //检查用户提交的 用户名 和 密码
@@ -463,7 +469,7 @@ class Uac
                 //登录失败
                 if ($logtimes>=5) {
                     //最多尝试 5 次
-                    $err["msg"] = "已尝试5次，请过一会再试";
+                    $err["msg"] = $timeoutMsg;
                     $err["timeout"] = true;
                 } else {
                     $err["msg"] = "用户名或密码不正确";

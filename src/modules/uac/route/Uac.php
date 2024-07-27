@@ -27,6 +27,17 @@ class Uac extends Base
     public $key = "Atto/Box/route/Uac";     //路由调用路径
 
     /**
+     * 获取当前的 appname
+     */
+    protected function getAppName()
+    {
+        if ($this->appname!="") return strtolower($this->appname);
+        $app = Request::$current->app;
+        if (!empty($app)) return strtolower($app);
+        return null;
+    }
+
+    /**
      * 获取 Uac 实例
      * @return oUac 实例
      */
@@ -133,6 +144,8 @@ class Uac extends Base
         ];
     }
     
+
+
     /**
      * Uac 用户操作接口
      * [host]/uac/usr[/...]
@@ -166,6 +179,7 @@ class Uac extends Base
             $postdata = Request::input("json");
             switch ($action) {
                 case "grant":
+                    //判断用户是否拥有权限
                     if (isset($postdata["opr"])) {
                         Response::json([
                             "operation" => $postdata["opr"],
@@ -189,6 +203,7 @@ class Uac extends Base
                     exit;
                     break;
                 case "role":
+                    //判断用户是否属于角色
                     $roles = isset($postdata["roles"]) ? $postdata["roles"] : [];
                     if (is_notempty_str($roles)) $roles = arr($roles);
                     if (!is_indexed($roles)) $roles = [];
@@ -207,12 +222,42 @@ class Uac extends Base
                     exit;
                     break;
 
+                default:
+                    //调用其他 用户接口
+                    $m = "usr".ucfirst($action);
+                    array_shift($args); //nav
+                    if (method_exists($this, $m)) {
+                        return $this->$m($uac, $postdata, ...$args);
+                    }
+                    break;
+
             }
 
         }
 
         exit;
     }
+    //获取用户拥有权限的 nav 导航列表
+    protected function usrNav($uac, $post = [], ...$args)
+    {
+        $app = $this->getAppName();
+        if (empty($app)) {
+            $args = array_merge(["root","assets","nav"], $args);
+            $pcls = cls("uac/OperationsParser");
+        } else {
+            $args = array_merge(["app",$app,"assets","nav"], $args);
+            $pcls = cls("App/$app/uac/".ucfirst($app)."OperationsParser");
+            if (!class_exists($pcls)) $pcls = cls("uac/OperationsParser");
+        }
+        $dir = path_find(implode("/", $args), ["checkDir"=>true]);
+        var_dump($dir);
+        if (!is_dir($dir)) return [];
+        $oParser = new $pcls();
+        return $oParser->getNavOperations($dir, $uac);
+    }
+
+
+
 
     /**
      * Uac 用户登录，ajax 访问，网页访问地址：[host]/login
