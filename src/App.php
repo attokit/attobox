@@ -190,7 +190,11 @@ class App
         $lgf = path_find($lgf);
         if (empty($lgf)) {
             //如果 app 下没有 login page，则使用 attobox 默认的
-            $lgf = path_find("box/page/login.php");
+            //$lgf = path_find("box/page/login.php");
+
+            //如果 app 下没有 login page 则返回 未登录错误，由前端决定如何登录
+            trigger_error("uac/notlogin", E_USER_ERROR);
+            exit;
         }
         if (empty($lgf)) Response::code(404);
         
