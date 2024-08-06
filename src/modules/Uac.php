@@ -615,7 +615,14 @@ class Uac
         $cnst = "APP_".strtoupper($app)."_UAC_";
         $conf = [];
         if (defined($cnst."CTRL")) $conf["uac_ctrl"] = constant($cnst."CTRL");
-        if (defined($cnst."DB")) $conf["uac_db"] = constant($cnst."DB");
+        if (defined($cnst."DB")) {
+            $cdb = constant($cnst."DB");
+            //默认添加 app/[appname]/ 作为数据库前缀
+            if (substr($cdb, 0,4)!=="app/") {
+                $cdb = "app/".strtolower($app)."/".$cdb;
+            }
+            $conf["uac_db"] = $cdb;
+        }
         //if (defined($cnst."TABLE")) $conf["uac_table"] = constant($cnst."TABLE");
         //if (defined($cnst."ROLE")) $conf["uac_role"] = constant($cnst."ROLE");
         if (defined($cnst."LOGIN")) $conf["uac_login"] = constant($cnst."LOGIN");
