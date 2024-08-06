@@ -689,7 +689,8 @@ class Dbm extends Base
             }
             Response::json([
                 "query" => "all",
-                "rs" => $rs
+                "rs" => $rs,
+                "raw" => $rs
             ]);
         } else if (!is_null($api)) {
             //通过调用 api 执行查询
@@ -702,7 +703,8 @@ class Dbm extends Base
                 if (!$rtn instanceof RecordSet) {
                     Response::json([
                         "query" => $query,
-                        "rs" => []
+                        "rs" => [],
+                        "raw" => []
                     ]);
                 } else {
                     Response::json([
@@ -712,7 +714,8 @@ class Dbm extends Base
                             "virtual" => $exportVirtual,
                             "related" => $exportRelated
                         ],
-                        "rs" => $rtn->export($exportTo, $exportVirtual, $exportRelated)
+                        "rs" => $rtn->export($exportTo, $exportVirtual, $exportRelated),
+                        "raw" => $rtn->export('ctx', $exportVirtual, $exportRelated)
                     ]);
                 }
             } else {
@@ -729,11 +732,13 @@ class Dbm extends Base
                     if ($exportRelated) $exportTo = "show";
                     $rsctx = $rsset->export($exportTo, $exportVirtual, $exportRelated);
                 }
+                $raw = $rsset->export('ctx', $exportVirtual);
             } else {
                 $rsctx = $rsset;
+                $raw = $rsset;
             }
             $rs["rs"] = $rsctx;
-            $rs["raw"] = $rsset;
+            $rs["raw"] = $raw;
             $rs["export"] = [
                 "to" => $exportTo,
                 "virtual" => $exportVirtual,
