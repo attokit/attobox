@@ -6,6 +6,8 @@
 
 namespace Atto\Box\db;
 
+use Atto\Box\Request;
+
 class Dsn 
 {
     //解析后的完整 dsn 语句
@@ -113,6 +115,22 @@ class Dsn
             return $this->parseSqliteSpecialMode("temp");
         } else {
             if (strpos($query, ".db")!==false) $query = str_replace(".db","",$query);
+
+            //在 app 路径下，默认为 dbn/tbn 添加 app/[appname]/ 前缀
+            $appn = Request::$current->app;
+            if (is_notempty_str($appn)) {
+                if (
+                    substr($query, 0,4)!=='app/' && 
+                    substr($query, 0,3)!=='db/' &&
+                    substr($query, 0,1)!=='/' /*&&
+                    count(explode("/", $query))>1*/
+                ) {
+                    //以 app/ 或 db/ 开头的数据库路径 不做处理
+                    $query = "app/".strtolower($appn)."/".$query;
+                }
+            } 
+            //var_dump($query);
+
             $dbf = path_find($query.".db",["inDir"=>DB_DIRS]);
             //var_dump($dbf);
             if (is_file($dbf)) {
