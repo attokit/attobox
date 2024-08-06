@@ -733,6 +733,7 @@ class Dbm extends Base
                 $rsctx = $rsset;
             }
             $rs["rs"] = $rsctx;
+            $rs["raw"] = $rsset;
             $rs["export"] = [
                 "to" => $exportTo,
                 "virtual" => $exportVirtual,
