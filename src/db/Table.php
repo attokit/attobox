@@ -499,9 +499,10 @@ class Table
      * 查询关联表
      * @param String $field 本表中的关联字段
      * @param Mixed $data 关联字段的值
+     * @param String $exportTo 可选 show/showctx 默认 show
      * @return Mixed 从关联表中查询获得的值
      */
-    public function queryRelatedTable($field, $data = null)
+    public function queryRelatedTable($field, $data = null, $exportTo="show")
     {
         if (empty($data)) return $data;
         $ci = $this->conf($field);
@@ -528,7 +529,8 @@ class Table
              * ! 包含虚拟字段将严重影响响应时间
              * 如果需要显示关联表的虚拟字段，使用 vfparser 单独生成
              */
-            $rsd = $rs->export("show", false, false);
+            //$rsd = $rs->export("show", false, false);
+            $rsd = $rs->export($exportTo, false, false);
             $lfd = $source["label"];
             for ($i=0;$i<count($rsd);$i++) {
                 $rsi = $rsd[$i];
@@ -576,9 +578,10 @@ class Table
      * @param String $field 本表中的关联字段
      * @param Mixed $data 关联字段的值
      * @param Bool $queryRelatedRecord 是否将关联表记录的关联表记录一并查询输出 false 表示仅输出一层关联表，不查询关联表的关联表
+     * @param String $exportTo 可选 show/showctx 默认 show
      * @return Mixed 从关联表中查询获得的值
      */
-    public function queryRelatedTableRecord($field, $data = null, $queryRelatedRecord = false)
+    public function queryRelatedTableRecord($field, $data = null, $queryRelatedRecord = false, $exportTo="show")
     {
         if (empty($data)) return [];
         $ci = $this->conf($field);
@@ -599,9 +602,11 @@ class Table
             if (!$rs instanceof RecordSet) return [];
             if ($rs->count()<=0) return [];
             if (is_array($data)) {
-                return $rs->export("show", true, $queryRelatedRecord);   //查询并包含虚拟字段
+                //return $rs->export("show", true, $queryRelatedRecord);   //查询并包含虚拟字段
+                return $rs->export($exportTo, true, $queryRelatedRecord);   //查询并包含虚拟字段
             } else {
-                return $rs[0]->export("show", true, $queryRelatedRecord);
+                //return $rs[0]->export("show", true, $queryRelatedRecord);
+                return $rs[0]->export($exportTo, true, $queryRelatedRecord);
             }
             //$rsd = $rs->export("show", true);   
         }

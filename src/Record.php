@@ -83,13 +83,16 @@ class Record implements \ArrayAccess, \IteratorAggregate
      */
     public function export($to="db", $withVirtual=false, $queryRelatedRecord=true)
     {
+        $showctx = $to=="showctx";
+        if ($showctx) $to = "show";
         $ctx = $this->table->convertor->data($this->context)->convTo($to)->export();
         $conf = $this->table->conf("field");
         if ($to=="show") {  //输出为前端展示，将所有 查询关联表字段 
             
-            $this->eachField(function($field) use (&$ctx, $conf, $queryRelatedRecord) {
+            $this->eachField(function($field) use (&$ctx, $conf, $queryRelatedRecord, $showctx) {
                 $ci = $conf[$field];
                 $di = $this->context[$field];
+                $expto = $showctx ? "showctx" : "show";
                 if (
                     $ci["isSelector"]==true && 
                     is_def($ci, "selector") && 
@@ -97,9 +100,9 @@ class Record implements \ArrayAccess, \IteratorAggregate
                     is_def($ci["selector"]["source"], "table")
                     //$ci["selector"]["useTable"]!=true
                 ) {
-                    $ctx[$field] = $this->table->queryRelatedTable($field, $di);
+                    $ctx[$field] = $this->table->queryRelatedTable($field, $di, $expto);
                     if ($queryRelatedRecord) {
-                        $related_rs = $this->table->queryRelatedTableRecord($field, $di);
+                        $related_rs = $this->table->queryRelatedTableRecord($field, $di, false, $expto);
                         if (!empty($related_rs)) {
                             $ctx[$field."_related_rs"] = $related_rs;
                             if (is_associate($related_rs)) {
@@ -109,6 +112,15 @@ class Record implements \ArrayAccess, \IteratorAggregate
                             }
                         }
                     }
+                }
+            });
+        }
+        if ($showctx) {
+            $octx = $this->table->convertor->data($this->context)->convTo("ctx")->export();
+            $this->eachField(function($field) use (&$ctx, $conf, $octx) {
+                $ci = $conf[$field];
+                if ($ci["isJson"]==true) {
+                    $ctx[$field] = $octx[$field];
                 }
             });
         }
@@ -781,6 +793,7 @@ class Record implements \ArrayAccess, \IteratorAggregate
         if (is_null($fdv)) return null;
         if (is_string($fdv)) $fdv = j2a($fdv);
         if (empty($fdv) || !is_array($fdv)) return null;
+        if (empty($keys)) return $fdv;
         $rst = null;
         foreach ($keys as $key) {
             if (isset($fdv[$key])) {

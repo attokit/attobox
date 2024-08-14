@@ -694,7 +694,7 @@ class Dbm extends Base
             ]);
         } else if (!is_null($api)) {
             //通过调用 api 执行查询
-            if ($exportRelated) $exportTo = "show";
+            if ($exportRelated && !in_array($exportTo,["show","showctx"])) $exportTo = "show";
             $qm = "api".ucfirst($qapi);
             $tb = $this->table->new();
             if (method_exists($tb, $qm)) {
@@ -729,7 +729,7 @@ class Dbm extends Base
                 if ($exportTo=="csv") {
                     $rsctx = $rsset->exportCsv();
                 } else {
-                    if ($exportRelated) $exportTo = "show";
+                    if ($exportRelated && !in_array($exportTo,["show","showctx"])) $exportTo = "show";
                     $rsctx = $rsset->export($exportTo, $exportVirtual, $exportRelated);
                 }
                 $raw = $rsset->export('ctx', $exportVirtual);
