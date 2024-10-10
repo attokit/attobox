@@ -70,6 +70,7 @@ class VTable /*extends Table*/
         }
         $this->config["xpath"] = $this->xpath;
         $this->config["isVirtual"] = $this->isVirtual;
+        $this->config["highlight"] = $conf["highlight"] ?? [];
         $this->config["field"] = [];
 
         /* 在输出 _export_ 时检查 directedit 权限，否则 Uac 加载数据表时会 反复 Uac::grant() 死循环
@@ -107,7 +108,7 @@ class VTable /*extends Table*/
                     ],
                     "table" => []
                 ];
-                $cks = explode(",", "name,xpath,title,desc,isVirtual,form,detail,fields,field,virtualFields,mode,default");
+                $cks = explode(",", "name,xpath,title,desc,isVirtual,form,detail,fields,field,virtualFields,mode,highlight,default");
                 foreach ($cks as $ck) {
                     if (is_def($conf, $ck)) {
                         $oc["table"][$ck] = $conf[$ck];
@@ -200,6 +201,13 @@ class VTable /*extends Table*/
                 $result = $this->$mi($result, $ei);
             }
         }
+        //处理完成后统一修改 id
+        if (count($result)>0 && isset($result[0]["id"])) {
+            for ($i=0;$i<count($result);$i++) {
+                $result[$i]["id"] = $i+1;
+            }
+        }
+
         return $result;
     }
 

@@ -653,7 +653,7 @@ class Dbm extends Base
             $qapi = $api["api"] ?? null;
             $qpd = $api["data"] ?? [];
         }
-
+        //var_dump($query);
         $export = $query["export"] ?? null;
         if (!is_null($export)) unset($query["export"]);
         $exportTo = $export["to"] ?? null;
@@ -662,6 +662,8 @@ class Dbm extends Base
         }
         $exportVirtual = $export["virtual"] ?? true;
         $exportRelated = $export["related"] ?? false;
+
+        //var_dump($query);
 
         //debug
         if ($this->debug) {
@@ -724,6 +726,14 @@ class Dbm extends Base
         } else {
             //var_dump($query);
             $rs = $this->table->R($query);
+            //var_dump($rs);
+            if (empty($rs)) {
+                Response::json([
+                    "query" => $query,
+                    "rs" => [],
+                    "raw" => []
+                ]);
+            }
             $rsset = $rs["rs"];
             if ($rsset instanceof RecordSet) {
                 if ($exportTo=="csv") {
@@ -907,6 +917,61 @@ class Dbm extends Base
         $rtn["query"] = $params;
         Response::json($rtn);
         exit;
+    }
+
+    /**
+     * api 
+     * forDev: 直接调用 record public 方法
+     */
+    protected function apiCall(...$args)
+    {
+        $post = $this->postData;
+        if (isset($post["query"])) {
+            $query = $post["query"];
+            unset($post["query"]);
+        } else {
+            $query = $post;
+            $post = [];
+        }
+
+        //error
+        $err = function ($msg) {
+            return [
+                "error" => true,
+                "msg" => $msg
+            ];
+        };
+
+        //method name
+        $method = $args[0] ?? null;
+        if (!is_notempty_str($method)) return $err("Method Name Needed");
+        array_shift($args);
+
+        //准备 record 实例
+        if (!empty($query)) {
+            $record = $this->table->query->apply($query)->single();
+            if (empty($record)) return $err("Record Not Exists");
+        } else {
+            $record = $this->table->new();
+        }
+
+        //检查要 call 的 method 是否存在
+        if (!method_exists($record, $method)) return $err("Call Method Not Exists");
+
+        //args
+        $cargs = $post["args"] ?? [];
+        if (empty($cargs)) $cargs = $args;
+        
+        //call method
+        $rst = $record->$method(...$cargs);
+        
+        if (is_null($rst) || (is_array($rst) && empty($rst))) return $err("Empty Return Value");
+        if ($rst instanceof Record || $rst instanceof RecordSet) {
+            return [
+                "result" => $rst->export("showctx", true, false)
+            ];
+        }
+        return ["result" => $rst];
     }
 
 

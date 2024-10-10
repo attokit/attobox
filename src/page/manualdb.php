@@ -41,7 +41,7 @@ foreach ($sibling as $dbn => $dbc) {
 <link rel="stylesheet" href="//cgy.design/src/atto/vue/css/base.css"/>
 <link rel="stylesheet" href="//cgy.design/src/atto/vue/css/printer.css"/>
 <link rel="stylesheet" href="//cgy.design/src/atto/vue/css/el-patch.css"/>-->
-<link rel="stylesheet" href="//cgy.design/src/atto/vue/css/theme-dark.css" id="attovue_dark_mode_css"/>
+<link rel="stylesheet" href="/src/atto/vue/css/theme-dark.css" id="attovue_dark_mode_css"/>
 <link rel="icon" href="//cgy.design/icon/cgy-qypms-favicon.svg"/>
 <style>
 :root {

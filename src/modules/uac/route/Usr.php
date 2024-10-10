@@ -157,20 +157,15 @@ class Usr extends Base
      */
     public function defaultMethod(...$args)
     {
+
         $uac = $this->uo();
-        $usr = $this->ur();
-        if (empty($usr)) {
-            //用户还未登录
-            return [
-                "isLogin" => false
-            ];
-        }
         if (empty($args)) {
             //获取登录用户的信息
-            if ($usr instanceof Record) {
+            $ur = $this->ur();
+            if ($ur instanceof Record) {
                 //$ud_ctx = $ur->export("ctx", true);
-                $ud_show = $usr->export("show", true);
-                $ud_raw = $usr->export("db");
+                $ud_show = $ur->export("show", true);
+                $ud_raw = $ur->export("db");
                 $ud = [
                     "info" => $ud_show, //$ud_ctx,
                     "raw" => $ud_raw,
@@ -199,23 +194,8 @@ class Usr extends Base
         $uac = $this->uo();
         if (!$uac->isLogin) {
             return $uac->usrLogin(...$args);
-        } else {
-            //已登录，直接重新返回 token
-            $usr = $uac->usr;
-            //创建 jwt Token 
-            $tk = Jwt::generate([
-                "uid" => $usr->_id
-            ]);
-            if (isset($tk["token"])) {
-                $uac->token = $tk["token"];
-            }
-            //下发 token，前端刷新页面
-            Response::json([
-                "isLogin" => true,
-                "token" => $uac->token
-            ]);
         }
-        //return false;
+        return false;
     }
 
     /**

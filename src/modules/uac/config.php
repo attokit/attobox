@@ -10,7 +10,7 @@ return [
     "UAC_DB" => "", //"sqlite:usr",
     
     //登录页面路径
-    "UAC_LOGIN" => "",  //"root/page/login.php",
+    "UAC_LOGIN" => "",  //"root/page",
 
     //UAC关联的微信公众账号，在 cgy.design 服务器中的账户名
     "UAC_WX" => "",     //"index",    //默认为 wx.cgy.design/index/***
@@ -21,10 +21,5 @@ return [
     //可选的 uac 用户 role 
     "UAC_ROLE" => "",
     "UAC_ROLE_NAME" => "",
-    "UAC_ROLES" => [
-        /*
-        "role-key" => "role-name"
-         */
-    ],
     
 ];

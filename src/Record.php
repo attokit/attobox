@@ -119,7 +119,7 @@ class Record implements \ArrayAccess, \IteratorAggregate
             $octx = $this->table->convertor->data($this->context)->convTo("ctx")->export();
             $this->eachField(function($field) use (&$ctx, $conf, $octx) {
                 $ci = $conf[$field];
-                if ($ci["isJson"]==true) {
+                if ($ci["isJson"]==true && (!isset($ctx[$field]) || !is_array($ctx[$field]))) {
                     $ctx[$field] = $octx[$field];
                 }
             });

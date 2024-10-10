@@ -400,8 +400,7 @@ class Uac
     {
         $action = empty($args) ? 'pwd' : array_shift($args);
 
-        if ($action=="scan") {
-            //扫码登录
+        if ($action=="scan") {  //扫码登录
             //只有用户扫码成功并通过权限验证后，才会执行此步骤，
             //查找用户信息，initUsr(usrRecord)
             $query = Request::input('json');
@@ -418,25 +417,13 @@ class Uac
                     $this->token = $tk["token"];
                 }
             }
-        } else if ($action=="pwd") {
-            //验证用户名密码
+        } else if ($action=="pwd") {    //验证用户名密码
+            //检查用户提交的 用户名 和 密码
+            $query = Request::input('json');
             $err = [
                 "isLogin" => false,
                 "msg" => ""
             ];
-            //首先检查登录次数
-            $sessionKey = "pwd_login_times";
-            $timeoutMsg = "尝试次数过多，请过一会再试";
-            $logtimes = session_get($sessionKey, 0);
-            if ($logtimes>=5) {
-                //最多尝试 5 次
-                $err["msg"] = $timeoutMsg;
-                $err["timeout"] = true;
-            }
-            $logtimes++;
-            session_set($sessionKey, $logtimes);
-            //检查用户提交的 用户名 和 密码
-            $query = Request::input('json');
             if (empty($this->usrTable)) {
                 $err["msg"] = "用户数据表无法访问，请确定是否连接到合法的登录接口";
                 Response::json($err);
@@ -454,9 +441,6 @@ class Uac
             //检查是否登录成功
             if ($usr instanceof Record) {
                 //登录成功
-                //清除 session
-                session_del($sessionKey);
-                //创建 usr record
                 $this->initUsr($usr);
                 //创建 jwt Token 
                 $tk = Jwt::generate([
@@ -466,14 +450,7 @@ class Uac
                     $this->token = $tk["token"];
                 }
             } else {
-                //登录失败
-                if ($logtimes>=5) {
-                    //最多尝试 5 次
-                    $err["msg"] = $timeoutMsg;
-                    $err["timeout"] = true;
-                } else {
-                    $err["msg"] = "用户名或密码不正确";
-                }
+                $err["msg"] = "用户名或密码不正确";
                 Response::json($err);
                 exit;
             }

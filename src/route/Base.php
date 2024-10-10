@@ -123,7 +123,7 @@ class Base extends Route
         $cpath = "vue/components".$package;
         $comps = [];
         //$dir = path_find("box/assets/$cpath", ["inDir"=>"", "checkDir"=>true]);
-        $dir = path_find("pre/assets/box/$cpath", ["inDir"=>"", "checkDir"=>true]);
+        $dir = path_find("pre/assets/atto/$cpath", ["inDir"=>"", "checkDir"=>true]);
         if (is_dir($dir)) {
             $dh = opendir($dir);
             while (($f = readdir($dh))!==false) {
@@ -274,6 +274,27 @@ class Base extends Route
             "src" => "//img.cgy.design/".implode("/", $args)
         ]);
     }*/
+
+    public function tester()
+    {
+        //$s = "9.2个/袋，10袋/箱";
+        //$nparr = explode("/", explode("，", $s)[0]);
+        //$ngu = preg_replace("/[0-9\.]/","", $nparr[0]);
+        //$ngn = str_replace($ngu, "", $nparr[0]);
+        //var_dump($ngu);
+        //var_dump($ngn);
+        //var_dump($nparr);
+
+        $s = "17g/包 ，18kg /  箱;；,";
+        //$s = preg_replace("/[;；]/","，",$s);
+        $s = str_replace(";", "，", $s);
+        $s = str_replace("；", "，", $s);
+        $s = str_replace(",", "，", $s);
+        $s = str_replace("kg", "Kg", $s);
+        $s = preg_replace("/[^kK]g/", "克", $s);
+        $s = preg_replace("/\s+/","",$s);
+        var_dump($s);
+    }
 
 
 

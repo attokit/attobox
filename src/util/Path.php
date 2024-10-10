@@ -106,6 +106,7 @@ function path_find(
             } else {
                 $cnst = "root";
             }
+            //var_dump($cnst);
             foreach ($inDir as $i => $dir) {
                 $cnstDir[] = "$cnst/$dir";
             }

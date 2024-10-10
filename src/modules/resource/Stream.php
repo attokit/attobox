@@ -280,7 +280,7 @@ class Stream
         //Content-Length是指定包含于请求或响应中数据的字节长度   
         header("Accept-Length: " . filesize($this->path)); 
         //用来告诉浏览器，文件是可以当做附件被下载，下载后的文件名称为$file_name该变量的值。
-        header("Content-Disposition: attachment; filename=" . basename($this->path)); 
+        header("Content-Disposition: attachment; filename=" . basename($this->path));
         
         //特殊格式文件
         if (in_array(strtolower($this->ext), ["ttf","woff","woff2"])) {

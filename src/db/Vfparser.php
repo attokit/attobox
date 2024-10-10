@@ -35,6 +35,8 @@ use Atto\Box\db\Table;
 use Atto\Box\Record;
 use Atto\Box\RecordSet;
 
+use Atto\Box\Uniter;
+
 class Vfparser 
 {
     //关联的 table 实例
@@ -106,6 +108,10 @@ class Vfparser
     public function parsePkg(/*$unit, $netwt, $maxunit, $minnum, $extra*/)
     {
         $ctx = $this->context;
+        $uniter = Uniter::create($ctx);
+        return $uniter->exportPkgString();
+
+
         $unit = $ctx["unit"];
         $netwt = $ctx["netwt"];
         $maxunit = $ctx["maxunit"];
@@ -153,6 +159,21 @@ class Vfparser
     public function parseMaxunit($num="qty", $pre="skuid", $useGnum = false)
     {
         $ctx = $this->context;
+        $uniter = Uniter::create($ctx, [
+            "unitField" => $pre."_unit",
+            "netwtField" => $pre."_netwt",
+            "maxunitField" => $pre."_maxunit",
+            "minnumField" => $pre."_minnum",
+            "extraField" => $pre."_extra",
+        ]);
+        //如果当前记录包含了规格信息，则使用当前记录的规格
+        $cupkg = $ctx["extra"]["currentPackage"] ?? null;
+        $uniter->setCustomPackage($cupkg);
+        $unum = $ctx[$num];
+        $units = $uniter->calcUnumToUnits($unum);
+        return $units["str"];
+
+
         $unum = $ctx[$num];
         //如果当前记录包含了规格信息，则使用当前记录的规格
         $cupkg = $ctx["extra"]["currentPackage"] ?? null;
@@ -191,6 +212,18 @@ class Vfparser
     public function parseUnitgnum($unum="num", $pre="skuid")
     {
         $ctx = $this->context;
+        $uniter = Uniter::create($ctx, [
+            "unitField" => $pre."_unit",
+            "netwtField" => $pre."_netwt",
+            "maxunitField" => $pre."_maxunit",
+            "minnumField" => $pre."_minnum",
+            "extraField" => $pre."_extra",
+        ]);
+        $unum = $ctx[$unum];
+        $gnum = $uniter->calcUnumToGnum($unum);
+        return $gnum["str"];
+
+
         $unum = $ctx[$unum];
         $nw = $ctx[$pre."_netwt"] ?? 1;
         $wt = $nw*$unum;
@@ -255,6 +288,19 @@ class Vfparser
     //输出 单价，散装货品显示 ￥20.00/Kg 有包装的货品显示 ￥10/袋，￥100/箱
     public function parsePriceunit($price="price", $pre="skuid")
     {
+        $ctx = $this->context;
+        $uniter = Uniter::create($ctx, [
+            "unitField" => $pre."_unit",
+            "netwtField" => $pre."_netwt",
+            "maxunitField" => $pre."_maxunit",
+            "minnumField" => $pre."_minnum",
+            "extraField" => $pre."_extra",
+        ]);
+        $price = $ctx[$price];
+        $up= $uniter->calcPriceToUnitPrice($price);
+        return $up["str"];
+
+
         //return "";
         $dig = 10000;
         $ctx = $this->context;

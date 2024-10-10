@@ -44,7 +44,10 @@ class Src extends Base
             //array_shift($args); //atto
             //$srcpath = "box/assets/".implode("/", $args);
             $srcpath = "pre/assets/".implode("/", $args);
+            //$sp = path_find($srcpath);
+            //var_dump($sp);
             $resource = Resource::create($srcpath);
+            //var_dump($resource);exit;
         } else {
             //正常调用资源
             $resource = Resource::create($args);
