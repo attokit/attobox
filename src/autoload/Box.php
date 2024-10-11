@@ -125,6 +125,7 @@ class Box
     private static function _define()
     {
         self::$_CONF = arr_extend(self::$_CONF, self::$_TEMP_CONF);
+        var_export(self::$_CONF);
         foreach (self::$_CONF as $k => $v) {
             if (!defined($k)) {
                 define($k, $v);
