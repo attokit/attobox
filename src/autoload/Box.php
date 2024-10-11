@@ -249,9 +249,15 @@ class Box
                 /**
                  * patch web library
                  */
-                $alo->addPsr4($ns.'\\', [
-                    ROOT_PATH, ROOT_PATH.DS."library"
-                ]);
+                $lib_dirs = explode(",", LIB_DIRS);
+                $lib_pathes = array_map(function ($i) {
+                    return ROOT_PATH.DS.trim($i);
+                }, $lib_dirs);
+                array_unshift($lib_pathes, ROOT_PATH);
+                $alo->addPsr4($ns.'\\', $lib_pathes);
+                //$alo->addPsr4($ns.'\\', [
+                //    ROOT_PATH, ROOT_PATH.DS."library"
+                //]);
 
                 /**
                  * patch error classes
