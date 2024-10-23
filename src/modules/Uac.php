@@ -36,6 +36,7 @@
 
 namespace Atto\Box;
 
+use Atto\Box\Event;
 use Atto\Box\Request;
 use Atto\Box\request\Url;
 use Atto\Box\Router;
@@ -476,6 +477,8 @@ class Uac
         if ($this->isLogin) {   //登录成功
             //写入 $_SESSION
             session_set("uac_uid", $this->usr->_id);
+            //触发用户登录成功事件
+            Event::trigger("usr-login", $this->usr, time());
             //下发 token，前端刷新页面
             Response::json([
                 "isLogin" => true,
