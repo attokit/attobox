@@ -9,6 +9,7 @@
 
 namespace Atto\Box;
 
+use Atto\Box\Event;
 use Atto\Box\Db;
 use Atto\Box\Record;
 use Atto\Box\db\Table;
@@ -267,6 +268,10 @@ class RecordSet implements \ArrayAccess, \IteratorAggregate, \Countable
                     return $rcls::create($db, $tb, $di);
                 },$data);
             }*/
+
+            //创建事件订阅
+            Event::regist($rs);
+
             return $rs;
         }
         return null;
@@ -304,6 +309,10 @@ class RecordSet implements \ArrayAccess, \IteratorAggregate, \Countable
         $rs->db = $ri->db;
         $rs->table = $ri->table;
         $rs->context = $recordArr;
+
+        //创建事件订阅
+        Event::regist($rs);
+            
         return $rs;
     }
 }

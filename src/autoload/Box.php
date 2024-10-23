@@ -192,13 +192,28 @@ class Box
                                 $app_dir.DS.'modules'
                             ]);
 
-                            //route class
-                            /*$alo->addPsr4($ns.'\\route\\'.$app.'\\', [
-                                $app_dir.DS.'route'
+                            //atto-orm
+                            $ormns = "Atto\\Orm";
+                            $alo->addPsr4($ormns.'\\'.$app.'\\', [
+                                $app_dir, 
+                                $app_dir.DS.'library',
+                                $app_dir.DS.'modules'
                             ]);
-                            $alo->addPsr4($ns.'\\route\\'.ucfirst(strtolower($app)).'\\', [
-                                $app_dir.DS.'route'
-                            ]);*/
+                            $alo->addPsr4($ormns.'\\'.ucfirst(strtolower($app)).'\\', [
+                                $app_dir, 
+                                $app_dir.DS.'library',
+                                $app_dir.DS.'modules'
+                            ]);
+                            $alo->addPsr4($ormns.'\\'.$app.'\\', [
+                                $app_dir, 
+                                $app_dir.DS.'library',
+                                $app_dir.DS.'modules'
+                            ]);
+                            $alo->addPsr4($ormns.'\\'.ucfirst(strtolower($app)).'\\', [
+                                $app_dir, 
+                                $app_dir.DS.'library',
+                                $app_dir.DS.'modules'
+                            ]);
                             
                             //error class
                             $alo->addPsr4($ns.'\\error\\'.$app.'\\', [
@@ -207,6 +222,8 @@ class Box
                             $alo->addPsr4($ns.'\\error\\'.ucfirst(strtolower($app)).'\\', [
                                 $app_dir.DS.'error'
                             ]);
+
+                            
                     
                         }
                     }
@@ -255,9 +272,6 @@ class Box
                 }, $lib_dirs);
                 array_unshift($lib_pathes, ROOT_PATH);
                 $alo->addPsr4($ns.'\\', $lib_pathes);
-                //$alo->addPsr4($ns.'\\', [
-                //    ROOT_PATH, ROOT_PATH.DS."library"
-                //]);
 
                 /**
                  * patch error classes
@@ -265,6 +279,14 @@ class Box
                 $alo->addPsr4($ns.'\\error\\', [
                     BOX_PATH.DS."error", 
                     ROOT_PATH.DS."error"
+                ]);
+
+                /**
+                 * patch atto-orm classes
+                 */
+                $alo->addPsr4('Atto\\Orm\\', [
+                    ROOT_PATH,
+                    ROOT_PATH.DS."library"
                 ]);
 
             }

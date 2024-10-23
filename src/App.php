@@ -7,6 +7,7 @@
 namespace Atto\Box;
 
 use Atto\Box\traits\staticCreate;
+use Atto\Box\Event;
 use Atto\Box\Request;
 use Atto\Box\Response;
 use Atto\Box\Uac;
@@ -44,6 +45,9 @@ class App
         }
         //初始化动作
         $this->init();
+
+        //创建事件订阅
+        Event::regist($this);
     }
 
     //init，子类覆盖

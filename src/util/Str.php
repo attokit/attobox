@@ -156,3 +156,11 @@ function str_nonce($length = 16, $symbol = true)
     }
     return $str;
 }
+
+//判断是否首字母大写
+function str_upcase_start($str)
+{
+    $rst = preg_match("/^[A-Z]+.*$/", $str, $matches);
+    //var_dump($matches);
+    return $rst!==false && $rst>0;
+}

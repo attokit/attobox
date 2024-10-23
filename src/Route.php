@@ -6,6 +6,7 @@
 
 namespace Atto\Box;
 
+use Atto\Box\Event;
 use Atto\Box\Response;
 use Atto\Box\Uac;
 use Atto\Box\Jwt;
@@ -62,6 +63,9 @@ class Route
         //if ($this->needJwt) {
         //    $this->jwtValidate();
         //}
+
+        //创建事件订阅
+        Event::regist($this);
     }
 
     /**

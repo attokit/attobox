@@ -13,6 +13,7 @@
 
 namespace Atto\Box;
 
+use Atto\Box\Event;
 use Atto\Box\Request;
 use Atto\Box\request\Curl;
 use Atto\Box\Db;
@@ -839,6 +840,8 @@ class Record implements \ArrayAccess, \IteratorAggregate
             $r->table = $tb;
             //$r->context = $data;
             $r->prepare($data);
+            //创建事件订阅
+            Event::regist($r);
             return $r;
         }
         return null;
