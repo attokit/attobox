@@ -263,7 +263,8 @@ class Vfparser
         $unum = $ctx[$unum];
         $nw = $ctx[$pre."_netwt"] ?? 1;
         $wt = $nw*$unum;
-        $extra = $ctx["extra"];
+        //$extra = $ctx["extra"];
+        $extra = $ctx[$pre."_extra"];
         if (is_string($extra) && is_json($extra)) {
             $extra = j2a($extra);
         }
