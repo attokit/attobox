@@ -199,10 +199,12 @@ class Uniter
      */
     public function setCustomPackage($pkg=[/* unit=>,netwt=>,maxunit=>,minnum=> */])
     {
-        if (empty($pkg)) return false;
-        foreach ($pkg as $k => $v) {
-            if (is_numeric($v)) $v = $v*1;
-            $this->$k = $v;
+        //if (empty($pkg)) return false;
+        if (is_notempty_arr($pkg)) {
+            foreach ($pkg as $k => $v) {
+                if (is_numeric($v)) $v = $v*1;
+                $this->$k = $v;
+            }
         }
         //批量判断
         $this->chkAll();

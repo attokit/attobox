@@ -159,17 +159,31 @@ class Vfparser
     public function parseMaxunit($num="qty", $pre="skuid", $useGnum = false)
     {
         $ctx = $this->context;
-        $uniter = Uniter::create($ctx, [
-            "unitField" => $pre."_unit",
-            "netwtField" => $pre."_netwt",
-            "maxunitField" => $pre."_maxunit",
-            "minnumField" => $pre."_minnum",
-            "extraField" => $pre."_extra",
-        ]);
+        if ($pre!="") {
+            $uniter = Uniter::create($ctx, [
+                "unitField" => $pre."_unit",
+                "netwtField" => $pre."_netwt",
+                "maxunitField" => $pre."_maxunit",
+                "minnumField" => $pre."_minnum",
+                "extraField" => $pre."_extra",
+            ]);
+        } else {
+            $uniter = Uniter::create($ctx);
+        }
         //如果当前记录包含了规格信息，则使用当前记录的规格
         $cupkg = $ctx["extra"]["currentPackage"] ?? null;
         $uniter->setCustomPackage($cupkg);
-        $unum = $ctx[$num];
+        $nw = $uniter->export()["netwt"];
+        if ($useGnum) {
+            if (is_numeric($num)) {
+                $unum = floor($num/$nw);
+            } else {
+                $unum = $ctx[$num];
+                $unum = floor($unum/$nw);
+            }
+        } else {
+            $unum = $ctx[$num];
+        }
         $units = $uniter->calcUnumToUnits($unum);
         return $units["str"];
 
@@ -254,6 +268,24 @@ class Vfparser
             return $fb*1000;
         }
 
+    }
+    //获取成品的配方中指定的满批重量 显示为 满批：件数(*Kg)
+    public function parseFullbatchunits($rppre="rpid", $pre="")
+    {
+        $fb = $this->parseFullbatch($rppre);
+        if ($fb<=0) return "未指定满批重量";
+        //$rtn = ["满批："];
+        $units = $this->parseMaxunit($fb, $pre, true);
+        $rtn[] = $units;
+        $rtn[] = "(";
+        if ($fb<1000) {
+            $rtn[] = $fb."克";
+        } else {
+            $rtn[] = round(($fb*100)/1000)/100;
+            $rtn[] = "Kg";
+        }
+        $rtn[] = ")";
+        return implode("", $rtn);
     }
 
     //将小包装数转换为 Kg，并判断 == 几个满批
