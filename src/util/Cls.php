@@ -11,6 +11,13 @@
  */
 function cls_ref($cls)
 {
+    if (!is_string($cls)) {
+        if (is_object($cls)) {
+            $cls = get_class($cls);
+        } else {
+            return null;
+        }
+    }
     if (!class_exists($cls)) return null;
     return new \ReflectionClass($cls);
 }
