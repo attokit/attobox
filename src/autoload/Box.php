@@ -204,15 +204,13 @@ class Box
                                 $app_dir.DS.'library',
                                 $app_dir.DS.'modules'
                             ]);
-                            $alo->addPsr4($ormns.'\\'.$app.'\\', [
-                                $app_dir, 
-                                $app_dir.DS.'library',
-                                $app_dir.DS.'modules'
+                            //atto-model
+                            $mdns = "Atto\\Model";
+                            $alo->addPsr4($mdns.'\\'.$app.'\\', [
+                                $app_dir.DS."model"
                             ]);
-                            $alo->addPsr4($ormns.'\\'.ucfirst(strtolower($app)).'\\', [
-                                $app_dir, 
-                                $app_dir.DS.'library',
-                                $app_dir.DS.'modules'
+                            $alo->addPsr4($mdns.'\\'.ucfirst(strtolower($app)).'\\', [
+                                $app_dir.DS."model"
                             ]);
                             
                             //error class
@@ -284,10 +282,10 @@ class Box
                 /**
                  * patch atto-orm classes
                  */
-                $alo->addPsr4('Atto\\Orm\\', [
+                /*$alo->addPsr4('Atto\\Orm\\', [
                     ROOT_PATH,
                     ROOT_PATH.DS."library"
-                ]);
+                ]);*/
 
             }
         }
