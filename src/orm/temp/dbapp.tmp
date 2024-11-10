@@ -1,0 +1,28 @@
+<?php
+/**
+ * Attokit/Attoorm framework
+ * DbApp
+ * 数据库服务 %{app/name}%
+ * 
+ */
+namespace Atto\Box\app;
+
+use Atto\Orm\Orm;
+use Atto\Orm\DbApp;
+
+class %{app/name}% extends DbApp 
+{
+    //app info
+    public $intr = "%{app/intr}%";              //app说明，子类覆盖
+    public $name = "%{app/name}%";              //app名称，子类覆盖
+    public $key = "Atto/Box/app/%{app/name}%";   //app调用路径
+
+    /**
+     * 与 当前 dbapp 关联的数据库连接参数
+     * !! 可以有多个关联数据库 !!
+     * 子类覆盖
+     */
+    protected $dbOptions = %{dbos}%;
+
+
+}

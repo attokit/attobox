@@ -1,0 +1,41 @@
+<?php
+/**
+ * 数据模型(表) 类
+ * %{appName}%/%{dbName}%/%{modelName}%
+ */
+
+namespace Atto\Orm\%{appName}%\model\%{dbName}%;
+
+use Atto\Orm\Model;
+use Atto\Orm\traits\model\Packager;
+
+class %{modelName}% extends Model 
+{
+    /**
+     * 为 数据表(模型) 实例 增加功能
+     */
+    //使用规格计算功能
+    //use Packager;
+
+    /**
+     * 当前数据模型(表) 依赖的 数据库实例
+     */
+    public static $db = null;
+
+    //此 数据表(模型) 类全称
+    public static $cls = "";
+    
+    /**
+     * 数据表 预设参数
+     * 子类覆盖
+     */
+    public static $name = "%{modelName}%";
+    public static $table = "%{table/name}%";       //数据表(模型)类 在数据库中的 表名称，通常是 model::$name 的全小写
+    public static $title = "%{table/title}%";
+    public static $desc = "%{table/desc}%";
+    public static $xpath = "%{appName}%/%{dbName}%/%{modelName}%";  // Appname/dbname/Tbname  -->  \Atto\Orm\Appname\model\dbname\Tbname
+    
+    //预设参数解析对象 ModelConfiger 实例
+    public static $configer = null;
+
+}

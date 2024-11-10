@@ -1,0 +1,83 @@
+{
+    "app": "所在DbApp名称，如：qypms",
+    "db": "数据库名称，如：main",
+
+    "name": "表名称，全小写，如：psku",
+    "title": "表名称，中文名，***表，如：产品SKU表",
+    "desc": "表介绍，如：保存产品SKU信息数据",
+    "xpath": "调用路径，如：qypms/main/psku",
+
+    "creation": {
+        "id": "integer NOT NULL PRIMARY KEY AUTOINCREMENT",
+        "more": "..."
+    },
+
+    "join": {
+        "__desc": "使用 JOIN 方法连接关联表，用于 medoo 查询，参见 medoo join 用法",
+        "[>]pstock": "pid",
+        "[<]more": {
+            "主表键名": "与主表键 相等的 关联表键名"
+        }
+    },
+    "useJoin": false,
+    "__useJoin": "是否每次查询都默认连接关联表",
+    "includes": ["每次查询都必须包含的字段","id","pid","..."],
+
+    "fields": ["解析得到的字段列表", "id", "..."],
+
+    "field": {
+        "pid": {
+            "__desc": "解析得到的每个字段的详细参数，结构如下",
+            "name": "字段名：pid",
+            "title": "字段名，中文：产品编码",
+            "desc": "字段说明：此库存成品SKU的产品编码，在系统中唯一",
+            "type": "字段在数据库中的保存类型：varchar",
+            "jstype": "字段在前端展示时，对应的数据类型，可选string,integer,float,boolean,array,object：string",
+            "phptype": "字段在后端处理时，使用的数据类型，多用于medoo->fetch()自动处理，可选String,Int,Number,Bool,JSON：String",
+
+            "isNumber": false,
+            "isJson": false,
+            "isTime": false,
+            "showInTable": true,
+            "width": 10,
+            "filterable": true,
+            "sortable": true,
+            "searchable": true,
+            "sort": "",
+            "isId": false,
+            "isPk": false,
+            "isEnable": false,
+            "showInForm": true,
+            "isFile": false,
+            "isSelector": true,
+            "selector": {
+            "dynamic": true,
+            "multiple": false,
+            "source": {
+                "table": "app/pms/product/psku",
+                "label": "_selectorlabel",
+                "value": "pid"
+            },
+            "values": [],
+            "useApi": false,
+            "useTable": true
+            },
+            "isSwitch": false,
+            "isGenerator": false,
+            "required": true,
+            "validate": false,
+            "formType": "string",
+            "inputer": {
+            "type": "el-select",
+            "options": [],
+            "params": {
+                "filterable": true,
+                "multiple": false
+            }
+            },
+            "default": null,
+            "isSum": false
+        }
+    }
+
+}
