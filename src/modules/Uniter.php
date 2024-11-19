@@ -599,7 +599,7 @@ class Uniter
             "g" => 0,
             "kg" => 0,
             "jin" => 0,
-            "min" => $price<0.01 ? round($price*10000)/10000 : round($price*100)/100,
+            "min" => $price<0.1 ? round($price*10000)/10000 : round($price*100)/100,
             "max" => 0,
             "str" => ""
         ];
@@ -612,7 +612,7 @@ class Uniter
         if (!$this->notGnum) {
             //正常的按重量计数
             $g = round(($price/$nw)*10000)/10000;
-            $rst["g"] = $g>=0.01 ? round($g*100)/100 : $g;
+            $rst["g"] = $g>=0.1 ? round($g*100)/100 : $g;
             $rst["kg"] = round(($g*1000)*100)/100;
             $rst["jin"] = round(($g*500)*100)/100;
             if ($this->noMaxu) {
@@ -650,14 +650,14 @@ class Uniter
                     if ($this->noMaxu) {
                         $rst["max"] = $rst["kg"];
                     } else {
-                        $rst["max"] = round($g*$minn*100)/100;
+                        $rst["max"] = round($price*$minn*100)/100;
                         $str[] = $k.$rst["max"].$s.$maxu;
                     }
                     $rst["str"] = implode("，", $str);
                 } else {
                     //指定了单个重量
                     $g = round(($price/$nw)*10000)/10000;
-                    $rst["g"] = $g>=0.01 ? round($g*100)/100 : $g;
+                    $rst["g"] = $g>=0.1 ? round($g*100)/100 : $g;
                     $rst["kg"] = round(($g*1000)*100)/100;
                     $rst["jin"] = round(($g*500)*100)/100;
                     $str = [];
@@ -675,7 +675,7 @@ class Uniter
                 //多个装
                 if ($minwt<=0) {
                     //未指定单个重量
-                    $g = round(($price/$this->ngMinNum)*100)/100;
+                    $g = round(($price/$this->ngMinNum)*10000)/10000;
                     $rst["g"] = $g;
                     $rst["kg"] = $g;
                     $rst["jin"] = $g;

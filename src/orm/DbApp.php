@@ -167,6 +167,9 @@ class DbApp extends App
         $pd = Request::input("json");
         $this->post = empty($pd) ? [] : $pd;
 
+        //URI = create 创建数据库
+        
+
         //URI = [action|tbn]/...
         if ($this->hasDb($args[0])!==true) {
             //未指定 dbn 则默认使用 main 作为当前数据库实例 currentDb

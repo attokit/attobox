@@ -3,9 +3,11 @@
  * 数据表(模型) 类 参数设置工具类
  * 
  * 数据表(模型) 类 预设参数应保存在：
- *      [dbpath]/../config/ 路径下
+ *      [dbpath]/[dbname]/config/ 路径下
  * 预设文件保存为：
- *      modelname.json
+ *      [dbname].json
+ * 解析后的 数据表(模型) 参数文件保存为：
+ *      [modelname].json
  * 预设文件可通过 build 生成：
  *      $model::configer->build();
  *      在每次修改预设参数后，都应执行 build 方法

@@ -550,6 +550,28 @@ class Dbo
         return !empty($this->curd) && $this->curd instanceof Curd && $this->curd->db->key == $this->key;
     }
 
+
+
+    /**
+     * 入口 Action 功能
+     * 通过 https://[host]/[appname]/[dbname]/... 调用的 数据库 action
+     */
+    /**
+     * [url]/create
+     * 创建数据库
+     */
+    /**
+     * [url]/update
+     * 更新数据库结构
+     * 
+     * @param Array $args URI
+     * @return Mixed
+     */
+    public function updateAction()
+    {
+        return "update db ".$this->app->name."/".$this->name;
+    }
+
     
 
 
