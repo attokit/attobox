@@ -123,13 +123,14 @@ class Base extends Route
         $cpath = "vue/components".$package;
         $comps = [];
         //$dir = path_find("box/assets/$cpath", ["inDir"=>"", "checkDir"=>true]);
-        $dir = path_find("pre/assets/atto/$cpath", ["inDir"=>"", "checkDir"=>true]);
+        //$dir = path_find("pre/assets/atto/$cpath", ["inDir"=>"", "checkDir"=>true]);
+        $dir = path_find("pre/wwwroot/assets/atto/$cpath", ["inDir"=>"", "checkDir"=>true]);
         if (is_dir($dir)) {
             $dh = opendir($dir);
             while (($f = readdir($dh))!==false) {
                 if ($f=="." || $f==".." || is_dir($dir.DS.$f) || strpos($f, ".vue")===false) continue;
                 $fn = str_replace(".vue","",$f);
-                $comps[$fn] = "//cgy.design/src/atto/$cpath/$fn.vue?export=js&name=$fn";
+                $comps[$fn] = "//io.cgy.design/src/atto/$cpath/$fn.vue?export=js&name=$fn";
             }
             closedir($dh);
         }
@@ -154,13 +155,14 @@ class Base extends Route
         $mpath = "vue/mixins".$package;
         $mixins = [];
         //$dir = path_find("box/assets/$mpath", ["inDir"=>"", "checkDir"=>true]);
-        $dir = path_find("pre/assets/atto/$mpath", ["inDir"=>"", "checkDir"=>true]);
+        //$dir = path_find("pre/assets/atto/$mpath", ["inDir"=>"", "checkDir"=>true]);
+        $dir = path_find("pre/wwwroot/assets/atto/$mpath", ["inDir"=>"", "checkDir"=>true]);
         if (is_dir($dir)) {
             $dh = opendir($dir);
             while (($f = readdir($dh))!==false) {
                 if ($f=="." || $f==".." || is_dir($dir.DS.$f) || strpos($f, ".js")===false) continue;
                 $fn = str_replace(".js","",$f);
-                $mixins[$fn] = "//cgy.design/src/atto/$mpath/$fn.js";
+                $mixins[$fn] = "//io.cgy.design/src/atto/$mpath/$fn.js";
             }
             closedir($dh);
         }
