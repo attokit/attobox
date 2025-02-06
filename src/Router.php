@@ -316,8 +316,7 @@ class Router
             //执行路由方法
             return call_user_func_array([$route,$method],$args);
         }
-        
+
     }
 
-    
 }
