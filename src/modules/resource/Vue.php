@@ -80,6 +80,18 @@ class Vue extends Resource
                 $cnt = $this->$m();
             }
         }
+
+        /**
+         * 输出前 根据 $_GET 参数，替换模板字符串
+         * %{...}%
+         */
+        $tpld = [];
+        foreach ($_GET as $k => $v) {
+            if (in_array($k, ["export", "name"])) continue;
+            $tpld[$k] = $v;
+        }
+        $cnt = str_tpl($cnt, $tpld);
+
         $this->content = $cnt;
         if (is_null($this->expExt)) $this->expExt = $this->rawExt;
 

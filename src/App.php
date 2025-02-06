@@ -96,7 +96,8 @@ class App
      */
     public function hijack($args)
     {
-        $route = Router::seek($args);
+        return Router::manual($args, $this);
+        /*$route = Router::seek($args);
         if (($route[0]=="\\Atto\\Box\\route\\Web" || $route[0]=="\\Atto\\Box\\route\\Base") && $route[1]=="defaultMethod") {  //未查找到有效 route
             //按 空路由 执行
             Response::code(404);
@@ -126,7 +127,7 @@ class App
             $route->routerCallParams = $callParams;
             //执行路由方法
             return call_user_func_array([$route,$method],$args);
-        }
+        }*/
     }
 
 

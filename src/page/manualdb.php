@@ -42,7 +42,7 @@ foreach ($sibling as $dbn => $dbc) {
 <link rel="stylesheet" href="//cgy.design/src/atto/vue/css/printer.css"/>
 <link rel="stylesheet" href="//cgy.design/src/atto/vue/css/el-patch.css"/>-->
 <link rel="stylesheet" href="/src/atto/vue/css/theme-dark.css" id="attovue_dark_mode_css"/>
-<link rel="icon" href="//cgy.design/icon/cgy-qypms-favicon.svg"/>
+<link rel="icon" href="//io.cgy.design/icon/cgy-qypms-favicon.svg"/>
 <style>
 :root {
     --ma-gap:       16px;
@@ -360,17 +360,20 @@ body {
 
 <!--<script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.6/axios.min.js"></script>-->
 <!--<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.9/vue.common.dev.min.js"></script>-->
-<!--<script src="//cdn.bootcdn.net/ajax/libs/element-ui/2.15.14/index.min.js"></script>-->
+<!--<script src="//cdn.bootcdn.net/ajax/libs/element-ui/2.15.14/index.min.js"></script>
 <script src="//lib.cgy.design/axios/@/axios.min.js"></script>
 <script src="//lib.cgy.design/vue/@/dev.min.js"></script>
-<script src="//lib.cgy.design/vue/@/ui/element-ui/2.15.14/element-ui.min.js" charset="utf-8"></script>
+<script src="//lib.cgy.design/vue/@/ui/element-ui/2.15.14/element-ui.min.js" charset="utf-8"></script>-->
+<script src="//io.cgy.design/axios/@/axios.min.js"></script>
+<script src="//io.cgy.design/vue/@/dev.min.js"></script>
+<script src="//io.cgy.design/vue/@/ui/element-ui/2.15.14/element-ui.min.js" charset="utf-8"></script>
 
 <!--<script src="https://cdn.bootcdn.net/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>-->
 
 <script type="module">
     //import codemirror from '//cgy.design/src/atto/vue/plugin/codemirror.js';
-    import cmJson from '//lib.cgy.design/codemirror/vue/cm-json';
-    import attovue from '//cgy.design/src/atto/vue/plugin/attovue.js';
+    import cmJson from '//io.cgy.design/codemirror/vue/cm-json';
+    import attovue from '/src/atto/vue/plugin/attovue.js';
 
     //import hljs from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/core.min.js';
     //import hlJavascript from '//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/es/languages/javascript.min.js';

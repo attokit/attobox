@@ -274,5 +274,49 @@ class Router
         return self::exec(...$routeParams);
     }
 
+    /**
+     * 手动调用某个路由，用于在路由劫持
+     * 仅支持劫持 App 路由
+     * @param Array $args 用于 seek 路由的 URI 参数数组
+     * @param Mixed $caller 劫持者，通常在 app_A 实例中劫持 app_B 的路由，则此处 $caller = app_A 实例
+     * @return Array 返回路由响应
+     */
+    public static function manual($args = ["index"], $caller = null)
+    {
+        $route = self::seek($args);
+        if (($route[0]=="\\Atto\\Box\\route\\Web" || $route[0]=="\\Atto\\Box\\route\\Base") && $route[1]=="defaultMethod") {
+            //未查找到有效 route
+            Response::code(404);
+        } else {
+            //var_dump($route);
+            //执行劫持到的 Route 方法
+            //return self::exec(...$route);
+
+            $method = $route[1];
+            $args = $route[2];
+            $route = $route[0];
+            if (!class_exists($route)) {
+                return [
+                    "status" => 500,
+                    "data" => "undefined route"
+                ];
+            }
+            $callParams = [
+                "route" => $route,
+                "method" => $method,
+                "args" => $args
+            ];
+            $route = new $route();
+            //设置 route 所属 appname
+            if ($caller instanceof App) {
+                $route->appname = $caller->name;
+            }
+            //缓存 router call params
+            $route->routerCallParams = $callParams;
+            //执行路由方法
+            return call_user_func_array([$route,$method],$args);
+        }
+    }
+
     
 }
