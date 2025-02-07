@@ -49,3 +49,15 @@ define("ORIGINAL", null);
  * composer autoload
  */
 require_once(VENDOR_PATH . DS . "autoload.php");
+
+/**
+ * global util functions autoload
+ * func dir = BOX_PATH/util/func
+ */
+autoRequireFiles(BOX_PATH . DS . "util");
+
+/**
+ * require core class
+ * file = BOX_PATH/autoload/Box.php
+ */
+require_once(BOX_PATH . DS . "autoload" . DS . "Box" . EXT);

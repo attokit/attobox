@@ -98,17 +98,17 @@ function cls_methods_filter($cls, $condition, $filter=\ReflectionMethod::IS_PROT
 }
 
 
-
 /**
+ * !!! 在 start.php 中执行，此处执行会与 cgyio 框架冲突 !!!
  * global util functions autoload
  * func dir = BOX_PATH/util/func
  */
-autoRequireFiles(BOX_PATH . DS . "util");
-
+//autoRequireFiles(BOX_PATH . DS . "util");
 
 
 /**
+ * !!! 在 start.php 中执行，此处执行会与 cgyio 框架冲突 !!!
  * require core class
  * file = BOX_PATH/autoload/Box.php
  */
-require_once(BOX_PATH . DS . "autoload" . DS . "Box" . EXT);
+//require_once(BOX_PATH . DS . "autoload" . DS . "Box" . EXT);
