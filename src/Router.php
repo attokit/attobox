@@ -73,7 +73,16 @@ class Router
         $rf = new \ReflectionClass($route);
         $pt = $rf->getDefaultProperties();
 
-        return isset($pt["unpause"]) ? (is_bool($pt["unpause"]) ? $pt["unpause"] : false) : false;
+        if (!isset($pt["unpause"])) return false;
+        $ptp = $pt["unpause"];
+        if (is_bool($ptp)) return $ptp;
+        if (is_array($ptp)) {
+            $m = $this->method;
+            return in_array($m, $ptp);
+        }
+        return false;
+
+        //return isset($pt["unpause"]) ? (is_bool($pt["unpause"]) ? $pt["unpause"] : false) : false;
     }
 
     /**

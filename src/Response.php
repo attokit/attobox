@@ -93,6 +93,10 @@ class Response
         $rou = $this->rou;
         //WEB_PAUSE == true
         if (WEB_PAUSE && !$rou->unpause) {
+        //var_dump($rou->unpause);
+        //var_dump($rou->method);
+        //var_dump($rou->params);
+        //if (WEB_PAUSE && ($rou->unpause==false || (is_array($rou->unpause) && !in_array($rou->method, $rou->unpause)))) {
             $pauseFile = "pause".EXT;
             $pausePages = [];
             if (!is_null($this->req->app)) {

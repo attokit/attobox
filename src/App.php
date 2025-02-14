@@ -22,6 +22,13 @@ class App
     public $name = "";  //app名称，子类覆盖
     public $key = "";   //app调用路径
 
+    /**
+     * 此 App 是否受 WEB_PAUSE 控制
+     * 默认 false
+     * 可选 true / [ '可指定某些方法', '不受 WEB_PAUSE 影响', ... ]
+     */
+    public $unpause = false;
+
     //此 app 是否需要 UAC 权限控制，
     //如仅部分方法需要控制权限，设为 false，在需要控制权限的方法内部 if (Uac::grant("$app->key/method")===true) { 方法逻辑 }
     //如所有方法都需要控制权限，设为 true

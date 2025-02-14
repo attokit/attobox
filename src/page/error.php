@@ -30,8 +30,8 @@ if (isset($error)) {
 <link rel="stylesheet" href="//cgy.design/src/atto/vue/css/err-page.css"/>
 <link rel="stylesheet" href="//cgy.design/src/atto/vue/css/el-patch.css"/>-->
 
-<link rel="stylesheet" href="//cgy.design/src/atto/vue/css/theme-dark.css" id="attovue_dark_mode_css"/>
-<link rel="icon" href="//cgy.design/icon/cgy-qypms-favicon.svg"/>
+<link rel="stylesheet" href="//io.cgy.design/src/atto/vue/css/theme-dark.css" id="attovue_dark_mode_css"/>
+<link rel="icon" href="//io.cgy.design/icon/cgy-qypms-favicon.svg"/>
 <!--<link rel="stylesheet" href="//lib.cgy.design/vue/@/themes/base/dark.css" id="cv_base_dark_css"/>
 <link rel="icon" href="//lib.cgy.design/icon/cgy-cgydesign-favicon.svg"/>-->
 <style>
@@ -47,7 +47,7 @@ body {
 <body style="padding-bottom:20vh; background-color: var(--color-bg);">
 
 <div id="err_page" class="atto-err-container" v-cloak>
-    <img class="err-icon" :src="'//cgy.design/icon/'+icon+'?fill='+(cssvar.color.danger.substring(1))"/>
+    <img class="err-icon" :src="'//io.cgy.design/icon/'+icon+'?fill='+(cssvar.color.danger.substring(1))"/>
     <div class="err-title">{{title}}</div>
     <div v-if="typeof msg == 'string'" class="err-msg">
         {{msg}}
@@ -95,13 +95,13 @@ body {
 <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.9/vue.common.dev.min.js"></script>
 <script src="//cdn.bootcdn.net/ajax/libs/element-ui/2.15.13/index.min.js"></script>-->
 
-<script src="//lib.cgy.design/axios/@/axios.min.js"></script>
-<script src="//lib.cgy.design/vue/@/vue.min.js"></script>
-<script src="//lib.cgy.design/vue/@/ui/element-ui/2.15.14/element-ui.min.js"></script>
+<script src="//io.cgy.design/axios/@/axios.min.js"></script>
+<script src="//io.cgy.design/vue/@/vue.min.js"></script>
+<script src="//io.cgy.design/vue/@/ui/element-ui/2.15.14/element-ui.min.js"></script>
 
 <!--<script type="module" src="//lib.cgy.design/vue/env/@/browser?dev=yes"></script>-->
 <script type="module">
-    import attovue from '//cgy.design/src/atto/vue/plugin/attovue.js';
+    import attovue from '//io.cgy.design/src/atto/vue/plugin/attovue.js';
     //import mixinBase from '//cgy.design/src/atto/vue/mixins/base.js';
     //import mixinBase from '//lib.cgy.design/vue/@/mixins/base/base';
 
